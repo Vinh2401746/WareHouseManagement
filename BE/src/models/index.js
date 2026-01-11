@@ -1,0 +1,10 @@
+module.exports.Token = require('./token.model');
+module.exports.User = require('./user.model');
+module.exports.Branch = require('./branch.model');
+module.exports.Category = require('./category.model');
+module.exports.InventoryTransaction = require('./inventoryTransaction.model');
+module.exports.Product = require('./product.model');
+module.exports.ProductBatch = require('./productBatch.model');
+module.exports.Sale = require('./sale.model');
+module.exports.Supplier = require('./supplier.model');
+module.exports.Warehouse = require('./warehouse.model');
