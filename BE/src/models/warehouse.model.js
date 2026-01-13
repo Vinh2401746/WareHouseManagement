@@ -23,8 +23,13 @@ const warehouseSchema = mongoose.Schema(
   }
 );
 
+// add plugin that converts mongoose to json
 warehouseSchema.plugin(toJSON);
 warehouseSchema.plugin(paginate);
 
+/**
+ * @typedef Warehouse
+ */
 const Warehouse = mongoose.model('Warehouse', warehouseSchema);
+
 module.exports = Warehouse;

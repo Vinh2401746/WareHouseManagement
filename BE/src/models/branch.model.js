@@ -22,8 +22,13 @@ const branchSchema = mongoose.Schema(
   }
 );
 
+// add plugin that converts mongoose to json
 branchSchema.plugin(toJSON);
 branchSchema.plugin(paginate);
 
+/**
+ * @typedef Branch
+ */
 const Branch = mongoose.model('Branch', branchSchema);
+
 module.exports = Branch;

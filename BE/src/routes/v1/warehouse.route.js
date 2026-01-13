@@ -1,38 +1,38 @@
 const express = require('express');
 const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
-const userValidation = require('../../validations/user.validation');
-const userController = require('../../controllers/user.controller');
+const warehouseValidation = require('../../validations/warehouse.validation');
+const warehouseController = require('../../controllers/warehouse.controller');
 
 const router = express.Router();
 
 router
   .route('/')
-  .post(auth('manageUsers'), validate(userValidation.createUser), userController.createUser)
-  .get(auth('getUsers'), validate(userValidation.getUsers), userController.getUsers);
+  .post(auth('manageWarehouses'), validate(warehouseValidation.createWarehouse), warehouseController.createWarehouse)
+  .get(auth('getWarehouses'), validate(warehouseValidation.getWarehouses), warehouseController.getWarehouses);
 
 router
-  .route('/:userId')
-  .get(auth('getUsers'), validate(userValidation.getUser), userController.getUser)
-  .patch(auth('manageUsers'), validate(userValidation.updateUser), userController.updateUser)
-  .delete(auth('manageUsers'), validate(userValidation.deleteUser), userController.deleteUser);
+  .route('/:warehouseId')
+  .get(auth('getWarehouses'), validate(warehouseValidation.getWarehouse), warehouseController.getWarehouse)
+  .put(auth('manageWarehouses'), validate(warehouseValidation.updateWarehouse), warehouseController.updateWarehouse)
+  .delete(auth('manageWarehouses'), validate(warehouseValidation.deleteWarehouse), warehouseController.deleteWarehouse);
 
 module.exports = router;
 
 /**
  * @swagger
  * tags:
- *   name: Users
- *   description: User management and retrieval
+ *   name: Warehouses
+ *   description: Warehouse management and retrieval
  */
 
 /**
  * @swagger
- * /users:
+ * /warehouses:
  *   post:
- *     summary: Create a user
- *     description: Only admins can create other users.
- *     tags: [Users]
+ *     summary: Create a warehouse
+ *     description: Can create warehouses.
+ *     tags: [Warehouses]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -42,73 +42,77 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - name
- *               - email
- *               - password
- *               - role
+ *               - user
+ *               - type
+ *               - manufacturer
+ *               - model
  *             properties:
- *               name:
+ *               user:
  *                 type: string
- *               email:
+ *               type:
  *                 type: string
- *                 format: email
- *                 description: must be unique
- *               password:
+ *                 description: warehouse type (car, var, bike, etc...)
+ *               manufacturer:
  *                 type: string
- *                 format: password
- *                 minLength: 8
- *                 description: At least one number and one letter
- *               role:
+ *               model:
+ *                 type: string
+ *                 description: warehouse model (308, Demio, Aqua, etc...)
+ *               numberplate:
  *                  type: string
- *                  enum: [user, admin]
+ *               makeyear:
+ *                  type: string
+ *               registeryear:
+ *                  type: string
+ *               capacity:
+ *                  type: string
+ *               fuel:
+ *                  type: string
+ *               color:
+ *                  type: string
  *             example:
- *               name: fake name
- *               email: admin@gmail.com
- *               password: admin123
- *               role: user
+ *               user: (User ID)
+ *               type: car
+ *               manufacturer: Mazda
+ *               model: Demio
+ *               numberplate: KM-1898
+ *               makeyear: 2007
+ *               registeryear: 2011
+ *               capacity: 5
+ *               fuel: Petrol
+ *               color: Red
  *     responses:
  *       "201":
  *         description: Created
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/User'
+ *                $ref: '#/components/schemas/Warehouse'
  *       "400":
- *         $ref: '#/components/responses/DuplicateEmail'
+ *         $ref: '#/components/responses/Duplicate'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
  *         $ref: '#/components/responses/Forbidden'
  *
  *   get:
- *     summary: Get all users
- *     description: Only admins can retrieve all users.
- *     tags: [Users]
+ *     summary: Get all warehouses
+ *     description: Retrieve all warehouses.
+ *     tags: [Warehouses]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: name
+ *         name: user
  *         schema:
  *           type: string
- *         description: User name
- *       - in: query
- *         name: role
- *         schema:
- *           type: string
- *         description: User role
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *         description: sort by query in the form of field:desc/asc (ex. name:asc)
+ *         description: User id
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           minimum: 1
  *         default: 10
- *         description: Maximum number of users
+ *         description: Maximum number of warehouses
  *       - in: query
  *         name: page
  *         schema:
@@ -127,7 +131,7 @@ module.exports = router;
  *                 results:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/User'
+ *                     $ref: '#/components/schemas/Warehouse'
  *                 page:
  *                   type: integer
  *                   example: 1
@@ -148,11 +152,11 @@ module.exports = router;
 
 /**
  * @swagger
- * /users/{id}:
+ * /warehouses/{id}:
  *   get:
- *     summary: Get a user
- *     description: Logged in users can fetch only their own user information. Only admins can fetch other users.
- *     tags: [Users]
+ *     summary: Get a warehouse
+ *     description: fetch Warehouses by id
+ *     tags: [Warehouses]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -161,14 +165,14 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: Warehouse id
  *     responses:
  *       "200":
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/User'
+ *                $ref: '#/components/schemas/Warehouse'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
@@ -177,9 +181,9 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   patch:
- *     summary: Update a user
- *     description: Logged in users can only update their own information. Only admins can update other users.
- *     tags: [Users]
+ *     summary: Update a warehouse
+ *     description: Update warehouses.
+ *     tags: [Warehouses]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -188,7 +192,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: Warehouse id
  *     requestBody:
  *       required: true
  *       content:
@@ -196,30 +200,48 @@ module.exports = router;
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               user:
  *                 type: string
- *               email:
+ *               type:
  *                 type: string
- *                 format: email
- *                 description: must be unique
- *               password:
+ *                 description: warehouse type (car, var, bike, etc...)
+ *               manufacturer:
  *                 type: string
- *                 format: password
- *                 minLength: 8
- *                 description: At least one number and one letter
+ *               model:
+ *                 type: string
+ *                 description: warehouse model (308, Demio, Aqua, etc...)
+ *               numberplate:
+ *                  type: string
+ *               makeyear:
+ *                  type: string
+ *               registeryear:
+ *                  type: string
+ *               capacity:
+ *                  type: string
+ *               fuel:
+ *                  type: string
+ *               color:
+ *                  type: string
  *             example:
- *               name: fake name
- *               email: admin@gmail.com
- *               password: admin123
+ *               user: (User ID)
+ *               type: car
+ *               manufacturer: Mazda
+ *               model: Demio
+ *               numberplate: KM-1898
+ *               makeyear: 2007
+ *               registeryear: 2011
+ *               capacity: 5
+ *               fuel: Petrol
+ *               color: Red
  *     responses:
  *       "200":
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/User'
+ *                $ref: '#/components/schemas/Warehouse'
  *       "400":
- *         $ref: '#/components/responses/DuplicateEmail'
+ *         $ref: '#/components/responses/Duplicate'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
@@ -228,9 +250,9 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   delete:
- *     summary: Delete a user
- *     description: Logged in users can delete only themselves. Only admins can delete other users.
- *     tags: [Users]
+ *     summary: Delete a warehouse
+ *     description: Delete warehouses.
+ *     tags: [Warehouses]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -239,7 +261,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: Warehouse id
  *     responses:
  *       "200":
  *         description: No content

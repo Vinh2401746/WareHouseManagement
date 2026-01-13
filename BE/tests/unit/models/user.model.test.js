@@ -8,7 +8,7 @@ describe('User model', () => {
       newUser = {
         name: faker.name.findName(),
         email: faker.internet.email().toLowerCase(),
-        password: 'password1',
+        password: 'admin123',
         role: 'user',
       };
     });
@@ -48,7 +48,7 @@ describe('User model', () => {
       const newUser = {
         name: faker.name.findName(),
         email: faker.internet.email().toLowerCase(),
-        password: 'password1',
+        password: 'admin123',
         role: 'user',
       };
       expect(new User(newUser).toJSON()).not.toHaveProperty('password');

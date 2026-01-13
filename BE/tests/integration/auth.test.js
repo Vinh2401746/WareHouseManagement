@@ -25,7 +25,7 @@ describe('Auth routes', () => {
       newUser = {
         name: faker.name.findName(),
         email: faker.internet.email().toLowerCase(),
-        password: 'password1',
+        password: 'admin123',
       };
     });
 
