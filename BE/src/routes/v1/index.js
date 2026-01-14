@@ -3,6 +3,7 @@ const authRoute = require('./auth.route');
 const userRoute = require('./user.route');
 const branchRoute = require('./branch.route');
 const warehouseRoute = require('./warehouse.route');
+const categoryRoute = require('./category.route');
 const docsRoute = require('./docs.route');
 const config = require('../../config/config');
 
@@ -24,6 +25,10 @@ const defaultRoutes = [
   {
     path: '/warehouse',
     route: warehouseRoute,
+  },
+  {
+    path: '/category',
+    route: categoryRoute,
   },
 ];
 

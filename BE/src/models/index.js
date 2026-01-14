@@ -8,3 +8,4 @@ module.exports.ProductBatch = require('./productBatch.model');
 module.exports.Sale = require('./sale.model');
 module.exports.Supplier = require('./supplier.model');
 module.exports.Warehouse = require('./warehouse.model');
+module.exports.Category = require("./category.model");
