@@ -1,11 +1,33 @@
+import dayjs from "dayjs";
+import { Navigate, Outlet } from "react-router-dom";
+import { AppRoutes } from "../router/routes";
+import { useAppSelector } from "../store/hooks";
+import { MainLayout } from "../Layouts/MainLayout";
 
+export const GuestRoute = () => {
+  const { token, expires } = useAppSelector(
+    (state) => state.user.tokens.access
+  );
+console.log("GuestRoute",token, expires);
 
-export const AuthProtectRoute = () => {
-  return <div>Auth Protect Route</div>;
-}
+  const isExpired = dayjs().isAfter(dayjs(expires));
 
+  if (token && !isExpired) {
+    return <Navigate to={AppRoutes.home.dashboard} replace />;
+  }
 
-export const AppProtectRoute = () => {
-  return <div>Auth Protect Route</div>;
-}
+  return <Outlet />;
+};
 
+export const PrivateRoute = () => {
+  const { token, expires } = useAppSelector(
+    (state) => state.user.tokens.access
+  );
+  const isExpired = dayjs().isAfter(dayjs(expires));
+
+  if (!token || isExpired) {
+    return <Navigate to={AppRoutes.auth.login} replace />;
+  }
+
+  return <MainLayout />;
+};

@@ -1,4 +1,8 @@
-import createSagaMiddleware from "redux-saga";
+import { all, fork } from 'redux-saga/effects';
+import { authSaga } from './auth';
 
-
-const sagaMiddleware = createSagaMiddleware()
+export function* rootSaga() {
+  yield all([
+    fork(authSaga),
+  ]);
+}
