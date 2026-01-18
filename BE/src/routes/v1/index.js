@@ -1,4 +1,5 @@
 const express = require('express');
+const testRoute = require('./test.route');
 const authRoute = require('./auth.route');
 const userRoute = require('./user.route');
 const branchRoute = require('./branch.route');
@@ -10,6 +11,10 @@ const config = require('../../config/config');
 const router = express.Router();
 
 const defaultRoutes = [
+  {
+    path: '/test',
+    route: testRoute,
+  },
   {
     path: '/auth',
     route: authRoute,
