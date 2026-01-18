@@ -10,10 +10,10 @@ export const GuestRoute = () => {
   const { token, expires } = useAppSelector(
     (state) => state.user.tokens.access
   );
-console.log("GuestRoute",token, expires);
-
+  
   const isExpired = dayjs().isAfter(dayjs(expires));
-
+  console.log("GuestRoute",token, isExpired);
+  
   if (token && !isExpired) {
     return <Navigate to={AppRoutes.home.dashboard} replace />;
   }

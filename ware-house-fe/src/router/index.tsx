@@ -13,12 +13,18 @@ export const RouterRoot = () => {
         element: <GuestRoute />,
         children: [
           {
+          index: true,              // 👈 match "/"
+          element: <LoginPage />,
+        },
+          {
             path: AppRoutes.auth.login,
+                index: true,  
             element: <LoginPage />,
           },
         ],
       },
       {
+
         id: "authented",
         element: <PrivateRoute />,
         children: [
