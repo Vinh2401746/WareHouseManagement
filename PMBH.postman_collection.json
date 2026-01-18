@@ -1,0 +1,535 @@
+{
+  "info": {
+    "_postman_id": "4ccd3099-9ce3-4c85-9b58-2f39717d88d3",
+    "name": "PMBH",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "37366291",
+    "_collection_link": "https://go.postman.co/collection/37366291-4ccd3099-9ce3-4c85-9b58-2f39717d88d3?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"password\": \"admin123\",\r\n    \"name\": \"{{$randomFullName}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/auth/register",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Get access token\", function () {\r",
+                  "    var jsonData = pm.response.json();\r",
+                  "    pm.globals.set(\"accessToken\", jsonData.tokens.access.token)\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"admin@gmail.com\",\r\n    \"password\": \"admin123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/auth/login",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Branches",
+      "item": [
+        {
+          "name": "Get list branches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/branch",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "branch"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create branch",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"{{$randomCity}}\",\r\n    \"address\": \"{{$randomStreetAddress}}, {{$randomCity}}\",\r\n    \"phone\": \"{{phone_number}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/branch",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "branch"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get detail branch",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/branch/696668629b94d83df894e11a",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "branch",
+                "696668629b94d83df894e11a"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update branch",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"{{$randomCity}}\",\r\n    \"address\": \"{{$randomStreetAddress}}, {{$randomCity}}\",\r\n    \"phone\": \"{{phone_number}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/branch/6966647eeb86f642d4446808",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "branch",
+                "6966647eeb86f642d4446808"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete branch",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/branch/6966647eeb86f642d4446808",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "branch",
+                "6966647eeb86f642d4446808"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Warehouses",
+      "item": [
+        {
+          "name": "Get list warehouses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/warehouse",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "warehouse"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create warehouses",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"chuỗi cửa hàng {{random_8_digits}}\",\r\n    \"address\": \"{{$randomStreetAddress}}\",\r\n    \"branch\": \"696668389b94d83df894e10e\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/warehouse",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "warehouse"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get detail warehouses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/warehouse/696673824ba0274f380805f7",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "warehouse",
+                "696673824ba0274f380805f7"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update warehouses",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"chuỗi cửa hàng {{random_8_digits}}\",\r\n    \"address\": \"{{$randomStreetAddress}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/warehouse/696673824ba0274f380805f7",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "warehouse",
+                "696673824ba0274f380805f7"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete warehouses",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/warehouse/696673824ba0274f380805f7",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "warehouse",
+                "696673824ba0274f380805f7"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get list categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/category",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "category"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create categories",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"{{$randomStreetName}}\",\r\n    \"code\": \"{{random_8_digits}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/category",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "category"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get detail categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/category/6967b6a950f1593c68d9e02b",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "category",
+                "6967b6a950f1593c68d9e02b"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update categories",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Cửa hàng bán lẻ số 1\",\r\n    \"address\": \"{{$randomStreetAddress}}\",\r\n    \"phone\": \"{{phone_number}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/category/6967b6a950f1593c68d9e02b",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "category",
+                "6967b6a950f1593c68d9e02b"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete categories",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/category/6967b6a950f1593c68d9e02b",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "category",
+                "6967b6a950f1593c68d9e02b"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create user",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"password\": \"admin123\",\r\n    \"name\": \"{{$randomFullName}}\",\r\n    \"role\": \"user\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/users",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "check health",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "New Request",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "/**\r",
+          " * Generate random numeric string with given length\r",
+          " */\r",
+          "function randomNumberString(length) {\r",
+          "  let result = '';\r",
+          "  for (let i = 0; i < length; i++) {\r",
+          "    result += Math.floor(Math.random() * 10);\r",
+          "  }\r",
+          "  return result;\r",
+          "}\r",
+          "\r",
+          "/**\r",
+          " * Random tax code\r",
+          " * - 10 digits\r",
+          " * - or 10 digits + '-' + 3 digits\r",
+          " */\r",
+          "function randomTaxCode() {\r",
+          "  const first10 = randomNumberString(10);\r",
+          "  const is13 = Math.random() < 0.5;\r",
+          "\r",
+          "  if (!is13) return first10;\r",
+          "\r",
+          "  return `${first10}-${randomNumberString(3)}`;\r",
+          "}\r",
+          "\r",
+          "function randomVietnamPhone() {\r",
+          "  const prefixes = ['03', '05', '07', '08', '09'];\r",
+          "  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];\r",
+          "\r",
+          "  // Tổng 10 số → prefix (2 số) + 8 số random\r",
+          "  return prefix + randomNumberString(8);\r",
+          "}\r",
+          "\r",
+          "pm.globals.set('tax_code', randomTaxCode());\r",
+          "pm.globals.set('random_8_digits', randomNumberString(8));\r",
+          "pm.globals.set('phone_number', randomVietnamPhone());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}
