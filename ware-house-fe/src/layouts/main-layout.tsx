@@ -1,20 +1,18 @@
 import { Outlet } from "react-router-dom";
 import { Layout } from "antd";
+import { AppHeader } from "./header";
 
-const { Sider, Header, Content } = Layout;
+const { Sider, Content } = Layout;
 
 export const MainLayout = () => {
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider width={300} style={{ background: "#211212" }}>
-        Menu
+      <Sider width={300} style={{backgroundColor :'white'}}>
+        Menufsfs
       </Sider>
 
-      <Layout>
-        <Header style={{ background: "#fff" }}>
-          Header
-        </Header>
-
+      <Layout style={{width: '100%'}}>
+        <AppHeader />
         <Content style={{ padding: 16 }}>
           <Outlet />
         </Content>

@@ -2,7 +2,9 @@ import dayjs from "dayjs";
 import { Navigate, Outlet } from "react-router-dom";
 import { AppRoutes } from "../router/routes";
 import { useAppSelector } from "../store/hooks";
-import { MainLayout } from "../Layouts/MainLayout";
+import { MainLayout } from "../layouts/main-layout";
+
+
 
 export const GuestRoute = () => {
   const { token, expires } = useAppSelector(

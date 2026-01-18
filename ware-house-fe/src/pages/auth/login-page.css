@@ -1,0 +1,50 @@
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #a6b6cd, #e6ebf1);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card {
+  width: 380px;
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 12px;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  /* text-align: center; */
+}
+
+.login-title {
+  margin-bottom: 4px;
+    text-align: center;
+}
+
+.login-form {
+  margin-top: 24px;
+}
+
+/* AntD input custom */
+.login-form .ant-input,
+.login-form .ant-input-password {
+  height: 44px;
+  border-radius: 8px;
+}
+
+.login-form .ant-btn {
+  height: 44px;
+  border-radius: 8px;
+  font-weight: 500;
+
+}
+
+.login-remember {
+  margin-bottom: 16px;
+}
+
+.login-remember .ant-form-item-control {
+  display: flex;
+  justify-content: flex-start;
+}
