@@ -9,6 +9,8 @@ const allRoles = {
     'manageWarehouses',
     'manageCategories',
     'getCategories',
+    'getProducts',
+    'manageProducts',
   ],
 };
 

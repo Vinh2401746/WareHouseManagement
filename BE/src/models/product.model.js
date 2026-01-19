@@ -33,8 +33,13 @@ const productSchema = mongoose.Schema(
   }
 );
 
+// add plugin that converts mongoose to json
 productSchema.plugin(toJSON);
 productSchema.plugin(paginate);
 
+/**
+ * @typedef Product
+ */
 const Product = mongoose.model('Product', productSchema);
+
 module.exports = Product;
