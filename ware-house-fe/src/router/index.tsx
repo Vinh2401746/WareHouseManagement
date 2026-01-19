@@ -1,21 +1,33 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { LoginPage } from "../pages/auth/login-page";
+import { AppRoutes } from "./routes";
+import { GuestRoute, PrivateRoute } from "../components/protect-route";
+import { DashBoardPage } from "../pages/app/dardboard/dashboard";
 
 export const RouterRoot = () => {
   const router = createBrowserRouter(
     [
       {
-        path: "/login",
+        path: AppRoutes.root,
         id: "root",
-        element: <LoginPage />,
-        //   children: [
-        //     {
-        //       id: "index",
-        //       loader: indexLoader,
-        //       HydrateFallback: IndexSkeleton,
-        //       Component: Index,
-        //     },
-        //   ],
+        element: <GuestRoute />,
+        children: [
+          {
+            path: AppRoutes.auth.login,
+            element: <LoginPage />,
+          },
+        ],
+      },
+      {
+        id: "authented",
+        element: <PrivateRoute />,
+        children: [
+          {
+            path: AppRoutes.home.dashboard,
+            id: AppRoutes.home.dashboard,
+            element: <DashBoardPage />,
+          },
+        ],
       },
     ],
     {
@@ -25,7 +37,7 @@ export const RouterRoot = () => {
           // No index data provided
         },
       },
-    }
+    },
   );
 
   return <RouterProvider router={router} />;

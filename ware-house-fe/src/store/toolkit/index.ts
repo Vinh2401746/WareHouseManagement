@@ -1,3 +1,4 @@
 
 
-export {counterSlice} from './auth'
+export {authSlice} from './auth'
+export {userSlice} from './user'
