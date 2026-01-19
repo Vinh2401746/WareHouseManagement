@@ -22,6 +22,7 @@ const createWarehouse = async (warehouseBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryWarehouses = async (filter, options) => {
+  options.populate = 'branch';
   const warehouses = await Warehouse.paginate(filter, options);
   return warehouses;
 };
@@ -32,7 +33,7 @@ const queryWarehouses = async (filter, options) => {
  * @returns {Promise<Warehouse>}
  */
 const getWarehouseById = async (id) => {
-  return Warehouse.findById(id);
+  return Warehouse.findById(id).populate('branch');
 };
 
 /**
