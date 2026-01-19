@@ -6,3 +6,4 @@ module.exports.branchService = require("./branch.service");
 module.exports.warehouseService = require("./warehouse.service");
 module.exports.categoryService = require("./category.service");
 module.exports.productService = require("./product.service");
+module.exports.supplierService = require("./supplier.service");

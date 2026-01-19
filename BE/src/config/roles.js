@@ -11,6 +11,8 @@ const allRoles = {
     'getCategories',
     'getProducts',
     'manageProducts',
+    'getSuppliers',
+    'manageSuppliers',
   ],
 };
 

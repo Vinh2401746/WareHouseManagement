@@ -6,6 +6,7 @@ const branchRoute = require('./branch.route');
 const warehouseRoute = require('./warehouse.route');
 const categoryRoute = require('./category.route');
 const productRoute = require('./product.route');
+const supplierRoute = require('./supplier.route');
 const docsRoute = require('./docs.route');
 const config = require('../../config/config');
 
@@ -39,6 +40,10 @@ const defaultRoutes = [
   {
     path: '/product',
     route: productRoute,
+  },
+  {
+    path: '/supplier',
+    route: supplierRoute,
   },
 ];
 
