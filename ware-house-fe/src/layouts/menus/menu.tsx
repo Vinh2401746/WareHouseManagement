@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import { useCallback } from "react";
 import {
   HomeOutlined,
   UploadOutlined,
@@ -8,9 +8,9 @@ import {
 import { Flex, Layout, Menu, type MenuProps } from "antd";
 import type { ItemType, MenuItemType } from "antd/es/menu/interface";
 import "./menu.css";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AppRoutes } from "../../router/routes";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import {  useAppSelector } from "../../store/hooks";
 import IcLogo from '../../assets/svg/logo.svg'
 
 const { Sider } = Layout;
@@ -18,7 +18,7 @@ const { Sider } = Layout;
 const items: ItemType<MenuItemType>[] = [
   {
     key: AppRoutes.home.dashboard,
-    icon: <UserOutlined />,
+    icon: <HomeOutlined />,
     label: "Tổng quan",
   },
   {
@@ -27,31 +27,50 @@ const items: ItemType<MenuItemType>[] = [
     label: "Người dùng",
   },
   {
-    key: "3",
+    key: AppRoutes.goods,
     icon: <VideoCameraOutlined />,
-    label: "nav 2",
-    children: [
-      {
-        key: "1-1",
-        icon: <UserOutlined />,
-        label: "nav 1-1",
-      },
-    ],
+    label: "Danh mục hàng",
   },
   {
-    key: "4",
+    key: AppRoutes.unit,
     icon: <UploadOutlined />,
-    label: "nav 3",
+    label: "Đơn vị tính",
+  },
+   {
+    key: AppRoutes.supplier,
+    icon: <UploadOutlined />,
+    label: "Nhà cung cấp",
+  },
+   {
+    key: AppRoutes.warehouse,
+    icon: <UploadOutlined />,
+    label: "Kho",
+  },
+   {
+    key: AppRoutes.store,
+    icon: <UploadOutlined />,
+    label: "Cửa hàng",
+  },
+   {
+    key: AppRoutes.invoice_import_export,
+    icon: <UploadOutlined />,
+    label: "Hoá đơn nhập/xuất",
+  },
+   {
+    key: AppRoutes.sales_invoice,
+    icon: <UploadOutlined />,
+    label: "Hoá đơn bán hàng",
   },
 ];
 
 export const MenusApp = () => {
   const { collapsed } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
+    const location = useLocation();
+  
   const onClick: MenuProps["onClick"] = useCallback(
     (e: any) => {
       navigate(e?.keyPath[0]);
-      //   console.log("click ", navigate(e?.keyPath[0]));
     },
     [navigate],
   );
@@ -74,8 +93,10 @@ export const MenusApp = () => {
         style={{ marginTop: 24 }}
         theme="dark"
         mode="inline"
-        defaultSelectedKeys={["1"]}
+        defaultSelectedKeys={[AppRoutes.home.dashboard]}
         items={items}
+        selectedKeys={[location.pathname]}
+        
       />
     </Sider>
   );

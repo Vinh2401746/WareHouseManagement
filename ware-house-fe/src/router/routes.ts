@@ -4,9 +4,16 @@ export const AppRoutes = {
     login :'/login'
   },
   home:{
-    dashboard: '/home/dashboard'
+    dashboard: '/dashboard'
   },
   user:{
     list:"/users"
-  }
+  },
+  goods: '/goods',
+  unit: '/unit',
+  supplier: '/supplier',
+  warehouse: '/warehouse',
+  store: '/store',
+  invoice_import_export: '/invoice_import_export',
+  sales_invoice: '/sales_invoice'
 };
