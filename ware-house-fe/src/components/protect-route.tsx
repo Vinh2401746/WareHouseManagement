@@ -12,7 +12,6 @@ export const GuestRoute = () => {
   );
   
   const isExpired = dayjs().isAfter(dayjs(expires));
-  console.log("GuestRoute",token, isExpired);
   
   if (token && !isExpired) {
     return <Navigate to={AppRoutes.home.dashboard} replace />;

@@ -8,17 +8,15 @@ import {
   logoutRequest
 } from "../toolkit/auth";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { AuthRequestLoginType } from "../../types/auth";
+import type { AuthRequestLoginType, AuthResponseLoginType } from "../../types/auth";
 import dispatchToast from "../../constants/toast";
-import type { AxiosResponse } from "axios";
 // Worker saga will be fired on USER_FETCH_REQUESTED actions
 function* loginSaga(action: PayloadAction<AuthRequestLoginType>) {
   try {
-    const inforLogin: AxiosResponse = yield call(authLoginApi, action.payload);
+    const inforLogin: AuthResponseLoginType = yield call(authLoginApi, action.payload);
+    
     yield put(logginRequesteSuccess());
-    if ([200, 201].includes(inforLogin.status)) {
-      yield put(setInforUser(inforLogin.data));
-    }
+      yield put(setInforUser(inforLogin));
 
     //   yield put({type: "USER_FETCH_SUCCEEDED", user: user});
   } catch (e: any) {

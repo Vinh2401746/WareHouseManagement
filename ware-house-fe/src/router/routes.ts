@@ -5,5 +5,8 @@ export const AppRoutes = {
   },
   home:{
     dashboard: '/home/dashboard'
+  },
+  user:{
+    list:"/users"
   }
 };

@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 4px rgba(128, 58, 58, 0.06);
 }
 
 /* Search input */
@@ -23,7 +23,7 @@
 
 /* Icons */
 .app-header__icon {
-  font-size: 20px;
+  font-size: 36px;
   cursor: pointer;
   color: #333;
 }
@@ -31,3 +31,16 @@
 .app-header__icon:hover {
   color: #1677ff;
 }
+.icon-collaped {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: white;
+  font-size: 24px;
+
+  padding: 6px;
+  border: 1px solid #ffffff;
+  border-radius: 6px;
+}
+

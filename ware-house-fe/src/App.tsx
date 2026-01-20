@@ -7,7 +7,18 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { ToastContainer } from "react-toastify";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+   defaultOptions: {
+    queries: {
+      staleTime: 0,
+      gcTime: 0,
+      retry:false,
+    },
+    mutations: {
+      gcTime: 0,
+    },
+  },
+});
 function App() {
   return (
     <Provider store={store}>

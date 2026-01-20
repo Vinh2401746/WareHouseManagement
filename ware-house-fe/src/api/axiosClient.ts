@@ -1,6 +1,9 @@
 import type { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import axios from "axios";
-import { store } from "../../store";
+import { store } from "../store";
+import { router } from "../router/routers";
+import dispatchToast from "../constants/toast";
+import { removeCurrentUser } from "../store/toolkit/user";
 
 
 
@@ -16,7 +19,7 @@ const AxiosClient = axios.create({
 
 AxiosClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig<any>) => {
-    const token = store.getState().user.tokens.access;
+    const {token} = store.getState().user.tokens.access;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -34,10 +37,14 @@ AxiosClient.interceptors.response.use(
     // } as Response;
     // // replace the data payload with your transformed object
     // res.data = transformed;
-    return Promise.resolve(res);
+    return Promise.resolve(res.data);
   },
-  async (err: AxiosResponse) => {
-    console.log("response erro",err);
+  async (err: AxiosResponse | any) => {
+    if ([err?.response?.status,err.status].includes(401) ) {
+      store.dispatch(removeCurrentUser());
+      dispatchToast("error","Hết phiên làm việc. Vui lòng đăng nhập lại.")
+      router.navigate("/login", { replace: true });
+    }
     return Promise.reject(err);
   },
 );

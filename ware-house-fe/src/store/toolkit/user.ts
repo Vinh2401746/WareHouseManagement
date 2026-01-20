@@ -24,7 +24,6 @@ export const userSlice = createSlice({
   initialState: initUserType,
   reducers: {
     setInforUser: (state, active: PayloadAction<AuthResponseLoginType>) => {
-      console.log("active", active);
       state = active.payload
       return state;
     },

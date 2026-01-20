@@ -22,3 +22,6 @@ export type AuthResponseLoginType = {
     };
   };
 };
+
+
+export type roles = 'admin' | 'user' | null

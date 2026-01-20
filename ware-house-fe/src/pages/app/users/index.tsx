@@ -1,0 +1,167 @@
+import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { QueryKeys } from "../../../constants/query-keys";
+import { deleteUser, getUsers } from "../../../api/users/users";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button, Flex, Pagination, Popconfirm, Table, Tag } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import type { UserFormRef } from "./components/creat-update-user";
+import UserFormModal from "./components/creat-update-user";
+import dispatchToast from "../../../constants/toast";
+
+export const UserPage = memo(() => {
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const formRef = useRef<UserFormRef>(null);
+  const { data, isLoading } = useQuery({
+    queryKey: [QueryKeys.users.users, page, limit],
+    queryFn: () => getUsers({ page, limit }),
+  });
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: (payload: { id: string }) => deleteUser({ id: payload.id }),
+    onSuccess: () => {
+      console.log("data");
+      dispatchToast("success", "Xoá người dùng thành công!");
+    },
+    onError: () => {
+      dispatchToast("error", "Xoá người dùng thất bại!");
+    },
+  });
+
+  const users = useMemo(() => data?.results ?? [], [data?.results]);
+
+  const onAction = useCallback(
+    (type: "delete" | "update" | "reset-pass", record: any) => {
+      switch (type) {
+        case "delete":
+          mutate({ id: record.id });
+          break;
+        case "update":
+          formRef.current?.show(record);
+          break;
+        case "reset-pass":
+          dispatchToast("warning", "Tính năng đang phát triển")
+          // formRef.current?.show(record);
+          break;
+        default:
+          break;
+      }
+    },
+    [mutate],
+  );
+
+  const columns: ColumnsType = [
+    {
+      title: "STT",
+      dataIndex: "id",
+      key: "id",
+      render: (_, __, index) => index + 1,
+      align: "center",
+      width: 100,
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+      align: "center",
+    },
+    {
+      title: "Tên",
+      dataIndex: "name",
+      key: "name",
+      align: "center",
+    },
+    {
+      title: "Quyền",
+      dataIndex: "role",
+      key: "role",
+      align: "center",
+    },
+    {
+      title: "Tuỳ chọn",
+      dataIndex: "",
+      key: "",
+      align: "center",
+      render(_, record) {
+        return (
+          <Flex
+            vertical={false}
+            gap={10}
+            justify="center"
+            style={{ cursor: "pointer" }}
+          >
+            <Tag
+              color={"green"}
+              variant={"outlined"}
+              onClick={() => onAction("update", record)}
+            >
+              Cập nhật
+            </Tag>
+            <Popconfirm
+              title="Xác nhận đặt lại mật khẩu user này?"
+              cancelText="Huỷ"
+              okText="Xác nhận"
+              onConfirm={() => onAction("reset-pass", record)}
+            >
+              <Tag
+                color={"yellow"}
+                variant={"outlined"}
+              >
+                Đặt lại mật khẩu
+              </Tag>
+            </Popconfirm>
+            <Popconfirm
+              title="Xác nhận xoá user này?"
+              cancelText="Huỷ"
+              okText="Xác nhận"
+              onConfirm={() => onAction("delete", record)}
+            >
+              <Tag color={"red"} variant={"outlined"}>
+                Xoá
+              </Tag>
+            </Popconfirm>
+          </Flex>
+        );
+      },
+    },
+  ];
+  return (
+    <>
+      <Flex justify="end">
+        <Button type="primary" onClick={() => formRef.current?.show()}>
+          Thêm Người Dùng
+        </Button>
+      </Flex>
+      <Table
+        dataSource={users}
+        columns={columns}
+        bordered
+        pagination={false}
+        loading={isLoading || isPending}
+        rowKey={"id"}
+        onRow={(record) => {
+          return {
+            onDoubleClick: () => {
+              formRef.current?.show({ ...record });
+            },
+          };
+        }}
+      scroll={{ y: 500}}
+      
+      />
+      <Flex justify="end">
+        <Pagination
+          onShowSizeChange={(current, size) => {
+            console.log("current", current, size);
+            setLimit(size);
+          }}
+          pageSize={page}
+          total={data?.totalPages || 1}
+          onChange={(page) => setPage(page)}
+          pageSizeOptions={[10, 20, 50]}
+        />
+      </Flex>
+      <UserFormModal ref={formRef} />
+    </>
+  );
+});
