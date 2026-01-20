@@ -26,7 +26,7 @@ export const PrivateRoute = () => {
   const isExpired = dayjs().isAfter(dayjs(expires));
 
   if (!token || isExpired) {
-    return <Navigate to={AppRoutes.auth.login} replace />;
+    return <Navigate to={AppRoutes.root} replace />;
   }
 
   return <MainLayout />;

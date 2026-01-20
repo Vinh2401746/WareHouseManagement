@@ -4,6 +4,7 @@ import { store } from "../store";
 import { router } from "../router/routers";
 import dispatchToast from "../constants/toast";
 import { removeCurrentUser } from "../store/toolkit/user";
+import { AppRoutes } from "../router/routes";
 
 
 
@@ -43,7 +44,7 @@ AxiosClient.interceptors.response.use(
     if ([err?.response?.status,err.status].includes(401) ) {
       store.dispatch(removeCurrentUser());
       dispatchToast("error","Hết phiên làm việc. Vui lòng đăng nhập lại.")
-      router.navigate("/login", { replace: true });
+      router.navigate(AppRoutes.root, { replace: true });
     }
     return Promise.reject(err);
   },
