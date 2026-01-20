@@ -8,11 +8,11 @@ import { PersistGate } from "redux-persist/integration/react";
 import { ToastContainer } from "react-toastify";
 
 const queryClient = new QueryClient({
-   defaultOptions: {
+  defaultOptions: {
     queries: {
       staleTime: 0,
       gcTime: 0,
-      retry:false,
+      retry: false,
     },
     mutations: {
       gcTime: 0,
@@ -32,6 +32,12 @@ function App() {
                 // borderRadius: 2,
                 // // Alias Token
                 // colorBgContainer: "#f6ffed",
+              },
+              components: {
+                Table: {
+                  rowHoverBg: "#daebfa",
+                  // borderColor:'#726565',
+                },
               },
             }}
           >

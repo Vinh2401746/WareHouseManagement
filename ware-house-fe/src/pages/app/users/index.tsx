@@ -2,12 +2,21 @@ import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { QueryKeys } from "../../../constants/query-keys";
 import { deleteUser, getUsers } from "../../../api/users/users";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button, Flex, Pagination, Popconfirm, Table, Tag } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Flex,
+  Pagination,
+  Popconfirm,
+  Table,
+  Tag,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { UserFormRef } from "./components/creat-update-user";
 import UserFormModal from "./components/creat-update-user";
 import dispatchToast from "../../../constants/toast";
-
+import { UserOutlined } from "@ant-design/icons";
+import './index.css'
 export const UserPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -40,7 +49,7 @@ export const UserPage = memo(() => {
           formRef.current?.show(record);
           break;
         case "reset-pass":
-          dispatchToast("warning", "Tính năng đang phát triển")
+          dispatchToast("warning", "Tính năng đang phát triển");
           // formRef.current?.show(record);
           break;
         default:
@@ -50,7 +59,7 @@ export const UserPage = memo(() => {
     [mutate],
   );
 
-  const columns: ColumnsType = [
+  const columns: ColumnsType = useMemo(() =>[
     {
       title: "STT",
       dataIndex: "id",
@@ -103,10 +112,7 @@ export const UserPage = memo(() => {
               okText="Xác nhận"
               onConfirm={() => onAction("reset-pass", record)}
             >
-              <Tag
-                color={"yellow"}
-                variant={"outlined"}
-              >
+              <Tag color={"yellow"} variant={"outlined"}>
                 Đặt lại mật khẩu
               </Tag>
             </Popconfirm>
@@ -123,19 +129,34 @@ export const UserPage = memo(() => {
           </Flex>
         );
       },
-    },
-  ];
+    }
+  ],[onAction]);
+
   return (
-    <>
+    <div style={{ rowGap: 24,  display: "flex",flexDirection:'column'}}>
+      <Breadcrumb
+        items={[
+          {
+            href: "/users",
+            title: (
+              <>
+                <UserOutlined />
+                <span>Người dùng</span>
+              </>
+            ),
+          },
+        ]}
+      />
       <Flex justify="end">
         <Button type="primary" onClick={() => formRef.current?.show()}>
           Thêm Người Dùng
         </Button>
       </Flex>
       <Table
+        size="middle"
         dataSource={users}
         columns={columns}
-        bordered
+        bordered={true}
         pagination={false}
         loading={isLoading || isPending}
         rowKey={"id"}
@@ -146,22 +167,20 @@ export const UserPage = memo(() => {
             },
           };
         }}
-      scroll={{ y: 500}}
-      
+        scroll={{ y: 500 }}
       />
-      <Flex justify="end">
+      <Flex justify="end" >
         <Pagination
           onShowSizeChange={(current, size) => {
             console.log("current", current, size);
             setLimit(size);
           }}
-          pageSize={page}
-          total={data?.totalPages || 1}
+          // pageSize={page}
+          total={data?.totalResults || 0}
           onChange={(page) => setPage(page)}
-          pageSizeOptions={[10, 20, 50]}
         />
       </Flex>
       <UserFormModal ref={formRef} />
-    </>
+    </div>
   );
 });

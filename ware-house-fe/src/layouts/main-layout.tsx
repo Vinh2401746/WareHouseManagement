@@ -11,7 +11,7 @@ export const MainLayout = () => {
       <MenusApp />
       <Layout >
         <AppHeader />
-        <Content style={{ padding: 16}}>
+        <Content style={{ padding: 16, backgroundColor:'whitesmoke'}}>
           <Outlet />
         </Content>
       </Layout>
