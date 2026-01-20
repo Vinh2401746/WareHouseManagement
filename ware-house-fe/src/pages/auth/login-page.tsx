@@ -1,34 +1,55 @@
-import { memo } from "react";
+import { memo, useCallback, useEffect } from "react";
 import { useAppDispatch } from "../../store/hooks";
 import { loginRequest } from "../../store/toolkit/auth";
-import {
-  LockOutlined,
-  MailOutlined,
-} from "@ant-design/icons";
+import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, Typography } from "antd";
 
 import "./login-page.css";
+import { LOCAL_KEYS } from "../../constants/local-keys";
+import { useForm } from "antd/es/form/Form";
 type FieldType = {
-  email?: string;
-  password?: string;
-  remember?: string;
+  email: string;
+  password: string;
+  remember: string;
 };
 const { Title } = Typography;
 
 export const LoginPage = memo(() => {
-  console.log("loginPages");
-
+  const [form] = useForm<FieldType>()
   const dispatch = useAppDispatch();
 
-  const onFinish = (values: { email: string; password: string }) => {
-    console.log("Login data:", values);
-    dispatch(
-      loginRequest({
-        email: "admin@gmail.com",
-        password: "admin123",
-      }),
-    );
-  };
+  useEffect(() => {
+
+      const un_store = localStorage.getItem(LOCAL_KEYS.USER_NAME)
+      const pw_store = localStorage.getItem(LOCAL_KEYS.PASSWORD)
+      if(un_store && pw_store){
+        form.setFieldsValue({
+          email: un_store,
+          password: pw_store,
+          remember: 'true'
+        })
+      }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
+
+  const onFinish = useCallback(
+    async (values: FieldType) => {
+      dispatch(
+        loginRequest({
+          email: values.email,
+          password: values.password,
+        }),
+      );
+      if (values.remember) {
+        localStorage.setItem(LOCAL_KEYS.USER_NAME, values.email);
+        localStorage.setItem(LOCAL_KEYS.PASSWORD, values.password);
+      } else {
+        localStorage.removeItem(LOCAL_KEYS.USER_NAME);
+        localStorage.removeItem(LOCAL_KEYS.PASSWORD);
+      }
+    },
+    [dispatch],
+  );
 
   return (
     <div className="login-page">
@@ -39,14 +60,15 @@ export const LoginPage = memo(() => {
 
         <Form
           name="basic"
+          form={form}
           //   labelCol={{ span: 8 }}
           //   wrapperCol={{ span: 16 }}
           //   style={{ maxWidth: 600 }}
-          initialValues={{
-            remember: true,
-            email: "admin@gmail.com",
-            password: "admin123",
-          }}
+          // initialValues={{
+          //   remember: true,
+          //   email: "admin@gmail.com",
+          //   password: "admin123",
+          // }}
           onFinish={onFinish}
           //   onFinishFailed={onFinishFailed}
           autoComplete="off"
@@ -57,16 +79,15 @@ export const LoginPage = memo(() => {
             name="email"
             rules={[{ required: true, message: "Vui lòng nhập Email!" }]}
           >
-            <Input  prefix={<MailOutlined />}/>
+            <Input prefix={<MailOutlined />} />
           </Form.Item>
 
           <Form.Item<FieldType>
             label="Password"
             name="password"
-           
             rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
           >
-            <Input.Password  prefix={<LockOutlined />} />
+            <Input.Password prefix={<LockOutlined />} />
           </Form.Item>
 
           <Form.Item<FieldType>

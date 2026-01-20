@@ -1,3 +1,4 @@
 export enum LOCAL_KEYS {
-  TOKEN = "TOKEN",
+  USER_NAME = 'USER_NAME' ,
+  PASSWORD = 'PASSWORD'
 }

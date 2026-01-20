@@ -15,7 +15,7 @@ export const router = createBrowserRouter(
       element: <GuestRoute />,
       children: [
         {
-          path: AppRoutes.auth.login,
+          // path: AppRoutes.auth.login,
           index: true,
           element: <LoginPage />,
         },
