@@ -26,11 +26,11 @@ export const createUser = async (payload: {
 };
 
 export const updateUser = async (payload: UpdateUserType): Promise<any> => {
-  const dataUpdate: Pick<UpdateUserType, "email" | "password" | "name" > = {
+  const dataUpdate: Pick<UpdateUserType, "email" | "password" | "name" | "role" > = {
     email:payload.email,
     password:payload.password,
     name:payload.name,
-    // role :payload.role
+    role :payload.role
   };
   console.log("dataUpte", dataUpdate);
   
