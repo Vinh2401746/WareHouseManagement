@@ -6,6 +6,7 @@ import { UserPage } from "../pages/app/users";
 import { DashBoardPage } from "../pages/app/dardboard/dashboard";
 import NotFoundPage from "../pages/404-developing";
 import DevelopingPage from "../pages/404-developing/developing";
+import { ForgotPasswordPage } from "../pages/auth/forgot-pass";
 
 export const router = createBrowserRouter(
   [
@@ -19,6 +20,11 @@ export const router = createBrowserRouter(
           index: true,
           element: <LoginPage />,
         },
+        {
+          
+          path:AppRoutes.auth.forgot_pass,
+          element: <ForgotPasswordPage />
+        }
       ],
       errorElement: <NotFoundPage />
     },

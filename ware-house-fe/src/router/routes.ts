@@ -1,7 +1,8 @@
 export const AppRoutes = {
   root : '/',
   auth:{
-    login :'/login'
+    login :'/login',
+    forgot_pass :'/forgot-pass',
   },
   home:{
     dashboard: '/dashboard'

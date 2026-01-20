@@ -1,12 +1,14 @@
-import { memo, useCallback, useEffect } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { useAppDispatch } from "../../store/hooks";
 import { loginRequest } from "../../store/toolkit/auth";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
-import { Button, Checkbox, Form, Input, Typography } from "antd";
+import { Button, Checkbox, Flex, Form, Input, Typography } from "antd";
 
 import "./login-page.css";
 import { LOCAL_KEYS } from "../../constants/local-keys";
 import { useForm } from "antd/es/form/Form";
+import { AppRoutes } from "../../router/routes";
+import { useNavigate } from "react-router-dom";
 type FieldType = {
   email: string;
   password: string;
@@ -15,31 +17,37 @@ type FieldType = {
 const { Title } = Typography;
 
 export const LoginPage = memo(() => {
-  const [form] = useForm<FieldType>()
+  const [form] = useForm<FieldType>();
   const dispatch = useAppDispatch();
-
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false)
   useEffect(() => {
+    const un_store = localStorage.getItem(LOCAL_KEYS.USER_NAME);
+    const pw_store = localStorage.getItem(LOCAL_KEYS.PASSWORD);
+    if (un_store && pw_store) {
+      form.setFieldsValue({
+        email: un_store,
+        password: pw_store,
+        remember: "true",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-      const un_store = localStorage.getItem(LOCAL_KEYS.USER_NAME)
-      const pw_store = localStorage.getItem(LOCAL_KEYS.PASSWORD)
-      if(un_store && pw_store){
-        form.setFieldsValue({
-          email: un_store,
-          password: pw_store,
-          remember: 'true'
-        })
-      }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[]);
+  const onNavigateForgot = () => {
+    navigate(AppRoutes.auth.forgot_pass);
+  };
 
   const onFinish = useCallback(
     async (values: FieldType) => {
+      setLoading(true)
       dispatch(
         loginRequest({
           email: values.email,
           password: values.password,
         }),
       );
+      setLoading(false)
       if (values.remember) {
         localStorage.setItem(LOCAL_KEYS.USER_NAME, values.email);
         localStorage.setItem(LOCAL_KEYS.PASSWORD, values.password);
@@ -89,24 +97,27 @@ export const LoginPage = memo(() => {
           >
             <Input.Password prefix={<LockOutlined />} />
           </Form.Item>
-
-          <Form.Item<FieldType>
-            name="remember"
-            valuePropName="checked"
-            className="login-remember"
-            label={null}
-          >
-            <Checkbox
-              style={{
-                alignSelf: "flex-start",
-              }}
+          <Flex justify="space-between" >
+            <Form.Item<FieldType>
+              name="remember"
+              valuePropName="checked"
+              // className="login-remember"
+              label={null}
             >
-              Lưu tài khoản
-            </Checkbox>
-          </Form.Item>
+              <Checkbox
+                style={{
+                  alignSelf: "flex-start",
+                }}
+              >
+                Lưu tài khoản
+              </Checkbox>
+            </Form.Item>
+            <Button style={{padding: 0}} type="link" onClick={onNavigateForgot}>Quên mật khẩu</Button>
+          </Flex>
 
           <Form.Item label={null}>
             <Button
+            disabled={loading}
               type="primary"
               htmlType="submit"
               style={{ width: "100%", height: 48 }}

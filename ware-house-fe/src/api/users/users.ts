@@ -31,9 +31,7 @@ export const updateUser = async (payload: UpdateUserType): Promise<any> => {
     password:payload.password,
     name:payload.name,
     role :payload.role
-  };
-  console.log("dataUpte", dataUpdate);
-  
+  };  
   if (!payload.id) throw "Không tìm thấy user";
 
   return AxiosClient.patch(`users/${payload?.id}`, dataUpdate);
@@ -42,4 +40,8 @@ export const updateUser = async (payload: UpdateUserType): Promise<any> => {
 export const deleteUser = async (payload: any): Promise<any> => {
   if (!payload.id) throw "Không tìm thấy user";
   return AxiosClient.delete(`users/${payload?.id}`);
+};
+
+export const requestResetPassword = async (payload: {email:string}): Promise<any> => {
+  return AxiosClient.post(`auth/forgot-password`,payload);
 };
