@@ -8,6 +8,7 @@ import NotFoundPage from "../pages/404-developing";
 import DevelopingPage from "../pages/404-developing/developing";
 import { ForgotPasswordPage } from "../pages/auth/forgot-pass";
 import { SettingPasswordPage } from "../pages/auth/setting-password";
+import { ProductsPage } from "../pages/app/products";
 
 export const router = createBrowserRouter(
   [
@@ -47,9 +48,9 @@ export const router = createBrowserRouter(
           element: <UserPage />,
         },
         {
-          path: AppRoutes.goods,
-          id: AppRoutes.goods,
-          element: <DevelopingPage />,
+          path: AppRoutes.products,
+          id: AppRoutes.products,
+          element: <ProductsPage />,
         },
         {
           path: AppRoutes.unit,

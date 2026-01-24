@@ -17,13 +17,19 @@ import dispatchToast from "../../../constants/toast";
 import { UserOutlined } from "@ant-design/icons";
 import './index.css'
 import { TableCommon } from "../../../components/table/table";
-export const UserPage = memo(() => {
+import { AppRoutes } from "../../../router/routes";
+import { getProductsApi } from "../../../api/products";
+import type { GetProductsRequestType } from "../../../types/products";
+export const ProductsPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<UserFormRef>(null);
   const { data, isLoading } = useQuery({
-    queryKey: [QueryKeys.users.users, page, limit],
-    queryFn: () => getUsers({ page, limit }),
+    queryKey: [QueryKeys.products.list],
+    queryFn: ({ queryKey }) => {
+    const [, payload] = queryKey as [string, GetProductsRequestType];
+    return getProductsApi(payload);
+  },
   });
 
   const { mutate, isPending } = useMutation({
@@ -133,15 +139,15 @@ export const UserPage = memo(() => {
   ],[onAction]);
 
   return (
-    <div style={{ rowGap: 12,  display: "flex",flexDirection:'column'}}>
+    <div style={{ rowGap: 24,  display: "flex",flexDirection:'column'}}>
       <Breadcrumb
         items={[
           {
-            href: "/users",
+            href: AppRoutes.goods,
             title: (
               <>
                 <UserOutlined />
-                <span>Người dùng</span>
+                <span>Hàng hoá</span>
               </>
             ),
           },
@@ -149,7 +155,7 @@ export const UserPage = memo(() => {
       />
       <Flex justify="end">
         <Button type="primary" onClick={() => formRef.current?.show()}>
-          Thêm Người Dùng
+          Thêm hàng hoá
         </Button>
       </Flex>
       <TableCommon

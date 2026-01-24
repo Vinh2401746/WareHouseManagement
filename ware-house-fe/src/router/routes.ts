@@ -11,7 +11,7 @@ export const AppRoutes = {
   user:{
     list:"/users"
   },
-  goods: '/goods',
+  products: '/products',
   unit: '/unit',
   supplier: '/supplier',
   warehouse: '/warehouse',

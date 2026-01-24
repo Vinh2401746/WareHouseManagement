@@ -35,8 +35,10 @@ function App() {
               },
               components: {
                 Table: {
-                  rowHoverBg: "#daebfa",
-                  // borderColor:'#726565',
+                  headerBg:'#dfdede',
+                  borderRadius: 8,
+                
+                  rowHoverBg : '#c2c2c5'
                 },
               },
             }}

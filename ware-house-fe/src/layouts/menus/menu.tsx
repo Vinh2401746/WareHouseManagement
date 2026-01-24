@@ -27,7 +27,7 @@ const items: ItemType<MenuItemType>[] = [
     label: "Người dùng",
   },
   {
-    key: AppRoutes.goods,
+    key: AppRoutes.products,
     icon: <VideoCameraOutlined />,
     label: "Danh mục hàng",
   },
