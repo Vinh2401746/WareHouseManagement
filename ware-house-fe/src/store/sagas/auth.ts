@@ -14,13 +14,16 @@ import dispatchToast from "../../constants/toast";
 function* loginSaga(action: PayloadAction<AuthRequestLoginType>) {
   try {
     const inforLogin: AuthResponseLoginType = yield call(authLoginApi, action.payload);
+    console.log("inforLogin",inforLogin);
     
     yield put(logginRequesteSuccess());
       yield put(setInforUser(inforLogin));
 
     //   yield put({type: "USER_FETCH_SUCCEEDED", user: user});
   } catch (e: any) {
-    dispatchToast("error", e.message || "Lỗi hệ thống vui lòng thử lại sau!");
+    console.log("login sage",e);
+    
+    dispatchToast("error", e?.response.data.message || e.message || "Lỗi hệ thống vui lòng thử lại sau!");
     yield put(loginRequestedFailt());
     //   yield put({type: "USER_FETCH_FAILED", message: e.message});
   }
