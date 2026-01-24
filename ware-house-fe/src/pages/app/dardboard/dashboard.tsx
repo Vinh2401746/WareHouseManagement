@@ -1,4 +1,4 @@
-import { Card, Col, Flex, Row} from "antd";
+import { Card, Col, Flex, Row } from "antd";
 import {
   LineChart,
   Line,
@@ -12,8 +12,6 @@ import {
 } from "recharts";
 import { StatCard } from "./components/StatCard";
 import { TransactionItem } from "./components/TransactionItem";
-
-
 
 const lineData = [
   { time: "00:00", deposit: 800, withdraw: 500, invest: 300 },
@@ -36,18 +34,34 @@ export const DashBoardPage = () => {
   return (
     <Flex vertical gap={24}>
       <Row gutter={[16, 16]}>
-        <StatCard title="Tổng cửa hàng" value={1250} up />
-        <StatCard title="Đã xuất kho" value={820} />
-        <StatCard title="Chưa xuất kho" value={430} />
-        <StatCard title="Tổng doanh thu tháng" value="125.000.000 VNĐ" down />
+        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24} >
+          <StatCard title="Tổng cửa hàng" value={1250} up />
+        </Col>
+        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24}>
+          <StatCard title="Đã xuất kho" value={820} />
+        </Col>
+        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24}>
+          <StatCard title="Chưa xuất kho" value={430} />
+        </Col>
+        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24}>
+          <StatCard title="Tổng doanh thu tháng" value="125.000.000 VNĐ" down />
+        </Col>
 
-        <StatCard title="Công nợ" value="45.000.000 VNĐ" up />
-        <StatCard title="Tổng giá trị tồn kho" value="150.000.000 VNĐ" up />
-        <StatCard title="Số dư cuối kỳ" value="250.000.000 VNĐ" down />
-        <StatCard title="Vòng quay tồn kho" value="250" />
+        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24}>
+          <StatCard title="Công nợ" value="45.000.000 VNĐ" up />
+        </Col>
+        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24}>
+          <StatCard title="Tổng giá trị tồn kho" value="150.000.000 VNĐ" up />
+        </Col>
+        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24}>
+          <StatCard title="Số dư cuối kỳ" value="250.000.000 VNĐ" down />
+        </Col>
+        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24}>
+          <StatCard title="Vòng quay tồn kho" value="250" />
+        </Col>
       </Row>
       <Row gutter={16}>
-        <Col span={14}>
+        <Col span={14} xxl={14} xl={14} lg={24} md={24} sm={24} xs={24}>
           <Card title="Biểu đồ dòng tiền">
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={lineData}>
@@ -62,7 +76,7 @@ export const DashBoardPage = () => {
           </Card>
         </Col>
 
-        <Col span={10}>
+        <Col span={10} xxl={10} xl={10} lg={24} md={24} sm={24} xs={24}>
           <Card title="Phân bổ sản phẩm">
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>

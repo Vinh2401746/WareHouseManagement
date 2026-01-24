@@ -3,6 +3,7 @@ export const AppRoutes = {
   auth:{
     login :'/login',
     forgot_pass :'/forgot-pass',
+    setting_pass : '/setting-pass'
   },
   home:{
     dashboard: '/dashboard'

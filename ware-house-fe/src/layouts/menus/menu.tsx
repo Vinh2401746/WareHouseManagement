@@ -66,8 +66,10 @@ const items: ItemType<MenuItemType>[] = [
 export const MenusApp = () => {
   const { collapsed } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
-    const location = useLocation();
-  
+  const location = useLocation();
+
+
+
   const onClick: MenuProps["onClick"] = useCallback(
     (e: any) => {
       navigate(e?.keyPath[0]);
@@ -79,7 +81,7 @@ export const MenusApp = () => {
       trigger={null}
       collapsible
       collapsed={collapsed}
-      width={300}
+      width={220}
       collapsedWidth={80}
     >
       <Flex gap={10} align="center" justify="center" style={{ marginTop: 10 }}>
@@ -101,3 +103,5 @@ export const MenusApp = () => {
     </Sider>
   );
 };
+
+

@@ -7,11 +7,17 @@ const { Content } = Layout;
 
 export const MainLayout = () => {
   return (
-    <Layout style={{ minHeight: "100vh" }}>
+    <Layout style={{ minHeight: "100vh", overflow: "hidden" }}>
       <MenusApp />
-      <Layout >
+      <Layout>
         <AppHeader />
-        <Content style={{ padding: 16, backgroundColor:'whitesmoke'}}>
+        <Content
+          style={{
+            padding: 16,
+            height: "calc(100vh - 64px)",
+            overflowY: "auto",
+          }}
+        >
           <Outlet />
         </Content>
       </Layout>

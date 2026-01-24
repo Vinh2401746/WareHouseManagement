@@ -12,7 +12,7 @@ export const StatCard = ({
   up?: boolean;
   down?: boolean;
 }) => (
-  <Col span={6}>
+
     <Card>
       <Statistic
         title={title}
@@ -30,5 +30,4 @@ export const StatCard = ({
         </Tag>
       )}
     </Card>
-  </Col>
 );

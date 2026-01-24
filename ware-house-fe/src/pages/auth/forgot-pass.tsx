@@ -50,7 +50,9 @@ export const ForgotPasswordPage = memo(() => {
         <Title level={1} className="login-title">
           Quản Trị Kho
         </Title>
-
+        <Title level={3} className="login-title">
+          Yêu cầu cấp lại mật khẩu
+        </Title>
         <Form
           name="basic"
           form={form}
