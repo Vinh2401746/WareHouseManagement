@@ -16,6 +16,9 @@ const getSuppliers = {
     phone: Joi.string(),
     email: Joi.string(),
     address: Joi.string(),
+    sortBy: Joi.string(),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
   }),
 };
 

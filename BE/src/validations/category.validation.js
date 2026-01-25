@@ -2,21 +2,20 @@ const Joi = require('joi');
 const { objectId } = require('./custom.validation');
 
 const createCategory = {
-  body: Joi.object().keys(
-      {
-		code: Joi.string(),
-		name: Joi.string(),
-	}
-  ),
+  body: Joi.object().keys({
+    code: Joi.string(),
+    name: Joi.string(),
+  }),
 };
 
 const getCategories = {
-  query: Joi.object().keys(
-      {
-		code: Joi.string(),
-		name: Joi.string(),
-	}
-  ),
+  query: Joi.object().keys({
+    code: Joi.string(),
+    name: Joi.string(),
+    sortBy: Joi.string(),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
+  }),
 };
 
 const getCategory = {
@@ -31,9 +30,9 @@ const updateCategory = {
   }),
   body: Joi.object()
     .keys({
-		code: Joi.string(),
-		name: Joi.string(),
-	})
+      code: Joi.string(),
+      name: Joi.string(),
+    })
     .min(1),
 };
 

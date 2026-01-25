@@ -18,6 +18,9 @@ const getProducts = {
     category: Joi.string(),
     unit: Joi.string(),
     minStock: Joi.number().integer(),
+    sortBy: Joi.string(),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
   }),
 };
 

@@ -2,23 +2,22 @@ const Joi = require('joi');
 const { objectId } = require('./custom.validation');
 
 const createWarehouse = {
-  body: Joi.object().keys(
-      {
-		name: Joi.string(),
-		branch: Joi.string(),
-		address: Joi.string(),
-	}
-  ),
+  body: Joi.object().keys({
+    name: Joi.string(),
+    branch: Joi.string(),
+    address: Joi.string(),
+  }),
 };
 
 const getWarehouses = {
-  query: Joi.object().keys(
-      {
-		name: Joi.string(),
-		branch: Joi.string(),
-		address: Joi.string(),
-	}
-  ),
+  query: Joi.object().keys({
+    name: Joi.string(),
+    branch: Joi.string(),
+    address: Joi.string(),
+    sortBy: Joi.string(),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
+  }),
 };
 
 const getWarehouse = {
@@ -33,10 +32,10 @@ const updateWarehouse = {
   }),
   body: Joi.object()
     .keys({
-		name: Joi.string(),
-		branch: Joi.string(),
-		address: Joi.string(),
-	})
+      name: Joi.string(),
+      branch: Joi.string(),
+      address: Joi.string(),
+    })
     .min(1),
 };
 

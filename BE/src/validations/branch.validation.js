@@ -14,6 +14,9 @@ const getBranchs = {
     name: Joi.string(),
     address: Joi.string(),
     phone: Joi.string(),
+    sortBy: Joi.string(),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
   }),
 };
 
