@@ -46,10 +46,23 @@ const deleteUser = {
   }),
 };
 
+const changeUserPassword = {
+  params: Joi.object().keys({
+    userId: Joi.required().custom(objectId),
+  }),
+  body: Joi.object()
+    .keys({
+      password: Joi.string().required().custom(password),
+      currentPassword: Joi.string(),
+    })
+    .required(),
+};
+
 module.exports = {
   createUser,
   getUsers,
   getUser,
   updateUser,
   deleteUser,
+  changeUserPassword,
 };

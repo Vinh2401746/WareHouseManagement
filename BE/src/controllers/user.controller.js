@@ -34,10 +34,30 @@ const deleteUser = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const changeUserPassword = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const { password: newPassword, currentPassword } = req.body;
+  const targetUser = await userService.getUserById(userId);
+  if (!targetUser) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  // If updating own password, require currentPassword to match
+  if (req.user.id === String(targetUser.id)) {
+    if (!currentPassword || !(await targetUser.isPasswordMatch(currentPassword))) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Current password is incorrect');
+    }
+  }
+
+  const updated = await userService.updateUserById(userId, { password: newPassword });
+  res.status(httpStatus.OK).send(updated);
+});
+
 module.exports = {
   createUser,
   getUsers,
   getUser,
   updateUser,
   deleteUser,
+  changeUserPassword,
 };
