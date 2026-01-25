@@ -19,6 +19,28 @@ const productSchema = mongoose.Schema(
       ref: 'Category',
       required: true,
     },
+    received_date: {
+      type: Date,
+      required: true,
+      default: Date.now,
+      comment: 'Ngày nhập hàng',
+    },
+    production_date: {
+      type: Date,
+      required: true,
+      comment: 'Ngày sản xuất',
+    },
+    expiration_date: {
+      type: Date,
+      required: true,
+      comment: 'Ngày hết hạn',
+    },
+    price: {
+      type: Number,
+      required: true,
+      min: 0,
+      comment: 'Giá bán',
+    },
     unit: {
       type: String,
       required: true,
