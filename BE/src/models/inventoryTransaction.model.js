@@ -67,12 +67,13 @@ const inventoryTransactionSchema = mongoose.Schema(
   }
 );
 
+// add plugin that converts mongoose to json
 inventoryTransactionSchema.plugin(toJSON);
 inventoryTransactionSchema.plugin(paginate);
 
-const InventoryTransaction = mongoose.model(
-  'InventoryTransaction',
-  inventoryTransactionSchema
-);
+/**
+ * @typedef InventoryTransaction
+ */
+const InventoryTransaction = mongoose.model('InventoryTransaction', inventoryTransactionSchema);
 
 module.exports = InventoryTransaction;
