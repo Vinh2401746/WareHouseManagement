@@ -5,3 +5,6 @@ module.exports.warehouseController = require("./warehouse.controller");
 module.exports.categoryController = require("./category.controller");
 module.exports.productController = require("./product.controller");
 module.exports.supplierController = require("./supplier.controller");
+module.exports.productBatchController = require("./productBatch.controller");
+module.exports.inventoryTransactionController = require("./inventoryTransaction.controller");
+module.exports.saleController = require("./sale.controller");

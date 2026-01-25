@@ -60,8 +60,13 @@ const saleSchema = mongoose.Schema(
   }
 );
 
+// add plugin that converts mongoose to json
 saleSchema.plugin(toJSON);
 saleSchema.plugin(paginate);
 
+/**
+ * @typedef Sale
+ */
 const Sale = mongoose.model('Sale', saleSchema);
+
 module.exports = Sale;

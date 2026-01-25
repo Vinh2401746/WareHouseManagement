@@ -5,3 +5,6 @@ module.exports.warehouseValidation = require("./warehouse.validation");
 module.exports.categoryValidation = require("./category.validation");
 module.exports.productValidation = require("./product.validation");
 module.exports.supplierValidation = require("./supplier.validation");
+module.exports.productBatchValidation = require("./productBatch.validation");
+module.exports.inventoryTransactionValidation = require("./inventoryTransaction.validation");
+module.exports.saleValidation = require("./sale.validation");
