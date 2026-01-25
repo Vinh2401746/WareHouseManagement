@@ -62,5 +62,5 @@ module.exports = {
     },
     from: envVars.EMAIL_FROM,
   },
-  appBaseUrl: envVars.APP_BASE_URL || 'http://link-to-app',
+  frontEndUrl: envVars.FRONTEND_URL || 'http://link-to-app',
 };
