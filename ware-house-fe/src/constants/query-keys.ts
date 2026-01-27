@@ -4,5 +4,8 @@ export const QueryKeys = {
   },
   products:{
     list: 'products'
+  },
+  category:{
+    list: 'category'
   }
 };

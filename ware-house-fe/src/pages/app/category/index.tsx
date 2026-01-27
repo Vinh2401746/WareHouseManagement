@@ -1,6 +1,5 @@
 import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { QueryKeys } from "../../../constants/query-keys";
-import { deleteUser, getUsers } from "../../../api/users/users";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Breadcrumb,
@@ -11,39 +10,42 @@ import {
   Tag,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import type { ProductFormRef } from "./components/create-update-product";
-import ProductFormModal from "./components/create-update-product";
+import type { CategoryFormRef } from "./components/create-update-category";
+import CategoryFormModal from "./components/create-update-category";
 import dispatchToast from "../../../constants/toast";
 import { UserOutlined } from "@ant-design/icons";
 import './index.css'
 import { TableCommon } from "../../../components/table/table";
 import { AppRoutes } from "../../../router/routes";
-import { getProductsApi } from "../../../api/products";
-import type { GetProductsRequestType } from "../../../types/products";
-export const ProductsPage = memo(() => {
+
+import { deleteCategory, getCategorysApi } from "../../../api/category";
+import type { GetCategoriesRequestType } from "../../../types/category";
+export const CategoryPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const formRef = useRef<ProductFormRef>(null);
-  const { data, isLoading } = useQuery({
-    queryKey: [QueryKeys.products.list, page, limit],
+  const formRef = useRef<CategoryFormRef>(null);
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: [QueryKeys.category.list, page, limit],
     queryFn: ({ queryKey }) => {
-    const [, payload] = queryKey as [string, GetProductsRequestType];
-    return getProductsApi(payload);
+    const [, payload] = queryKey as [string, GetCategoriesRequestType];
+    return getCategorysApi(payload);
   },
+    gcTime: 15 * 60 * 1000 // 15 phut cache
   });
 
   const { mutate, isPending } = useMutation({
-    mutationFn: (payload: { id: string }) => deleteUser({ id: payload.id }),
+    mutationFn: (payload: { id: string }) => deleteCategory({ id: payload.id }),
     onSuccess: () => {
       console.log("data");
-      dispatchToast("success", "Xoá người dùng thành công!");
+      dispatchToast("success", "Xoá danh mục thành công!");
+      refetch()
     },
     onError: () => {
-      dispatchToast("error", "Xoá người dùng thất bại!");
+      dispatchToast("error", "Xoá danh mục thất bại!");
     },
   });
 
-  const products = useMemo(() => data?.results ?? [], [data?.results]);
+  const categories = useMemo(() => data?.results ?? [], [data?.results]);
 
   const onAction = useCallback(
     (type: "delete" | "update" | "reset-pass", record: any) => {
@@ -53,10 +55,6 @@ export const ProductsPage = memo(() => {
           break;
         case "update":
           formRef.current?.show(record);
-          break;
-        case "reset-pass":
-          dispatchToast("warning", "Tính năng đang phát triển");
-          // formRef.current?.show(record);
           break;
         default:
           break;
@@ -81,36 +79,10 @@ export const ProductsPage = memo(() => {
       align: "center",
     },
     {
-      title: "Tên",
+      title: "Tên danh mục",
       dataIndex: "name",
       key: "name",
       align: "center",
-    },
-    {
-      title: "Đơn vị",
-      dataIndex: "unit",
-      key: "unit",
-      align: "center",
-    },
-    {
-      title: "Giá",
-      dataIndex: "price",
-      key: "price",
-      align: "center",
-      render: (value:string) => value + ' VNĐ' 
-    },
-     {
-      title: "Tồn kho tối thiểu",
-      dataIndex: "minStock",
-      key: "minStock",
-      align: "center",
-    },
-      {
-      title: "Danh mục",
-      dataIndex: "category",
-      key: "category",
-      align: "center",
-      render :(value:any)=> `${value?.name || ''}-${value?.code || ''}`
     },
     {
       title: "Tuỳ chọn",
@@ -133,7 +105,7 @@ export const ProductsPage = memo(() => {
               Cập nhật
             </Tag>
             <Popconfirm
-              title="Xác nhận xoá user này?"
+              title="Xác nhận xoá danh mục này?"
               cancelText="Huỷ"
               okText="Xác nhận"
               onConfirm={() => onAction("delete", record)}
@@ -153,11 +125,11 @@ export const ProductsPage = memo(() => {
       <Breadcrumb
         items={[
           {
-            href: AppRoutes.products,
+            href: AppRoutes.category,
             title: (
               <>
                 <UserOutlined />
-                <span>Hàng hoá</span>
+                <span>Danh mục sản phẩm</span>
               </>
             ),
           },
@@ -165,12 +137,12 @@ export const ProductsPage = memo(() => {
       />
       <Flex justify="end">
         <Button type="primary" onClick={() => formRef.current?.show()}>
-          Thêm hàng hoá
+          Thêm danh mục
         </Button>
       </Flex>
       <TableCommon
         size="middle"
-        dataSource={products}
+        dataSource={categories}
         columns={columns}
         pagination={false}
         loading={isLoading || isPending}
@@ -195,7 +167,7 @@ export const ProductsPage = memo(() => {
           onChange={(page) => setPage(page)}
         />
       </Flex>
-      <ProductFormModal ref={formRef} />
+      <CategoryFormModal ref={formRef} />
     </div>
   );
 });

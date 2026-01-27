@@ -29,12 +29,12 @@ const items: ItemType<MenuItemType>[] = [
   {
     key: AppRoutes.products,
     icon: <VideoCameraOutlined />,
-    label: "Danh mục hàng",
+    label: "Sản phẩm",
   },
   {
-    key: AppRoutes.unit,
+    key: AppRoutes.category,
     icon: <UploadOutlined />,
-    label: "Đơn vị tính",
+    label: "Danh mục sản phẩm",
   },
    {
     key: AppRoutes.supplier,

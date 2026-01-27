@@ -12,7 +12,7 @@ export const AppRoutes = {
     list:"/users"
   },
   products: '/products',
-  unit: '/unit',
+  category: '/category',
   supplier: '/supplier',
   warehouse: '/warehouse',
   store: '/store',
