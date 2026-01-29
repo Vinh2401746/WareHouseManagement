@@ -13,9 +13,10 @@ const queryClient = new QueryClient({
       staleTime: 0,
       gcTime: 0,
       retry: false,
+      placeholderData: (previousData:any) => previousData,
     },
     mutations: {
-      gcTime: 0,
+      // gcTime: 0,
     },
   },
 });

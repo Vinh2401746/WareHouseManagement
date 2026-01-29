@@ -1,10 +1,12 @@
 import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { Modal, Form, Input, Select } from "antd";
-import { CATEGORIES, ROLES, UNITS } from "../../../../constants/common";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { UNITS } from "../../../../constants/common";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { QueryKeys } from "../../../../constants/query-keys";
-import type { GetCategoriesRequestType } from "../../../../types/category";
 import { getCategorysApi } from "../../../../api/category";
+import { createProductApi, updateProductsApi } from "../../../../api/products";
+import dispatchToast from "../../../../constants/toast";
+import { ONLY_NUMBER } from "../../../../utils/regex";
 
 export type ProductFormData = {
   code: string;
@@ -28,7 +30,13 @@ const initForm: ProductFormData = {
   minStock: 0,
   id: "",
 };
-const ProductFormModal = forwardRef<ProductFormRef>((_, ref) => {
+
+type ProductFormModalProps = {
+  onSuccess:()=> void,
+  onError?:()=> void,
+}
+
+const ProductFormModal = forwardRef<ProductFormRef,ProductFormModalProps>(({onSuccess}, ref) => {
   const [open, setOpen] = useState(false);
   const [product, setproduct] = useState<ProductFormData>(initForm);
   const [form] = Form.useForm<ProductFormData>();
@@ -40,28 +48,22 @@ const ProductFormModal = forwardRef<ProductFormRef>((_, ref) => {
     },
   });
 
-  const category = useMemo(()=> data?.results?.map((item)=>({
-    value:item.id,
-    label:item.name
-  })),[data?.results])
-  console.log("data u[date product", data);
-  
+  const category = useMemo(
+    () =>
+      data?.results?.map((item:any) => ({
+        value: item.id,
+        label: item.name,
+      })),
+    [data?.results],
+  );
 
-  // const isUpdate = useMemo(() => product.id, [product.id]);
-  const queryClient = useQueryClient();
+  const isUpdate = useMemo(() => product.id, [product.id]);
+
   useImperativeHandle(ref, () => ({
     show: (data) => {
       setOpen(true);
       form.setFieldsValue(data ? data : initForm);
       setproduct((data ? data : initForm) as ProductFormData);
-      // if (data) {
-      //   form.setFieldsValue({
-      //     ...data,
-      //   });
-      //   setproduct(data as ProductFormData)
-      // } else {
-      //   form.resetFields();
-      // }
     },
     hide: () => {
       setOpen(false);
@@ -70,44 +72,46 @@ const ProductFormModal = forwardRef<ProductFormRef>((_, ref) => {
   }));
 
   const { mutate } = useMutation({
-    // mutationFn: (payload: ProductFormData) =>{
-    //  return isUpdate
-    //     ? updateUser({ ...payload, id: product.id })
-    //     : createUser(payload)},
+    mutationFn: (payload: ProductFormData) => {
+      return isUpdate
+        ? updateProductsApi({ ...payload, productId: product.id })
+        : createProductApi(payload);
+    },
     onSuccess: () => {
-      // dispatchToast(
-      //   "success",
-      //   `${isUpdate ? "Cập nhật" : "Tạo"} người dùng thành công`,
-      // );
+      dispatchToast(
+        "success",
+        `${isUpdate ? "Cập nhật" : "Tạo"} sản phẩm thành công`,
+      );
       setOpen(false);
-      queryClient.invalidateQueries({
-        queryKey: [QueryKeys.users.users],
-      });
+      onSuccess()
     },
     onError: (error: any) => {
       console.log("error", error);
 
-      // dispatchToast(
-      //   "warning",
-      //   error?.response?.data?.message ||
-      //     `${isUpdate ? "Cập nhật" : "Tạo"} người dùng thất bại`,
-      // );
+      dispatchToast(
+        "warning",
+        error?.response?.data?.message ||
+          `${isUpdate ? "Cập nhật" : "Tạo"} sản phẩm thất bại`,
+      );
     },
   });
 
   const onFinish = (values: ProductFormData) => {
-    // console.log("Submit:", values);
-    // mutate(values);
+    console.log("Submit:", values);
+    mutate({
+      ...values,
+      minStock:Number(values.minStock)
+    });
   };
 
   return (
     <Modal
       open={open}
-      title="Chi tiết sản phẩm"
+      title={`${!isUpdate ? "Tạo" : "Cập nhật"} sản phẩm`}
       onCancel={() => setOpen(false)}
       onOk={() => form.submit()}
       // destroyOnHidden
-      // okText={`${!isUpdate ? "Tạo" : "Cập nhật"}`}
+      okText={`${!isUpdate ? "Tạo" : "Cập nhật"}`}
       cancelText="Đóng"
     >
       <Form
@@ -127,9 +131,7 @@ const ProductFormModal = forwardRef<ProductFormRef>((_, ref) => {
         <Form.Item
           label="Mã sản phẩm"
           name="code"
-          rules={[
-            { required: true, message: "Vui lòng nhập mã sản phẩm" },
-          ]}
+          rules={[{ required: true, message: "Vui lòng nhập mã sản phẩm" }]}
         >
           <Input />
         </Form.Item>
@@ -152,7 +154,7 @@ const ProductFormModal = forwardRef<ProductFormRef>((_, ref) => {
             { required: true, message: "Vui lòng chọn danh mục sản phẩm" },
           ]}
         >
-          <Select options={category|| []} />
+          <Select options={category || []} />
         </Form.Item>
         <Form.Item
           label="Đơn vị"
@@ -166,7 +168,17 @@ const ProductFormModal = forwardRef<ProductFormRef>((_, ref) => {
           name="minStock"
           rules={[
             { required: true, message: "Vui lòng chọn nhập tồn kho tối thiểu" },
-            { type: "number", message: "Vui lòng chỉ nhập số" },
+            {
+              validator(_, value ) {
+                console.log("valuee", value);
+                
+                const includesNumber = ONLY_NUMBER.test(value)
+                if(!includesNumber){
+                  return Promise.resolve()
+                }
+                return Promise.reject("Vui lòng chỉ nhập số")
+              },
+            }
           ]}
         >
           <Input />

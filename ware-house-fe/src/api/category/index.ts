@@ -3,10 +3,11 @@ import type {
   PostCategoryType,
   UpdatetCategoryType,
 } from "../../types/category";
+import type { CommonListResponse } from "../../types/common";
 import { keyQueryFilterString } from "../../utils/helper";
 import AxiosClient from "../axiosClient";
 
-export const getCategorysApi = async (payload: GetCategoriesRequestType) => {
+export const getCategorysApi = async (payload: GetCategoriesRequestType):Promise<CommonListResponse | any>  => {
   const queryString = keyQueryFilterString(payload);
   return AxiosClient.get(`category?${queryString}`);
 };

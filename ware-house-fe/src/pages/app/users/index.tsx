@@ -19,9 +19,9 @@ import './index.css'
 import { TableCommon } from "../../../components/table/table";
 export const UserPage = memo(() => {
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(2);
   const formRef = useRef<UserFormRef>(null);
-  const { data, isLoading } = useQuery({
+  const { data, isFetching } = useQuery({
     queryKey: [QueryKeys.users.users, page, limit],
     queryFn: () => getUsers({ page, limit }),
   });
@@ -157,7 +157,8 @@ export const UserPage = memo(() => {
         dataSource={users}
         columns={columns}
         pagination={false}
-        loading={isLoading || isPending}
+        loading={isFetching}
+        
         rowKey={"id"}
         onRow={(record) => {
           return {
@@ -174,6 +175,7 @@ export const UserPage = memo(() => {
             console.log("current", current, size);
             setLimit(size);
           }}
+          pageSize={limit}
           // pageSize={page}
           total={data?.totalResults || 0}
           onChange={(page) => setPage(page)}
