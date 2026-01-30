@@ -37,8 +37,13 @@ const productBatchSchema = mongoose.Schema(
   }
 );
 
+// add plugin that converts mongoose to json
 productBatchSchema.plugin(toJSON);
 productBatchSchema.plugin(paginate);
 
+/**
+ * @typedef ProductBatch
+ */
 const ProductBatch = mongoose.model('ProductBatch', productBatchSchema);
+
 module.exports = ProductBatch;

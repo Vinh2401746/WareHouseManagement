@@ -19,36 +19,22 @@ const productSchema = mongoose.Schema(
       ref: 'Category',
       required: true,
     },
-    received_date: {
-      type: Date,
-      required: true,
-      default: Date.now,
-      comment: 'Ngày nhập hàng',
-    },
-    production_date: {
-      type: Date,
-      required: true,
-      comment: 'Ngày sản xuất',
-    },
-    expiration_date: {
-      type: Date,
-      required: true,
-      comment: 'Ngày hết hạn',
-    },
-    price: {
-      type: Number,
-      required: true,
-      min: 0,
-      comment: 'Giá bán',
-    },
     unit: {
       type: String,
       required: true,
+      trim: true,
     },
     minStock: {
       type: Number,
+      required: true,
       default: 0,
+      min: 0,
     },
+    package: {
+      type: String,
+      trim: true,
+      comment: 'Quy cách đóng gói',
+    }
   },
   {
     timestamps: true,

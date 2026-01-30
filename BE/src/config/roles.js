@@ -13,6 +13,12 @@ const allRoles = {
     'manageProducts',
     'getSuppliers',
     'manageSuppliers',
+    'manageProductBatchs',
+    'getProductBatchs',
+    'manageInventoryTransactions',
+    'getInventoryTransactions',
+    'manageSales',
+    'getSales',
   ],
 };
 
