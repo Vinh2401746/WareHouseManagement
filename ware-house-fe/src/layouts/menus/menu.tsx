@@ -11,7 +11,6 @@ import "./menu.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AppRoutes } from "../../router/routes";
 import {  useAppSelector } from "../../store/hooks";
-import IcLogo from '../../assets/svg/logo.svg'
 
 const { Sider } = Layout;
 
@@ -85,7 +84,6 @@ export const MenusApp = () => {
       collapsedWidth={80}
     >
       <Flex gap={10} align="center" justify="center" style={{ marginTop: 10 }}>
-        <img src={IcLogo} alt="powersync" width={100} height={ collapsed ? 40 : 80} />
         {/* {!collapsed && (
           <span style={{ fontSize: 16, fontWeight: "bold" }}>KHO</span>
         )} */}

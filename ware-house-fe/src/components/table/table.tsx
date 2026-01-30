@@ -2,24 +2,34 @@ import { Table, type TableProps } from "antd";
 import { memo } from "react";
 import "./table.css";
 type TableCommonProps = {} & TableProps;
+
+
+const styles: TableProps<any[]>["styles"] = {
+  root: {
+    // padding: 10,
+    border: "2px solid #E5E7EB",
+    borderRadius: 8,
+    overflow:'hidden'
+  },
+  content:{
+    
+  },
+  body:{
+    row:{
+      // borderRadius:10,
+      // backgroundColor:'transparent',
+    }
+  }
+
+};
+
 export const TableCommon = memo((props: TableCommonProps) => {
   return (
     <Table
-      classNames={{
-        root: "table-container",
-        body: {
-          row: "table-row",
-          cell: "table-cell",
-        },
-        header: {
-          wrapper: "table-header",
-          
-        },
-        content: "table-content",
-      }}
       pagination={false}
       rowKey={"id"}
       size="middle"
+      styles={styles}
       // bordered
       {...props}
     />

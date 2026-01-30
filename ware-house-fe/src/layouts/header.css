@@ -32,14 +32,9 @@
   color: #1677ff;
 }
 .icon-collaped {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
   color: white;
-  font-size: 24px;
-
-  padding: 6px;
+  font-size: 20px;
+  padding: 4px;
   border: 1px solid #ffffff;
   border-radius: 6px;
 }

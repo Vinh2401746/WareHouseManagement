@@ -37,9 +37,9 @@ function App() {
               components: {
                 Table: {
                   headerBg:'#dfdede',
-                  borderRadius: 8,
+                  // borderRadius: 8,
                 
-                  rowHoverBg : '#c2c2c5'
+                  rowHoverBg : '#dfdede'
                 },
               },
             }}

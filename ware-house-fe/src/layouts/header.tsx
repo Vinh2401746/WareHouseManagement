@@ -26,6 +26,7 @@ const { Header } = Layout;
 import "./header.css";
 import ModalCommon, { type ModalCommonRef } from "../components/modal";
 import { ChangePassword } from "../components/change-password";
+import IcLogo from "../assets/svg/logo.svg";
 const items: MenuProps["items"] = [
   {
     key: "Profile",
@@ -59,11 +60,9 @@ export const AppHeader = () => {
   const screens = useBreakpoint();
 
   const prevMd = useRef(screens.md);
-  const refModal = useRef<ModalCommonRef>(null)
-
+  const refModal = useRef<ModalCommonRef>(null);
 
   useEffect(() => {
-
     if (prevMd.current && !screens.md && !collapsed) {
       dispatch(collapMenuRequest());
     }
@@ -82,7 +81,7 @@ export const AppHeader = () => {
           dispatch(logoutRequest());
           break;
         case "Settings":
-           refModal.current?.show()
+          refModal.current?.show();
           break;
         default:
           // dispatchToast("info", "Coming soome");
@@ -104,14 +103,24 @@ export const AppHeader = () => {
         flexDirection: "row",
         alignItems: "center",
         background: "#001529",
-        position: "relative",
+        paddingRight:12,
+        paddingLeft:12,
+        height:80
+        // padding:50
+        // position: "relative",
+        
         // boxShadow : '10px 1px 4px rgba(149, 85, 85, 0.06)'
       }}
     >
-      <Flex>
+      <Flex align="center" gap={20}>
+        <img
+          src={IcLogo}
+          alt="powersync"
+          width={ 280}
+          height={40}
+        />
         <div
           onClick={handleCollape}
-          style={{ position: "absolute", left: 0, top: 4 }}
         >
           {!collapsed ? (
             <FastBackwardOutlined className="icon-collaped" />
@@ -143,8 +152,8 @@ export const AppHeader = () => {
           <Avatar size={36} icon={<UserOutlined />} src={AvatarDefault} />
         </Dropdown>
       </Flex>
-      <ModalCommon title="Đổi mật khẩu" ref={refModal} footer={null} >
-        <ChangePassword  onClose={()=>refModal.current?.hide()}/>
+      <ModalCommon title="Đổi mật khẩu" ref={refModal} footer={null}>
+        <ChangePassword onClose={() => refModal.current?.hide()} />
       </ModalCommon>
     </Header>
   );

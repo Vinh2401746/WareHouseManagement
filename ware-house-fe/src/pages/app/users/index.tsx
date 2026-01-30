@@ -19,14 +19,14 @@ import './index.css'
 import { TableCommon } from "../../../components/table/table";
 export const UserPage = memo(() => {
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(2);
+  const [limit, setLimit] = useState(10);
   const formRef = useRef<UserFormRef>(null);
   const { data, isFetching } = useQuery({
     queryKey: [QueryKeys.users.users, page, limit],
     queryFn: () => getUsers({ page, limit }),
   });
 
-  const { mutate, isPending } = useMutation({
+  const { mutate } = useMutation({
     mutationFn: (payload: { id: string }) => deleteUser({ id: payload.id }),
     onSuccess: () => {
       console.log("data");
