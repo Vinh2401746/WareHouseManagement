@@ -8,6 +8,8 @@ const createProduct = {
     category: Joi.string(),
     unit: Joi.string(),
     minStock: Joi.number().integer(),
+    expiration_date: Joi.date(),
+    production_date: Joi.date(),
   }),
 };
 
