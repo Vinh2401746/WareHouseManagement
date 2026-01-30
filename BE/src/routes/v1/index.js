@@ -8,7 +8,7 @@ const categoryRoute = require('./category.route');
 const productRoute = require('./product.route');
 const supplierRoute = require('./supplier.route');
 const docsRoute = require('./docs.route');
-const productBatchRoute = require('./productBatch.route');
+// const productBatchRoute = require('./productBatch.route');
 const inventoryTransactionRoute = require('./inventoryTransaction.route');
 const saleRoute = require('./sale.route');
 const config = require('../../config/config');
@@ -48,10 +48,10 @@ const defaultRoutes = [
     path: '/supplier',
     route: supplierRoute,
   },
-  {
-    path: '/productBatch',
-    route: productBatchRoute,
-  },
+  // {
+  //   path: '/productBatch',
+  //   route: productBatchRoute,
+  // },
   {
     path: '/inventoryTransaction',
     route: inventoryTransactionRoute,
