@@ -10,6 +10,7 @@ const createProduct = {
     minStock: Joi.number().integer(),
     expiration_date: Joi.date(),
     production_date: Joi.date(),
+    price:Joi.number().integer(),
   }),
 };
 
