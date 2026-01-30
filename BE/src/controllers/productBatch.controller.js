@@ -10,7 +10,15 @@ const createProductBatch = catchAsync(async (req, res) => {
 });
 
 const getProductBatchs = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['product', 'warehouse', 'batchCode', 'manufactureDate', 'expiryDate', 'quantity', 'importPrice']);
+  const filter = pick(req.query, [
+    'product',
+    'warehouse',
+    'batchCode',
+    'manufactureDate',
+    'expiryDate',
+    'quantity',
+    'importPrice',
+  ]);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await productBatchService.queryProductBatches(filter, options);
   res.send(result);

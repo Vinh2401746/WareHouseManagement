@@ -7,9 +7,9 @@ describe('Category model', () => {
 
     beforeEach(() => {
       newCategory = {
-		code: faker.random.word(),
-		name: faker.random.word(),
-	};
+        code: faker.random.word(),
+        name: faker.random.word(),
+      };
     });
 
     test('should correctly validate a valid category', async () => {

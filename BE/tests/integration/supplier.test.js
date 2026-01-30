@@ -16,11 +16,11 @@ describe('Supplier routes', () => {
 
     beforeEach(() => {
       newSupplier = {
-		name: faker.random.word(),
-		phone: faker.random.word(),
-		email: faker.random.word(),
-		address: faker.random.word(),
-	};
+        name: faker.random.word(),
+        phone: faker.random.word(),
+        email: faker.random.word(),
+        address: faker.random.word(),
+      };
     });
 
     test('should return 201 and successfully create new supplier if data is ok', async () => {
@@ -64,7 +64,7 @@ describe('Supplier routes', () => {
       });
       expect(res.body.results).toHaveLength(2);
       expect(res.body.results[0]).toEqual({
-        id: supplierOne._id.toHexString()
+        id: supplierOne._id.toHexString(),
       });
     });
 
@@ -141,7 +141,7 @@ describe('Supplier routes', () => {
 
       expect(res.body).not.toHaveProperty('password');
       expect(res.body).toEqual({
-        id: supplierOne._id.toHexString()
+        id: supplierOne._id.toHexString(),
       });
     });
 
@@ -223,11 +223,11 @@ describe('Supplier routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
       const updateBody = {
-		name: faker.random.word(),
-		phone: faker.random.word(),
-		email: faker.random.word(),
-		address: faker.random.word(),
-	};
+        name: faker.random.word(),
+        phone: faker.random.word(),
+        email: faker.random.word(),
+        address: faker.random.word(),
+      };
 
       const res = await request(app)
         .patch(`/v1/suppliers/${supplierOne._id}`)
@@ -235,9 +235,9 @@ describe('Supplier routes', () => {
         .send(updateBody)
         .expect(httpStatus.OK);
 
-      let validationData = {
-        id: supplierOne._id.toHexString()
-      }
+      const validationData = {
+        id: supplierOne._id.toHexString(),
+      };
       validationData.merge(updateBody);
 
       expect(res.body).not.toHaveProperty('password');
@@ -253,22 +253,22 @@ describe('Supplier routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
       const updateBody = {
-		name: faker.random.word(),
-		phone: faker.random.word(),
-		email: faker.random.word(),
-		address: faker.random.word(),
-	};
+        name: faker.random.word(),
+        phone: faker.random.word(),
+        email: faker.random.word(),
+        address: faker.random.word(),
+      };
       await request(app).patch(`/v1/suppliers/${supplierOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if supplierId is not a valid mongo id', async () => {
       await insertSuppliers([supplierTwo]);
       const updateBody = {
-		name: faker.random.word(),
-		phone: faker.random.word(),
-		email: faker.random.word(),
-		address: faker.random.word(),
-	};
+        name: faker.random.word(),
+        phone: faker.random.word(),
+        email: faker.random.word(),
+        address: faker.random.word(),
+      };
       await request(app)
         .patch(`/v1/suppliers/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)

@@ -16,14 +16,14 @@ describe('Sale routes', () => {
 
     beforeEach(() => {
       newSale = {
-		code: faker.random.word(),
-		branch: faker.random.word(),
-		warehouse: faker.random.word(),
-		soldBy: faker.random.word(),
-		saleDate: faker.random.word(),
-		totalAmount: faker.random.word(),
-		items: faker.random.word(),
-	};
+        code: faker.random.word(),
+        branch: faker.random.word(),
+        warehouse: faker.random.word(),
+        soldBy: faker.random.word(),
+        saleDate: faker.random.word(),
+        totalAmount: faker.random.word(),
+        items: faker.random.word(),
+      };
     });
 
     test('should return 201 and successfully create new sale if data is ok', async () => {
@@ -67,7 +67,7 @@ describe('Sale routes', () => {
       });
       expect(res.body.results).toHaveLength(2);
       expect(res.body.results[0]).toEqual({
-        id: saleOne._id.toHexString()
+        id: saleOne._id.toHexString(),
       });
     });
 
@@ -144,7 +144,7 @@ describe('Sale routes', () => {
 
       expect(res.body).not.toHaveProperty('password');
       expect(res.body).toEqual({
-        id: saleOne._id.toHexString()
+        id: saleOne._id.toHexString(),
       });
     });
 
@@ -226,14 +226,14 @@ describe('Sale routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertSales([saleOne]);
       const updateBody = {
-		code: faker.random.word(),
-		branch: faker.random.word(),
-		warehouse: faker.random.word(),
-		soldBy: faker.random.word(),
-		saleDate: faker.random.word(),
-		totalAmount: faker.random.word(),
-		items: faker.random.word(),
-	};
+        code: faker.random.word(),
+        branch: faker.random.word(),
+        warehouse: faker.random.word(),
+        soldBy: faker.random.word(),
+        saleDate: faker.random.word(),
+        totalAmount: faker.random.word(),
+        items: faker.random.word(),
+      };
 
       const res = await request(app)
         .patch(`/v1/sales/${saleOne._id}`)
@@ -241,9 +241,9 @@ describe('Sale routes', () => {
         .send(updateBody)
         .expect(httpStatus.OK);
 
-      let validationData = {
-        id: saleOne._id.toHexString()
-      }
+      const validationData = {
+        id: saleOne._id.toHexString(),
+      };
       validationData.merge(updateBody);
 
       expect(res.body).not.toHaveProperty('password');
@@ -259,28 +259,28 @@ describe('Sale routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertSales([saleOne]);
       const updateBody = {
-		code: faker.random.word(),
-		branch: faker.random.word(),
-		warehouse: faker.random.word(),
-		soldBy: faker.random.word(),
-		saleDate: faker.random.word(),
-		totalAmount: faker.random.word(),
-		items: faker.random.word(),
-	};
+        code: faker.random.word(),
+        branch: faker.random.word(),
+        warehouse: faker.random.word(),
+        soldBy: faker.random.word(),
+        saleDate: faker.random.word(),
+        totalAmount: faker.random.word(),
+        items: faker.random.word(),
+      };
       await request(app).patch(`/v1/sales/${saleOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if saleId is not a valid mongo id', async () => {
       await insertSales([saleTwo]);
       const updateBody = {
-		code: faker.random.word(),
-		branch: faker.random.word(),
-		warehouse: faker.random.word(),
-		soldBy: faker.random.word(),
-		saleDate: faker.random.word(),
-		totalAmount: faker.random.word(),
-		items: faker.random.word(),
-	};
+        code: faker.random.word(),
+        branch: faker.random.word(),
+        warehouse: faker.random.word(),
+        soldBy: faker.random.word(),
+        saleDate: faker.random.word(),
+        totalAmount: faker.random.word(),
+        items: faker.random.word(),
+      };
       await request(app)
         .patch(`/v1/sales/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)

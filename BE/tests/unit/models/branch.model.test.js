@@ -7,10 +7,10 @@ describe('Branch model', () => {
 
     beforeEach(() => {
       newBranch = {
-		name: faker.random.word(),
-		address: faker.random.word(),
-		phone: faker.random.word(),
-	};
+        name: faker.random.word(),
+        address: faker.random.word(),
+        phone: faker.random.word(),
+      };
     });
 
     test('should correctly validate a valid branch', async () => {

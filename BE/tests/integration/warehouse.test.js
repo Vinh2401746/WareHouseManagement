@@ -16,10 +16,10 @@ describe('Warehouse routes', () => {
 
     beforeEach(() => {
       newWarehouse = {
-		name: faker.random.word(),
-		branch: faker.random.word(),
-		address: faker.random.word(),
-	};
+        name: faker.random.word(),
+        branch: faker.random.word(),
+        address: faker.random.word(),
+      };
     });
 
     test('should return 201 and successfully create new warehouse if data is ok', async () => {
@@ -63,7 +63,7 @@ describe('Warehouse routes', () => {
       });
       expect(res.body.results).toHaveLength(2);
       expect(res.body.results[0]).toEqual({
-        id: warehouseOne._id.toHexString()
+        id: warehouseOne._id.toHexString(),
       });
     });
 
@@ -140,7 +140,7 @@ describe('Warehouse routes', () => {
 
       expect(res.body).not.toHaveProperty('password');
       expect(res.body).toEqual({
-        id: warehouseOne._id.toHexString()
+        id: warehouseOne._id.toHexString(),
       });
     });
 
@@ -222,10 +222,10 @@ describe('Warehouse routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertWarehouses([warehouseOne]);
       const updateBody = {
-		name: faker.random.word(),
-		branch: faker.random.word(),
-		address: faker.random.word(),
-	};
+        name: faker.random.word(),
+        branch: faker.random.word(),
+        address: faker.random.word(),
+      };
 
       const res = await request(app)
         .patch(`/v1/warehouses/${warehouseOne._id}`)
@@ -233,9 +233,9 @@ describe('Warehouse routes', () => {
         .send(updateBody)
         .expect(httpStatus.OK);
 
-      let validationData = {
-        id: warehouseOne._id.toHexString()
-      }
+      const validationData = {
+        id: warehouseOne._id.toHexString(),
+      };
       validationData.merge(updateBody);
 
       expect(res.body).not.toHaveProperty('password');
@@ -251,20 +251,20 @@ describe('Warehouse routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertWarehouses([warehouseOne]);
       const updateBody = {
-		name: faker.random.word(),
-		branch: faker.random.word(),
-		address: faker.random.word(),
-	};
+        name: faker.random.word(),
+        branch: faker.random.word(),
+        address: faker.random.word(),
+      };
       await request(app).patch(`/v1/warehouses/${warehouseOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if warehouseId is not a valid mongo id', async () => {
       await insertWarehouses([warehouseTwo]);
       const updateBody = {
-		name: faker.random.word(),
-		branch: faker.random.word(),
-		address: faker.random.word(),
-	};
+        name: faker.random.word(),
+        branch: faker.random.word(),
+        address: faker.random.word(),
+      };
       await request(app)
         .patch(`/v1/warehouses/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)

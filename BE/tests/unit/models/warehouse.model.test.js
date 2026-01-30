@@ -7,10 +7,10 @@ describe('Warehouse model', () => {
 
     beforeEach(() => {
       newWarehouse = {
-		name: faker.random.word(),
-		branch: faker.random.word(),
-		address: faker.random.word(),
-	};
+        name: faker.random.word(),
+        branch: faker.random.word(),
+        address: faker.random.word(),
+      };
     });
 
     test('should correctly validate a valid warehouse', async () => {

@@ -6,7 +6,12 @@ const setupTestDB = require('../utils/setupTestDB');
 const { InventoryTransaction } = require('../../src/models');
 const { userOne, userTwo, insertUsers } = require('../fixtures/user.fixture');
 const { userOneAccessToken, userTwoAccessToken } = require('../fixtures/token.fixture');
-const { inventoryTransactionOne, inventoryTransactionTwo, inventoryTransactionThree, insertInventoryTransactions } = require('../fixtures/inventoryTransaction.fixture');
+const {
+  inventoryTransactionOne,
+  inventoryTransactionTwo,
+  inventoryTransactionThree,
+  insertInventoryTransactions,
+} = require('../fixtures/inventoryTransaction.fixture');
 
 setupTestDB();
 
@@ -16,15 +21,15 @@ describe('InventoryTransaction routes', () => {
 
     beforeEach(() => {
       newInventoryTransaction = {
-		type: faker.random.word(),
-		reason: faker.random.word(),
-		warehouse: faker.random.word(),
-		supplier: faker.random.word(),
-		sale: faker.random.word(),
-		createdBy: faker.random.word(),
-		transactionDate: faker.random.word(),
-		items: faker.random.word(),
-	};
+        type: faker.random.word(),
+        reason: faker.random.word(),
+        warehouse: faker.random.word(),
+        supplier: faker.random.word(),
+        sale: faker.random.word(),
+        createdBy: faker.random.word(),
+        transactionDate: faker.random.word(),
+        items: faker.random.word(),
+      };
     });
 
     test('should return 201 and successfully create new inventoryTransaction if data is ok', async () => {
@@ -68,7 +73,7 @@ describe('InventoryTransaction routes', () => {
       });
       expect(res.body.results).toHaveLength(2);
       expect(res.body.results[0]).toEqual({
-        id: inventoryTransactionOne._id.toHexString()
+        id: inventoryTransactionOne._id.toHexString(),
       });
     });
 
@@ -145,7 +150,7 @@ describe('InventoryTransaction routes', () => {
 
       expect(res.body).not.toHaveProperty('password');
       expect(res.body).toEqual({
-        id: inventoryTransactionOne._id.toHexString()
+        id: inventoryTransactionOne._id.toHexString(),
       });
     });
 
@@ -153,7 +158,10 @@ describe('InventoryTransaction routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertInventoryTransactions([inventoryTransactionOne]);
 
-      await request(app).get(`/v1/inventoryTransactions/${inventoryTransactionOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app)
+        .get(`/v1/inventoryTransactions/${inventoryTransactionOne._id}`)
+        .send()
+        .expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if inventoryTransactionId is not a valid mongo id', async () => {
@@ -197,7 +205,10 @@ describe('InventoryTransaction routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertInventoryTransactions([inventoryTransactionOne]);
 
-      await request(app).delete(`/v1/inventoryTransactions/${inventoryTransactionOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app)
+        .delete(`/v1/inventoryTransactions/${inventoryTransactionOne._id}`)
+        .send()
+        .expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if inventoryTransactionId is not a valid mongo id', async () => {
@@ -227,15 +238,15 @@ describe('InventoryTransaction routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertInventoryTransactions([inventoryTransactionOne]);
       const updateBody = {
-		type: faker.random.word(),
-		reason: faker.random.word(),
-		warehouse: faker.random.word(),
-		supplier: faker.random.word(),
-		sale: faker.random.word(),
-		createdBy: faker.random.word(),
-		transactionDate: faker.random.word(),
-		items: faker.random.word(),
-	};
+        type: faker.random.word(),
+        reason: faker.random.word(),
+        warehouse: faker.random.word(),
+        supplier: faker.random.word(),
+        sale: faker.random.word(),
+        createdBy: faker.random.word(),
+        transactionDate: faker.random.word(),
+        items: faker.random.word(),
+      };
 
       const res = await request(app)
         .patch(`/v1/inventoryTransactions/${inventoryTransactionOne._id}`)
@@ -243,9 +254,9 @@ describe('InventoryTransaction routes', () => {
         .send(updateBody)
         .expect(httpStatus.OK);
 
-      let validationData = {
-        id: inventoryTransactionOne._id.toHexString()
-      }
+      const validationData = {
+        id: inventoryTransactionOne._id.toHexString(),
+      };
       validationData.merge(updateBody);
 
       expect(res.body).not.toHaveProperty('password');
@@ -261,30 +272,33 @@ describe('InventoryTransaction routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertInventoryTransactions([inventoryTransactionOne]);
       const updateBody = {
-		type: faker.random.word(),
-		reason: faker.random.word(),
-		warehouse: faker.random.word(),
-		supplier: faker.random.word(),
-		sale: faker.random.word(),
-		createdBy: faker.random.word(),
-		transactionDate: faker.random.word(),
-		items: faker.random.word(),
-	};
-      await request(app).patch(`/v1/inventoryTransactions/${inventoryTransactionOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
+        type: faker.random.word(),
+        reason: faker.random.word(),
+        warehouse: faker.random.word(),
+        supplier: faker.random.word(),
+        sale: faker.random.word(),
+        createdBy: faker.random.word(),
+        transactionDate: faker.random.word(),
+        items: faker.random.word(),
+      };
+      await request(app)
+        .patch(`/v1/inventoryTransactions/${inventoryTransactionOne._id}`)
+        .send(updateBody)
+        .expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if inventoryTransactionId is not a valid mongo id', async () => {
       await insertInventoryTransactions([inventoryTransactionTwo]);
       const updateBody = {
-		type: faker.random.word(),
-		reason: faker.random.word(),
-		warehouse: faker.random.word(),
-		supplier: faker.random.word(),
-		sale: faker.random.word(),
-		createdBy: faker.random.word(),
-		transactionDate: faker.random.word(),
-		items: faker.random.word(),
-	};
+        type: faker.random.word(),
+        reason: faker.random.word(),
+        warehouse: faker.random.word(),
+        supplier: faker.random.word(),
+        sale: faker.random.word(),
+        createdBy: faker.random.word(),
+        transactionDate: faker.random.word(),
+        items: faker.random.word(),
+      };
       await request(app)
         .patch(`/v1/inventoryTransactions/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)

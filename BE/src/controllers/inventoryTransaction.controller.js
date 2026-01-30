@@ -10,14 +10,25 @@ const createInventoryTransaction = catchAsync(async (req, res) => {
 });
 
 const getInventoryTransactions = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['type', 'reason', 'warehouse', 'supplier', 'sale', 'createdBy', 'transactionDate', 'items']);
+  const filter = pick(req.query, [
+    'type',
+    'reason',
+    'warehouse',
+    'supplier',
+    'sale',
+    'createdBy',
+    'transactionDate',
+    'items',
+  ]);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await inventoryTransactionService.queryInventoryTransactions(filter, options);
   res.send(result);
 });
 
 const getInventoryTransaction = catchAsync(async (req, res) => {
-  const inventoryTransaction = await inventoryTransactionService.getInventoryTransactionById(req.params.inventoryTransactionId);
+  const inventoryTransaction = await inventoryTransactionService.getInventoryTransactionById(
+    req.params.inventoryTransactionId
+  );
   if (!inventoryTransaction) {
     throw new ApiError(httpStatus.NOT_FOUND, 'InventoryTransaction not found');
   }
@@ -25,7 +36,10 @@ const getInventoryTransaction = catchAsync(async (req, res) => {
 });
 
 const updateInventoryTransaction = catchAsync(async (req, res) => {
-  const inventoryTransaction = await inventoryTransactionService.updateInventoryTransactionById(req.params.inventoryTransactionId, req.body);
+  const inventoryTransaction = await inventoryTransactionService.updateInventoryTransactionById(
+    req.params.inventoryTransactionId,
+    req.body
+  );
   res.send(inventoryTransaction);
 });
 
@@ -46,7 +60,6 @@ const importInventory = async (req, res) => {
   await inventoryTransactionService.importInventory(req.body, req);
   res.status(httpStatus.CREATED).send({ message: 'Inventory imported successfully' });
 };
-
 
 module.exports = {
   createInventoryTransaction,

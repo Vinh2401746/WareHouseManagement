@@ -16,9 +16,9 @@ describe('Category routes', () => {
 
     beforeEach(() => {
       newCategory = {
-		code: faker.random.word(),
-		name: faker.random.word(),
-	};
+        code: faker.random.word(),
+        name: faker.random.word(),
+      };
     });
 
     test('should return 201 and successfully create new category if data is ok', async () => {
@@ -62,7 +62,7 @@ describe('Category routes', () => {
       });
       expect(res.body.results).toHaveLength(2);
       expect(res.body.results[0]).toEqual({
-        id: categoryOne._id.toHexString()
+        id: categoryOne._id.toHexString(),
       });
     });
 
@@ -139,7 +139,7 @@ describe('Category routes', () => {
 
       expect(res.body).not.toHaveProperty('password');
       expect(res.body).toEqual({
-        id: categoryOne._id.toHexString()
+        id: categoryOne._id.toHexString(),
       });
     });
 
@@ -221,9 +221,9 @@ describe('Category routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertCategories([categoryOne]);
       const updateBody = {
-		code: faker.random.word(),
-		name: faker.random.word(),
-	};
+        code: faker.random.word(),
+        name: faker.random.word(),
+      };
 
       const res = await request(app)
         .patch(`/v1/categories/${categoryOne._id}`)
@@ -231,9 +231,9 @@ describe('Category routes', () => {
         .send(updateBody)
         .expect(httpStatus.OK);
 
-      let validationData = {
-        id: categoryOne._id.toHexString()
-      }
+      const validationData = {
+        id: categoryOne._id.toHexString(),
+      };
       validationData.merge(updateBody);
 
       expect(res.body).not.toHaveProperty('password');
@@ -249,18 +249,18 @@ describe('Category routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertCategories([categoryOne]);
       const updateBody = {
-		code: faker.random.word(),
-		name: faker.random.word(),
-	};
+        code: faker.random.word(),
+        name: faker.random.word(),
+      };
       await request(app).patch(`/v1/categories/${categoryOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if categoryId is not a valid mongo id', async () => {
       await insertCategories([categoryTwo]);
       const updateBody = {
-		code: faker.random.word(),
-		name: faker.random.word(),
-	};
+        code: faker.random.word(),
+        name: faker.random.word(),
+      };
       await request(app)
         .patch(`/v1/categories/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)

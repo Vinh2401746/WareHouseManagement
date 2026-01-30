@@ -7,14 +7,14 @@ describe('Sale model', () => {
 
     beforeEach(() => {
       newSale = {
-		code: faker.random.word(),
-		branch: faker.random.word(),
-		warehouse: faker.random.word(),
-		soldBy: faker.random.word(),
-		saleDate: faker.random.word(),
-		totalAmount: faker.random.word(),
-		items: faker.random.word(),
-	};
+        code: faker.random.word(),
+        branch: faker.random.word(),
+        warehouse: faker.random.word(),
+        soldBy: faker.random.word(),
+        saleDate: faker.random.word(),
+        totalAmount: faker.random.word(),
+        items: faker.random.word(),
+      };
     });
 
     test('should correctly validate a valid sale', async () => {

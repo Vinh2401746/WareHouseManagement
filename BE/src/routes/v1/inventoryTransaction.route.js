@@ -8,14 +8,34 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(auth('manageInventoryTransactions'), validate(inventoryTransactionValidation.createInventoryTransaction), inventoryTransactionController.createInventoryTransaction)
-  .get(auth('getInventoryTransactions'), validate(inventoryTransactionValidation.getInventoryTransactions), inventoryTransactionController.getInventoryTransactions);
+  .post(
+    auth('manageInventoryTransactions'),
+    validate(inventoryTransactionValidation.createInventoryTransaction),
+    inventoryTransactionController.createInventoryTransaction
+  )
+  .get(
+    auth('getInventoryTransactions'),
+    validate(inventoryTransactionValidation.getInventoryTransactions),
+    inventoryTransactionController.getInventoryTransactions
+  );
 
 router
   .route('/:inventoryTransactionId')
-  .get(auth('getInventoryTransactions'), validate(inventoryTransactionValidation.getInventoryTransaction), inventoryTransactionController.getInventoryTransaction)
-  .patch(auth('manageInventoryTransactions'), validate(inventoryTransactionValidation.updateInventoryTransaction), inventoryTransactionController.updateInventoryTransaction)
-  .delete(auth('manageInventoryTransactions'), validate(inventoryTransactionValidation.deleteInventoryTransaction), inventoryTransactionController.deleteInventoryTransaction);
+  .get(
+    auth('getInventoryTransactions'),
+    validate(inventoryTransactionValidation.getInventoryTransaction),
+    inventoryTransactionController.getInventoryTransaction
+  )
+  .patch(
+    auth('manageInventoryTransactions'),
+    validate(inventoryTransactionValidation.updateInventoryTransaction),
+    inventoryTransactionController.updateInventoryTransaction
+  )
+  .delete(
+    auth('manageInventoryTransactions'),
+    validate(inventoryTransactionValidation.deleteInventoryTransaction),
+    inventoryTransactionController.deleteInventoryTransaction
+  );
 
 module.exports = router;
 

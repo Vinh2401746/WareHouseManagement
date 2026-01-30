@@ -7,11 +7,11 @@ describe('Supplier model', () => {
 
     beforeEach(() => {
       newSupplier = {
-		name: faker.random.word(),
-		phone: faker.random.word(),
-		email: faker.random.word(),
-		address: faker.random.word(),
-	};
+        name: faker.random.word(),
+        phone: faker.random.word(),
+        email: faker.random.word(),
+        address: faker.random.word(),
+      };
     });
 
     test('should correctly validate a valid supplier', async () => {

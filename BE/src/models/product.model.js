@@ -34,7 +34,7 @@ const productSchema = mongoose.Schema(
       type: String,
       trim: true,
       comment: 'Quy cách đóng gói',
-    }
+    },
   },
   {
     timestamps: true,

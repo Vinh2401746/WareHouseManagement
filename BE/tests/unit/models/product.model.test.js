@@ -7,12 +7,12 @@ describe('Product model', () => {
 
     beforeEach(() => {
       newProduct = {
-		code: faker.random.word(),
-		name: faker.random.word(),
-		category: faker.random.word(),
-		unit: faker.random.word(),
-		minStock: faker.random.word(),
-	};
+        code: faker.random.word(),
+        name: faker.random.word(),
+        category: faker.random.word(),
+        unit: faker.random.word(),
+        minStock: faker.random.word(),
+      };
     });
 
     test('should correctly validate a valid product', async () => {

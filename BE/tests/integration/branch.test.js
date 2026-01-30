@@ -16,10 +16,10 @@ describe('Branch routes', () => {
 
     beforeEach(() => {
       newBranch = {
-		name: faker.random.word(),
-		address: faker.random.word(),
-		phone: faker.random.word(),
-	};
+        name: faker.random.word(),
+        address: faker.random.word(),
+        phone: faker.random.word(),
+      };
     });
 
     test('should return 201 and successfully create new branch if data is ok', async () => {
@@ -63,7 +63,7 @@ describe('Branch routes', () => {
       });
       expect(res.body.results).toHaveLength(2);
       expect(res.body.results[0]).toEqual({
-        id: branchOne._id.toHexString()
+        id: branchOne._id.toHexString(),
       });
     });
 
@@ -140,7 +140,7 @@ describe('Branch routes', () => {
 
       expect(res.body).not.toHaveProperty('password');
       expect(res.body).toEqual({
-        id: branchOne._id.toHexString()
+        id: branchOne._id.toHexString(),
       });
     });
 
@@ -222,10 +222,10 @@ describe('Branch routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertBranchs([branchOne]);
       const updateBody = {
-		name: faker.random.word(),
-		address: faker.random.word(),
-		phone: faker.random.word(),
-	};
+        name: faker.random.word(),
+        address: faker.random.word(),
+        phone: faker.random.word(),
+      };
 
       const res = await request(app)
         .patch(`/v1/branches/${branchOne._id}`)
@@ -233,9 +233,9 @@ describe('Branch routes', () => {
         .send(updateBody)
         .expect(httpStatus.OK);
 
-      let validationData = {
-        id: branchOne._id.toHexString()
-      }
+      const validationData = {
+        id: branchOne._id.toHexString(),
+      };
       validationData.merge(updateBody);
 
       expect(res.body).not.toHaveProperty('password');
@@ -251,20 +251,20 @@ describe('Branch routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertBranchs([branchOne]);
       const updateBody = {
-		name: faker.random.word(),
-		address: faker.random.word(),
-		phone: faker.random.word(),
-	};
+        name: faker.random.word(),
+        address: faker.random.word(),
+        phone: faker.random.word(),
+      };
       await request(app).patch(`/v1/branches/${branchOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if branchId is not a valid mongo id', async () => {
       await insertBranchs([branchTwo]);
       const updateBody = {
-		name: faker.random.word(),
-		address: faker.random.word(),
-		phone: faker.random.word(),
-	};
+        name: faker.random.word(),
+        address: faker.random.word(),
+        phone: faker.random.word(),
+      };
       await request(app)
         .patch(`/v1/branches/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)

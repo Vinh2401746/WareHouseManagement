@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { InventoryTransaction } = require('../models');
+const { InventoryTransaction, ProductBatch } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 /**
@@ -74,26 +74,26 @@ const deleteInventoryTransactionById = async (inventoryTransactionId) => {
 const importInventory = async (inventoryTransactionBody, req) => {
   const { warehouse, supplier, items } = inventoryTransactionBody;
 
-  const batches = [];
+  const batches = await Promise.all(
+    items.map(async (item) => {
+      const batch = await ProductBatch.create({
+        product: item.product,
+        warehouse,
+        batchCode: item.batchCode,
+        manufactureDate: item.manufactureDate,
+        expiryDate: item.expiryDate,
+        quantity: item.quantity,
+        importPrice: item.price,
+      });
 
-  for (const item of items) {
-    const batch = await ProductBatch.create({
-      product: item.product,
-      warehouse,
-      batchCode: item.batchCode,
-      manufactureDate: item.manufactureDate,
-      expiryDate: item.expiryDate,
-      quantity: item.quantity,
-      importPrice: item.price,
-    });
-
-    batches.push({
-      product: item.product,
-      batch: batch._id,
-      quantity: item.quantity,
-      price: item.price,
-    });
-  }
+      return {
+        product: item.product,
+        batch: batch._id,
+        quantity: item.quantity,
+        price: item.price,
+      };
+    })
+  );
 
   const transaction = await InventoryTransaction.create({
     type: 'IMPORT',
@@ -104,7 +104,7 @@ const importInventory = async (inventoryTransactionBody, req) => {
     items: batches,
   });
 
-  res.status(201).json(transaction);
+  return transaction;
 };
 
 module.exports = {

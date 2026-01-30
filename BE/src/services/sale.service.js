@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { Sale } = require('../models');
+const { Sale, InventoryTransaction, ProductBatch } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 /**
@@ -8,44 +8,56 @@ const ApiError = require('../utils/ApiError');
  * @returns {Promise<Sale>}
  */
 const createSale = async (req) => {
- const { branch, warehouse, items } = req.body;
+  const { branch, warehouse, items } = req.body;
 
-  let totalAmount = 0;
-  const exportItems = [];
+  const itemResults = await Promise.all(
+    items.map(async (item) => {
+      let remainingQty = item.quantity;
 
-  for (const item of items) {
-    let remainingQty = item.quantity;
-
-    const batches = await ProductBatch.find({
-      product: item.product,
-      warehouse,
-      quantity: { $gt: 0 },
-      expiryDate: { $gte: new Date() },
-    }).sort({ expiryDate: 1 });
-
-    for (const batch of batches) {
-      if (remainingQty <= 0) break;
-
-      const usedQty = Math.min(batch.quantity, remainingQty);
-      batch.quantity -= usedQty;
-      remainingQty -= usedQty;
-
-      await batch.save();
-
-      exportItems.push({
+      const batches = await ProductBatch.find({
         product: item.product,
-        batch: batch._id,
-        quantity: usedQty,
-        price: item.price,
-      });
-    }
+        warehouse,
+        quantity: { $gt: 0 },
+        expiryDate: { $gte: new Date() },
+      }).sort({ expiryDate: 1 });
 
-    if (remainingQty > 0) {
-      return res.status(400).json({ message: 'Not enough stock' });
-    }
+      const exportItems = [];
+      const savePromises = [];
 
-    totalAmount += item.quantity * item.price;
-  }
+      for (const batch of batches) {
+        if (remainingQty <= 0) break;
+
+        const usedQty = Math.min(batch.quantity, remainingQty);
+        if (usedQty <= 0) continue;
+
+        batch.quantity -= usedQty;
+        remainingQty -= usedQty;
+
+        savePromises.push(batch.save());
+
+        exportItems.push({
+          product: item.product,
+          batch: batch._id,
+          quantity: usedQty,
+          price: item.price,
+        });
+      }
+
+      if (remainingQty > 0) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Not enough stock');
+      }
+
+      await Promise.all(savePromises);
+
+      return {
+        amount: item.quantity * item.price,
+        exportItems,
+      };
+    })
+  );
+
+  const totalAmount = itemResults.reduce((sum, item) => sum + item.amount, 0);
+  const exportItems = itemResults.flatMap((item) => item.exportItems);
 
   const sale = await Sale.create({
     code: `SALE-${Date.now()}`,

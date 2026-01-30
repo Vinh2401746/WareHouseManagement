@@ -3,17 +3,17 @@ const { toJSON, paginate } = require('./plugins');
 
 const categorySchema = mongoose.Schema(
   {
-		code: {
-			type: String,
-			required: true,
-			trim: true,
-		},
-		name: {
-			type: String,
-			required: true,
-			trim: true,
-		},
-	},
+    code: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+  },
   {
     timestamps: true,
   }

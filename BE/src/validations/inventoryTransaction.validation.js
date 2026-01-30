@@ -2,33 +2,29 @@ const Joi = require('joi');
 const { objectId } = require('./custom.validation');
 
 const createInventoryTransaction = {
-  body: Joi.object().keys(
-      {
-		type: Joi.string(),
-		reason: Joi.string(),
-		warehouse: Joi.string(),
-		supplier: Joi.string(),
-		sale: Joi.string(),
-		createdBy: Joi.string(),
-		transactionDate: Joi.date(),
-		items: Joi.string(),
-	}
-  ),
+  body: Joi.object().keys({
+    type: Joi.string(),
+    reason: Joi.string(),
+    warehouse: Joi.string(),
+    supplier: Joi.string(),
+    sale: Joi.string(),
+    createdBy: Joi.string(),
+    transactionDate: Joi.date(),
+    items: Joi.string(),
+  }),
 };
 
 const getInventoryTransactions = {
-  query: Joi.object().keys(
-      {
-		type: Joi.string(),
-		reason: Joi.string(),
-		warehouse: Joi.string(),
-		supplier: Joi.string(),
-		sale: Joi.string(),
-		createdBy: Joi.string(),
-		transactionDate: Joi.date(),
-		items: Joi.string(),
-	}
-  ),
+  query: Joi.object().keys({
+    type: Joi.string(),
+    reason: Joi.string(),
+    warehouse: Joi.string(),
+    supplier: Joi.string(),
+    sale: Joi.string(),
+    createdBy: Joi.string(),
+    transactionDate: Joi.date(),
+    items: Joi.string(),
+  }),
 };
 
 const getInventoryTransaction = {
@@ -43,15 +39,15 @@ const updateInventoryTransaction = {
   }),
   body: Joi.object()
     .keys({
-		type: Joi.string(),
-		reason: Joi.string(),
-		warehouse: Joi.string(),
-		supplier: Joi.string(),
-		sale: Joi.string(),
-		createdBy: Joi.string(),
-		transactionDate: Joi.date(),
-		items: Joi.string(),
-	})
+      type: Joi.string(),
+      reason: Joi.string(),
+      warehouse: Joi.string(),
+      supplier: Joi.string(),
+      sale: Joi.string(),
+      createdBy: Joi.string(),
+      transactionDate: Joi.date(),
+      items: Joi.string(),
+    })
     .min(1),
 };
 

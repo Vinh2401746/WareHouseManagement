@@ -8,14 +8,26 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(auth('manageProductBatchs'), validate(productBatchValidation.createProductBatch), productBatchController.createProductBatch)
+  .post(
+    auth('manageProductBatchs'),
+    validate(productBatchValidation.createProductBatch),
+    productBatchController.createProductBatch
+  )
   .get(auth('getProductBatchs'), validate(productBatchValidation.getProductBatchs), productBatchController.getProductBatchs);
 
 router
   .route('/:productBatchId')
   .get(auth('getProductBatchs'), validate(productBatchValidation.getProductBatch), productBatchController.getProductBatch)
-  .put(auth('manageProductBatchs'), validate(productBatchValidation.updateProductBatch), productBatchController.updateProductBatch)
-  .delete(auth('manageProductBatchs'), validate(productBatchValidation.deleteProductBatch), productBatchController.deleteProductBatch);
+  .put(
+    auth('manageProductBatchs'),
+    validate(productBatchValidation.updateProductBatch),
+    productBatchController.updateProductBatch
+  )
+  .delete(
+    auth('manageProductBatchs'),
+    validate(productBatchValidation.deleteProductBatch),
+    productBatchController.deleteProductBatch
+  );
 
 module.exports = router;
 

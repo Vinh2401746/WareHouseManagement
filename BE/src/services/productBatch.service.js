@@ -8,15 +8,7 @@ const ApiError = require('../utils/ApiError');
  * @returns {Promise<ProductBatch>}
  */
 const createProductBatch = async (productBatchBody) => {
-  const {
-    product,
-    warehouse,
-    batchCode,
-    manufactureDate,
-    expiryDate,
-    quantity,
-    importPrice,
-  } = productBatchBody;
+  const { product, warehouse, batchCode, manufactureDate, expiryDate, quantity, importPrice } = productBatchBody;
 
   // basic date validation
   if (manufactureDate && expiryDate) {
@@ -31,9 +23,13 @@ const createProductBatch = async (productBatchBody) => {
   }
 
   // normalize/generate batch code if missing
-  const normalizedCode = (batchCode && String(batchCode).trim())
-    ? String(batchCode).trim()
-    : `B${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  const normalizedCode =
+    batchCode && String(batchCode).trim()
+      ? String(batchCode).trim()
+      : `B${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.random()
+          .toString(36)
+          .slice(2, 8)
+          .toUpperCase()}`;
 
   // prevent duplicate batch per product & warehouse
   const existing = await ProductBatch.findOne({ product, warehouse, batchCode: normalizedCode });

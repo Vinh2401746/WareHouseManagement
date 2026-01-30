@@ -16,12 +16,12 @@ describe('Product routes', () => {
 
     beforeEach(() => {
       newProduct = {
-		code: faker.random.word(),
-		name: faker.random.word(),
-		category: faker.random.word(),
-		unit: faker.random.word(),
-		minStock: faker.random.word(),
-	};
+        code: faker.random.word(),
+        name: faker.random.word(),
+        category: faker.random.word(),
+        unit: faker.random.word(),
+        minStock: faker.random.word(),
+      };
     });
 
     test('should return 201 and successfully create new product if data is ok', async () => {
@@ -65,7 +65,7 @@ describe('Product routes', () => {
       });
       expect(res.body.results).toHaveLength(2);
       expect(res.body.results[0]).toEqual({
-        id: productOne._id.toHexString()
+        id: productOne._id.toHexString(),
       });
     });
 
@@ -142,7 +142,7 @@ describe('Product routes', () => {
 
       expect(res.body).not.toHaveProperty('password');
       expect(res.body).toEqual({
-        id: productOne._id.toHexString()
+        id: productOne._id.toHexString(),
       });
     });
 
@@ -224,12 +224,12 @@ describe('Product routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertProducts([productOne]);
       const updateBody = {
-		code: faker.random.word(),
-		name: faker.random.word(),
-		category: faker.random.word(),
-		unit: faker.random.word(),
-		minStock: faker.random.word(),
-	};
+        code: faker.random.word(),
+        name: faker.random.word(),
+        category: faker.random.word(),
+        unit: faker.random.word(),
+        minStock: faker.random.word(),
+      };
 
       const res = await request(app)
         .patch(`/v1/products/${productOne._id}`)
@@ -237,9 +237,9 @@ describe('Product routes', () => {
         .send(updateBody)
         .expect(httpStatus.OK);
 
-      let validationData = {
-        id: productOne._id.toHexString()
-      }
+      const validationData = {
+        id: productOne._id.toHexString(),
+      };
       validationData.merge(updateBody);
 
       expect(res.body).not.toHaveProperty('password');
@@ -255,24 +255,24 @@ describe('Product routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertProducts([productOne]);
       const updateBody = {
-		code: faker.random.word(),
-		name: faker.random.word(),
-		category: faker.random.word(),
-		unit: faker.random.word(),
-		minStock: faker.random.word(),
-	};
+        code: faker.random.word(),
+        name: faker.random.word(),
+        category: faker.random.word(),
+        unit: faker.random.word(),
+        minStock: faker.random.word(),
+      };
       await request(app).patch(`/v1/products/${productOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if productId is not a valid mongo id', async () => {
       await insertProducts([productTwo]);
       const updateBody = {
-		code: faker.random.word(),
-		name: faker.random.word(),
-		category: faker.random.word(),
-		unit: faker.random.word(),
-		minStock: faker.random.word(),
-	};
+        code: faker.random.word(),
+        name: faker.random.word(),
+        category: faker.random.word(),
+        unit: faker.random.word(),
+        minStock: faker.random.word(),
+      };
       await request(app)
         .patch(`/v1/products/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)

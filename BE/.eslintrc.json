@@ -9,7 +9,11 @@
     "ecmaVersion": 2018
   },
   "rules": {
-    "no-console": "error",
+    "no-console": "off",
+    "no-await-in-loop": "warn",
+    "no-param-reassign": "off",
+    "no-restricted-syntax": "off",
+    "no-continue": "off",
     "func-names": "off",
     "no-underscore-dangle": "off",
     "consistent-return": "off",

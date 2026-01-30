@@ -6,7 +6,12 @@ const setupTestDB = require('../utils/setupTestDB');
 const { ProductBatch } = require('../../src/models');
 const { userOne, userTwo, insertUsers } = require('../fixtures/user.fixture');
 const { userOneAccessToken, userTwoAccessToken } = require('../fixtures/token.fixture');
-const { productBatchOne, productBatchTwo, productBatchThree, insertProductBatchs } = require('../fixtures/productBatch.fixture');
+const {
+  productBatchOne,
+  productBatchTwo,
+  productBatchThree,
+  insertProductBatchs,
+} = require('../fixtures/productBatch.fixture');
 
 setupTestDB();
 
@@ -16,13 +21,13 @@ describe('ProductBatch routes', () => {
 
     beforeEach(() => {
       newProductBatch = {
-		product: faker.random.word(),
-		warehouse: faker.random.word(),
-		batchCode: faker.random.word(),
-		manufactureDate: faker.random.word(),
-		quantity: faker.random.number(),
-		importPrice: faker.random.number(),
-	};
+        product: faker.random.word(),
+        warehouse: faker.random.word(),
+        batchCode: faker.random.word(),
+        manufactureDate: faker.random.word(),
+        quantity: faker.random.number(),
+        importPrice: faker.random.number(),
+      };
     });
 
     test('should return 201 and successfully create new productBatch if data is ok', async () => {
@@ -66,7 +71,7 @@ describe('ProductBatch routes', () => {
       });
       expect(res.body.results).toHaveLength(2);
       expect(res.body.results[0]).toEqual({
-        id: productBatchOne._id.toHexString()
+        id: productBatchOne._id.toHexString(),
       });
     });
 
@@ -143,7 +148,7 @@ describe('ProductBatch routes', () => {
 
       expect(res.body).not.toHaveProperty('password');
       expect(res.body).toEqual({
-        id: productBatchOne._id.toHexString()
+        id: productBatchOne._id.toHexString(),
       });
     });
 
@@ -225,13 +230,13 @@ describe('ProductBatch routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertProductBatchs([productBatchOne]);
       const updateBody = {
-		product: faker.random.word(),
-		warehouse: faker.random.word(),
-		batchCode: faker.random.word(),
-		manufactureDate: faker.random.word(),
-		quantity: faker.random.number(),
-		importPrice: faker.random.number(),
-	};
+        product: faker.random.word(),
+        warehouse: faker.random.word(),
+        batchCode: faker.random.word(),
+        manufactureDate: faker.random.word(),
+        quantity: faker.random.number(),
+        importPrice: faker.random.number(),
+      };
 
       const res = await request(app)
         .patch(`/v1/productBatchs/${productBatchOne._id}`)
@@ -239,9 +244,9 @@ describe('ProductBatch routes', () => {
         .send(updateBody)
         .expect(httpStatus.OK);
 
-      let validationData = {
-        id: productBatchOne._id.toHexString()
-      }
+      const validationData = {
+        id: productBatchOne._id.toHexString(),
+      };
       validationData.merge(updateBody);
 
       expect(res.body).not.toHaveProperty('password');
@@ -257,26 +262,26 @@ describe('ProductBatch routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertProductBatchs([productBatchOne]);
       const updateBody = {
-		product: faker.random.word(),
-		warehouse: faker.random.word(),
-		batchCode: faker.random.word(),
-		manufactureDate: faker.random.word(),
-		quantity: faker.random.number(),
-		importPrice: faker.random.number(),
-	};
+        product: faker.random.word(),
+        warehouse: faker.random.word(),
+        batchCode: faker.random.word(),
+        manufactureDate: faker.random.word(),
+        quantity: faker.random.number(),
+        importPrice: faker.random.number(),
+      };
       await request(app).patch(`/v1/productBatchs/${productBatchOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if productBatchId is not a valid mongo id', async () => {
       await insertProductBatchs([productBatchTwo]);
       const updateBody = {
-		product: faker.random.word(),
-		warehouse: faker.random.word(),
-		batchCode: faker.random.word(),
-		manufactureDate: faker.random.word(),
-		quantity: faker.random.number(),
-		importPrice: faker.random.number(),
-	};
+        product: faker.random.word(),
+        warehouse: faker.random.word(),
+        batchCode: faker.random.word(),
+        manufactureDate: faker.random.word(),
+        quantity: faker.random.number(),
+        importPrice: faker.random.number(),
+      };
       await request(app)
         .patch(`/v1/productBatchs/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)

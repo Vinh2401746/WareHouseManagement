@@ -7,13 +7,13 @@ describe('ProductBatch model', () => {
 
     beforeEach(() => {
       newProductBatch = {
-		product: faker.random.word(),
-		warehouse: faker.random.word(),
-		batchCode: faker.random.word(),
-		manufactureDate: faker.random.word(),
-		quantity: faker.random.number(),
-		importPrice: faker.random.number(),
-	};
+        product: faker.random.word(),
+        warehouse: faker.random.word(),
+        batchCode: faker.random.word(),
+        manufactureDate: faker.random.word(),
+        quantity: faker.random.number(),
+        importPrice: faker.random.number(),
+      };
     });
 
     test('should correctly validate a valid productBatch', async () => {

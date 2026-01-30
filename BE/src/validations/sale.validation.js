@@ -2,31 +2,27 @@ const Joi = require('joi');
 const { objectId } = require('./custom.validation');
 
 const createSale = {
-  body: Joi.object().keys(
-      {
-		code: Joi.string(),
-		branch: Joi.string(),
-		warehouse: Joi.string(),
-		soldBy: Joi.string(),
-		saleDate: Joi.string(),
-		totalAmount: Joi.string(),
-		items: Joi.string(),
-	}
-  ),
+  body: Joi.object().keys({
+    code: Joi.string(),
+    branch: Joi.string(),
+    warehouse: Joi.string(),
+    soldBy: Joi.string(),
+    saleDate: Joi.string(),
+    totalAmount: Joi.string(),
+    items: Joi.string(),
+  }),
 };
 
 const getSales = {
-  query: Joi.object().keys(
-      {
-		code: Joi.string(),
-		branch: Joi.string(),
-		warehouse: Joi.string(),
-		soldBy: Joi.string(),
-		saleDate: Joi.string(),
-		totalAmount: Joi.string(),
-		items: Joi.string(),
-	}
-  ),
+  query: Joi.object().keys({
+    code: Joi.string(),
+    branch: Joi.string(),
+    warehouse: Joi.string(),
+    soldBy: Joi.string(),
+    saleDate: Joi.string(),
+    totalAmount: Joi.string(),
+    items: Joi.string(),
+  }),
 };
 
 const getSale = {
@@ -41,14 +37,14 @@ const updateSale = {
   }),
   body: Joi.object()
     .keys({
-		code: Joi.string(),
-		branch: Joi.string(),
-		warehouse: Joi.string(),
-		soldBy: Joi.string(),
-		saleDate: Joi.string(),
-		totalAmount: Joi.string(),
-		items: Joi.string(),
-	})
+      code: Joi.string(),
+      branch: Joi.string(),
+      warehouse: Joi.string(),
+      soldBy: Joi.string(),
+      saleDate: Joi.string(),
+      totalAmount: Joi.string(),
+      items: Joi.string(),
+    })
     .min(1),
 };
 
