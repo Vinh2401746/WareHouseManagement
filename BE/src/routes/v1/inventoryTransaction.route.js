@@ -18,7 +18,20 @@ router
     validate(inventoryTransactionValidation.getInventoryTransactions),
     inventoryTransactionController.getInventoryTransactions
   );
-
+router
+  .route('/import')
+  .post(
+    auth('manageInventoryTransactions'),
+    validate(inventoryTransactionValidation.importInventory),
+    inventoryTransactionController.importInventory
+  );
+router
+  .route('/import')
+  .get(
+    auth('manageInventoryTransactions'),
+    validate(inventoryTransactionValidation.getInventoryTransactions),
+    inventoryTransactionController.getInventoryTransactions
+  );
 router
   .route('/:inventoryTransactionId')
   .get(

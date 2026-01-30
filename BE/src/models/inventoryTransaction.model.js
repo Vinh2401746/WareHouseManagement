@@ -7,40 +7,43 @@ const inventoryTransactionSchema = mongoose.Schema(
       type: String,
       enum: ['IMPORT', 'EXPORT'],
       required: true,
+      comment: 'Loại giao dịch: nhập hoặc xuất',
     },
-
     reason: {
       type: String,
-      enum: ['PURCHASE', 'SALE', 'DESTROY'],
-      required: true,
+      required: false,
+      comment: 'Lý do giao dịch',
     },
-
     warehouse: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Warehouse',
       required: true,
     },
-
     supplier: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Supplier',
     },
-
     sale: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Sale',
+      comment: 'Liên kết đến đơn bán hàng nếu có',
     },
-
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
+      comment: 'Người tạo phiếu',
     },
-
     transactionDate: {
       type: Date,
       default: Date.now,
+      comment: 'Ngày giao dịch',
     },
-
+    // người giao hàng
+    deliveryPerson: {
+      type: String,
+      required: false,
+      comment: 'Người giao hàng (áp dụng cho nhập hàng)',
+    },
     items: [
       {
         product: {

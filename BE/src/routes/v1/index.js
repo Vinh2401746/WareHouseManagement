@@ -53,7 +53,7 @@ const defaultRoutes = [
   //   route: productBatchRoute,
   // },
   {
-    path: '/inventoryTransaction',
+    path: '/inventory',
     route: inventoryTransactionRoute,
   },
   {

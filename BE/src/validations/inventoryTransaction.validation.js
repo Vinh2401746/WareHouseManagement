@@ -16,14 +16,17 @@ const createInventoryTransaction = {
 
 const getInventoryTransactions = {
   query: Joi.object().keys({
-    type: Joi.string(),
+    type: Joi.string().valid('IMPORT', 'EXPORT'),
     reason: Joi.string(),
-    warehouse: Joi.string(),
-    supplier: Joi.string(),
-    sale: Joi.string(),
-    createdBy: Joi.string(),
+    warehouse: Joi.custom(objectId),
+    supplier: Joi.custom(objectId),
+    sale: Joi.custom(objectId),
+    createdBy: Joi.custom(objectId),
     transactionDate: Joi.date(),
-    items: Joi.string(),
+    deliveryPerson: Joi.string(),
+    sortBy: Joi.string(),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
   }),
 };
 
@@ -57,10 +60,76 @@ const deleteInventoryTransaction = {
   }),
 };
 
+const importInventory = {
+  body: Joi.object().keys({
+    warehouse: Joi.string().required().custom(objectId).messages({
+      'any.required': 'Mã kho là bắt buộc',
+      'string.base': 'Mã kho phải là chuỗi',
+    }),
+    supplier: Joi.string().required().custom(objectId).messages({
+      'any.required': 'Nhà cung cấp là bắt buộc',
+      'string.base': 'Nhà cung cấp phải là chuỗi',
+    }),
+    reason: Joi.string().messages({
+      'string.base': 'Lý do phải là chuỗi',
+    }),
+    deliveryPerson: Joi.string().messages({
+      'string.base': 'Người giao hàng phải là chuỗi',
+    }),
+    items: Joi.array()
+      .items(
+        Joi.object().keys({
+          productCode: Joi.string().required().messages({
+            'any.required': 'Mã sản phẩm là bắt buộc',
+            'string.base': 'Mã sản phẩm phải là chuỗi',
+          }),
+          productName: Joi.string().required().messages({
+            'any.required': 'Tên sản phẩm là bắt buộc',
+            'string.base': 'Tên sản phẩm phải là chuỗi',
+          }),
+          unit: Joi.string().required().messages({
+            'any.required': 'Đơn vị tính là bắt buộc',
+            'string.base': 'Đơn vị tính phải là chuỗi',
+          }),
+          packaging: Joi.string().messages({
+            'string.base': 'Đóng gói phải là chuỗi',
+          }),
+          quantity: Joi.number().integer().min(1).required().messages({
+            'any.required': 'Số lượng là bắt buộc',
+            'number.base': 'Số lượng phải là số',
+            'number.integer': 'Số lượng phải là số nguyên',
+            'number.min': 'Số lượng phải lớn hơn hoặc bằng 1',
+          }),
+          price: Joi.number().min(0).required().messages({
+            'any.required': 'Giá là bắt buộc',
+            'number.base': 'Giá phải là số',
+            'number.min': 'Giá phải lớn hơn hoặc bằng 0',
+          }),
+          expiryDate: Joi.date().required().messages({
+            'any.required': 'Ngày hết hạn là bắt buộc',
+            'date.base': 'Ngày hết hạn phải là ngày hợp lệ',
+          }),
+          category: Joi.string().required().custom(objectId).messages({
+            'any.required': 'Danh mục sản phẩm là bắt buộc',
+            'string.base': 'Danh mục sản phẩm phải là chuỗi',
+          }),
+        })
+      )
+      .min(1)
+      .required()
+      .messages({
+        'any.required': 'items là bắt buộc',
+        'array.base': 'items phải là một mảng',
+        'array.min': 'items phải chứa ít nhất 1 phần tử',
+      }),
+  }),
+};
+
 module.exports = {
   createInventoryTransaction,
   getInventoryTransactions,
   getInventoryTransaction,
   updateInventoryTransaction,
   deleteInventoryTransaction,
+  importInventory,
 };

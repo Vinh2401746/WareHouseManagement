@@ -18,7 +18,7 @@ const getInventoryTransactions = catchAsync(async (req, res) => {
     'sale',
     'createdBy',
     'transactionDate',
-    'items',
+    'deliveryPerson',
   ]);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await inventoryTransactionService.queryInventoryTransactions(filter, options);
@@ -48,18 +48,17 @@ const deleteInventoryTransaction = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
-// business func
-
+// business funct
 /**
- * Import inventory transaction
- * param {Object} req
- * param {Object} res
- * return {Promise<void>}
+ * Import inventory
+ * @param {Object} req
+ * @param {Object} res
+ * @returns {Promise<void>}
  */
-const importInventory = async (req, res) => {
-  await inventoryTransactionService.importInventory(req.body, req);
-  res.status(httpStatus.CREATED).send({ message: 'Inventory imported successfully' });
-};
+const importInventory = catchAsync(async (req, res) => {
+  const inventoryTransaction = await inventoryTransactionService.importInventory(req.body, req);
+  res.status(httpStatus.CREATED).send(inventoryTransaction);
+});
 
 module.exports = {
   createInventoryTransaction,
