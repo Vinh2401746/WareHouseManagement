@@ -1,6 +1,5 @@
 import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { Modal, Form, Input, Select } from "antd";
-import { UNITS } from "../../../../constants/common";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { QueryKeys } from "../../../../constants/query-keys";
 import { getCategorysApi } from "../../../../api/category";
@@ -62,7 +61,9 @@ const ProductFormModal = forwardRef<ProductFormRef,ProductFormModalProps>(({onSu
   useImperativeHandle(ref, () => ({
     show: (data) => {
       setOpen(true);
-      form.setFieldsValue(data ? data : initForm);
+      form.setFieldsValue(data ? {...data,
+        category:data?.category?.id || ''
+      } : initForm);
       setproduct((data ? data : initForm) as ProductFormData);
     },
     hide: () => {
@@ -133,7 +134,7 @@ const ProductFormModal = forwardRef<ProductFormRef,ProductFormModalProps>(({onSu
           name="code"
           rules={[{ required: true, message: "Vui lòng nhập mã sản phẩm" }]}
         >
-          <Input />
+          <Input onChange={(event)=> form.setFieldValue('code', event.target.value?.toUpperCase() || "")} />
         </Form.Item>
         {/* {!isUpdate && (
           <Form.Item
@@ -159,9 +160,10 @@ const ProductFormModal = forwardRef<ProductFormRef,ProductFormModalProps>(({onSu
         <Form.Item
           label="Đơn vị"
           name="unit"
-          rules={[{ required: true, message: "Vui lòng chọn đơn vị" }]}
+          rules={[{ required: true, message: "Vui lòng nhập đơn vị" }]}
         >
-          <Select options={UNITS} />
+          <Input />
+          {/* <Select options={UNITS} /> */}
         </Form.Item>
         <Form.Item
           label="Tồn kho tối thiểu"
@@ -170,11 +172,17 @@ const ProductFormModal = forwardRef<ProductFormRef,ProductFormModalProps>(({onSu
             { required: true, message: "Vui lòng chọn nhập tồn kho tối thiểu" },
             {
               validator(_, value ) {
-                console.log("valuee", value);
+                console.log("valuee", value[0] == '0');
                 
                 const includesNumber = ONLY_NUMBER.test(value)
                 if(!includesNumber){
                   return Promise.resolve()
+                }
+                if(value[0] == '0'){
+                  return Promise.reject("Vui lòng nhập tồn kho hợp lệ")
+                }
+                if(Number(value) < 0){
+                  return Promise.reject("Tồn kho không được nhỏ hơn 0")
                 }
                 return Promise.reject("Vui lòng chỉ nhập số")
               },

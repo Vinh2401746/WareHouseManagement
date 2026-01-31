@@ -94,7 +94,7 @@ const CategoryFormModal = forwardRef<CategoryFormRef>((_, ref) => {
           name="name"
           rules={[{ required: true, message: "Vui lòng nhập tên danh mục" }]}
         >
-          <Input />
+          <Input onChange={(event)=> form.setFieldValue('name', event.target.value?.toUpperCase() || "")} />
         </Form.Item>
 
         <Form.Item
@@ -104,7 +104,7 @@ const CategoryFormModal = forwardRef<CategoryFormRef>((_, ref) => {
             { required: true, message: "Vui lòng nhập mã danh mục" },
           ]}
         >
-          <Input />
+          <Input onChange={(event)=> form.setFieldValue('code', event.target.value?.toUpperCase() || "")}/>
         </Form.Item>
         {/* {!isUpdate && (
           <Form.Item

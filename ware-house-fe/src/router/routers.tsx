@@ -10,6 +10,7 @@ import { ForgotPasswordPage } from "../pages/auth/forgot-pass";
 import { SettingPasswordPage } from "../pages/auth/setting-password";
 import { ProductsPage } from "../pages/app/products";
 import { CategoryPage } from "../pages/app/category";
+import { SuppilerPage } from "../pages/app/suppiler";
 
 export const router = createBrowserRouter(
   [
@@ -61,7 +62,7 @@ export const router = createBrowserRouter(
         {
           path: AppRoutes.supplier,
           id: AppRoutes.supplier,
-          element: <DevelopingPage />,
+          element: <SuppilerPage />,
         },
         {
           path: AppRoutes.warehouse,

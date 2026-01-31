@@ -7,5 +7,8 @@ export const QueryKeys = {
   },
   category:{
     list: 'category'
+  },
+  supplier:{
+    list: 'supplier'
   }
 };

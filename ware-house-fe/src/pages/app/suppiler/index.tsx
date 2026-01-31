@@ -3,46 +3,44 @@ import { QueryKeys } from "../../../constants/query-keys";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Button, Flex, Pagination, Popconfirm, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import type { ProductFormRef } from "./components/create-update-product";
-import ProductFormModal from "./components/create-update-product";
+import type { SupplierFormRef } from "./components/create-update-product";
+import SupplierFormModal from "./components/create-update-product";
 import dispatchToast from "../../../constants/toast";
 import { UserOutlined } from "@ant-design/icons";
 import "./index.css";
 import { TableCommon } from "../../../components/table/table";
 import { AppRoutes } from "../../../router/routes";
-import { deleteProductApi, getProductsApi } from "../../../api/products";
-import type { GetProductsRequestType } from "../../../types/products";
-import { UNITS } from "../../../constants/common";
-import { formatNumber } from "../../../utils/helper";
-export const ProductsPage = memo(() => {
+import type { GetSuppliersRequestType } from "../../../types/supplier";
+import { getSuppliersApi,deleteSuplierApi } from "../../../api/supplier";
+export const SuppilerPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const formRef = useRef<ProductFormRef>(null);
+  const formRef = useRef<SupplierFormRef>(null);
 
   const { data, refetch, isFetching } = useQuery({
-    queryKey: [QueryKeys.products.list, { page, limit }],
+    queryKey: [QueryKeys.supplier.list, { page, limit }],
     queryFn: ({ queryKey }) => {
-      const [, payload] = queryKey as [string, GetProductsRequestType];
-      return getProductsApi(payload);
+      const [, payload] = queryKey as [string, GetSuppliersRequestType];
+      return getSuppliersApi(payload);
     },
   });
 
   const { mutate, isPending } = useMutation({
     mutationFn: (payload: { id: string }) =>
-      deleteProductApi({ id: payload.id }),
+      deleteSuplierApi({ id: payload.id }),
     onSuccess: () => {
-      dispatchToast("success", "Xoá sản phẩm thành công!");
-      if((data?.totalResults  % ( (page - 1)  * limit) == 1) && page > 1){
+      dispatchToast("success", "Xoá nhà cung cấp thành công!");
+      if((data?.totalResults  % ( (page -1)  * limit) == 1) && page > 1){
        return setPage( page - 1 )
       }
       refetch();
     },
     onError: () => {
-      dispatchToast("error", "Xoá sản phẩm thất bại!");
+      dispatchToast("error", "Xoá nhà cung cấp thất bại!");
     },
   });
 
-  const products = useMemo(() => data?.results ?? [], [data?.results]);
+  const supplier = useMemo(() => data?.results ?? [], [data?.results]);
 
   const onAction = useCallback(
     (type: "delete" | "update" | "reset-pass", record: any) => {
@@ -75,38 +73,28 @@ export const ProductsPage = memo(() => {
         width: 80,
       },
       {
-        title: "Mã hàng hoá",
-        dataIndex: "code",
-        key: "code",
-        align: "center",
-      },
-      {
         title: "Tên",
         dataIndex: "name",
         key: "name",
         align: "center",
       },
       {
-        title: "Đơn vị",
-        dataIndex: "unit",
-        key: "unit",
+        title: "Số điện thoại",
+        dataIndex: "phone",
+        key: "phone",
         align: "center",
-        render: (value) =>
-          UNITS.find((item) => item.value == value)?.label || "",
       },
       {
-        title: "Tồn kho tối thiểu",
-        dataIndex: "minStock",
-        key: "minStock",
+        title: "Email",
+        dataIndex: "email",
+        key: "email",
         align: "center",
-        render:(value) => <span style={{fontWeight:'bold'}}>{formatNumber(value)}</span>
       },
       {
-        title: "Danh mục",
-        dataIndex: "category",
-        key: "category",
+        title: "Địa chỉ",
+        dataIndex: "address",
+        key: "address",
         align: "center",
-        render: (value: any) => `${value?.name || ""}-${value?.code || ""}`,
       },
       {
         title: "Tuỳ chọn",
@@ -129,7 +117,7 @@ export const ProductsPage = memo(() => {
                 Cập nhật
               </Tag>
               <Popconfirm
-                title="Xác nhận xoá sản phẩm này?"
+                title="Xác nhận xoá nhà cung cấp này?"
                 cancelText="Huỷ"
                 okText="Xác nhận"
                 onConfirm={() => onAction("delete", record)}
@@ -151,11 +139,11 @@ export const ProductsPage = memo(() => {
       <Breadcrumb
         items={[
           {
-            href: AppRoutes.products,
+            href: AppRoutes.supplier,
             title: (
               <>
                 <UserOutlined />
-                <span>sản phẩm</span>
+                <span>Nhà cung cấp</span>
               </>
             ),
           },
@@ -163,12 +151,12 @@ export const ProductsPage = memo(() => {
       />
       <Flex justify="end">
         <Button type="primary" onClick={() => formRef.current?.show()}>
-          Thêm sản phẩm
+          Thêm nhà cung cấp
         </Button>
       </Flex>
       <TableCommon
         size="middle"
-        dataSource={products}
+        dataSource={supplier}
         columns={columns}
         pagination={false}
         loading={isFetching || isPending}
@@ -195,7 +183,7 @@ export const ProductsPage = memo(() => {
           }}
         />
       </Flex>
-      <ProductFormModal
+      <SupplierFormModal
         onSuccess={() => {
           refetch();
           formRef.current?.hide();

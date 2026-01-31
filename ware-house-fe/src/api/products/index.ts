@@ -21,7 +21,15 @@ export const updateProductsApi = async (payload: UpdateProductRequestType):Promi
     UpdateProductRequestType,
     "code" | "name" | "category" | "unit" | "minStock"
   > = {
-    ...payload,
+    code: payload.code,
+    name: payload.name,
+    category: payload.category,
+    unit: payload.unit,
+    minStock: payload.minStock,
   };
   return AxiosClient.put(`product/${payload.productId}`, dataUpdate);
+};
+
+export const deleteProductApi = async (payload: { id: string }) => {
+  return AxiosClient.delete(`product/${payload.id}` );
 };

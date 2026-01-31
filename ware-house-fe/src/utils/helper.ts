@@ -6,4 +6,9 @@ const keyQueryFilterString = (obj: object | any):string => {
   return queryString;
 };
 
-export { keyQueryFilterString };
+const formatNumber = (value: number | string) =>
+  Number(value).toLocaleString("vi-VN");
+
+ // "12.484.288"
+
+export { keyQueryFilterString,formatNumber };
