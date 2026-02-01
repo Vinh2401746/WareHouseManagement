@@ -19,6 +19,8 @@ const allRoles = {
     'getInventoryTransactions',
     'manageSales',
     'getSales',
+    'manageUnits',
+    'getUnits',
   ],
 };
 

@@ -9,6 +9,7 @@ const productRoute = require('./product.route');
 const supplierRoute = require('./supplier.route');
 const docsRoute = require('./docs.route');
 // const productBatchRoute = require('./productBatch.route');
+const unitRoute = require('./unit.route');
 const inventoryTransactionRoute = require('./inventoryTransaction.route');
 const saleRoute = require('./sale.route');
 const config = require('../../config/config');
@@ -59,6 +60,10 @@ const defaultRoutes = [
   {
     path: '/sale',
     route: saleRoute,
+  },
+  {
+    path: '/unit',
+    route: unitRoute,
   },
 ];
 

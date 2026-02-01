@@ -178,7 +178,7 @@ const importInventory = async (importInventoryBody, req) => {
     supplier,
     createdBy: req.user.id,
     items: batches,
-    deliveryPerson: deliveryPerson,
+    deliveryPerson,
   });
 
   return transaction;
