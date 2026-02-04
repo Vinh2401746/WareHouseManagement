@@ -128,6 +128,10 @@ dist
 # vsode settings
 .vscode/
 *.code-workspace
+# cursor settings
+.cursor/
+BE/.cursor/
+BE/.vscode/
 
 # yarn v3
 .pnp.*
