@@ -136,7 +136,7 @@ See [config.js](../BE/src/config/config.js) for schema with Joi validation
 1. Create model: [models/category.model.js](../BE/src/models/category.model.js)
 2. Create service: [services/category.service.js](../BE/src/services/category.service.js) - CRUD operations
 3. Create controller: [controllers/category.controller.js](../BE/src/controllers/category.controller.js) - wrap service calls with `catchAsync()`
-4. Create validation: [validations/category.validation.js](../BE/src/validations/category.validation.js) - Joi schemas for each endpoint
+4. Create validation: [validations/category.validation.js](../BE/src/validations/category.validation.js) - Joi schemas for xceach endpoint
 5. Create route: [routes/v1/category.route.js](../BE/src/routes/v1/category.route.js) - mount in [routes/v1/index.js](../BE/src/routes/v1/index.js)
 6. Add permissions to [config/roles.js](../BE/src/config/roles.js)
 
