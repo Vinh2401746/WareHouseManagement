@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { Category } = require('../models');
 const ApiError = require('../utils/ApiError');
+const responseMessages = require('../constants/responseMessages');
 
 /**
  * Create a category
@@ -44,7 +45,7 @@ const getCategoryById = async (id) => {
 const updateCategoryById = async (categoryId, updateBody) => {
   const category = await getCategoryById(categoryId);
   if (!category) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Category not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.category.notFound);
   }
   Object.assign(category, updateBody);
   await category.save();
@@ -59,7 +60,7 @@ const updateCategoryById = async (categoryId, updateBody) => {
 const deleteCategoryById = async (categoryId) => {
   const category = await getCategoryById(categoryId);
   if (!category) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Category not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.category.notFound);
   }
   await category.remove();
   return category;

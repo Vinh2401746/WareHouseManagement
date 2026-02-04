@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { Product } = require('../models');
 const ApiError = require('../utils/ApiError');
+const responseMessages = require('../constants/responseMessages');
 
 /**
  * Create a product
@@ -45,7 +46,7 @@ const getProductById = async (id) => {
 const updateProductById = async (productId, updateBody) => {
   const product = await getProductById(productId);
   if (!product) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Product not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.product.notFound);
   }
   Object.assign(product, updateBody);
   await product.save();
@@ -60,7 +61,7 @@ const updateProductById = async (productId, updateBody) => {
 const deleteProductById = async (productId) => {
   const product = await getProductById(productId);
   if (!product) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Product not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.product.notFound);
   }
   await product.remove();
   return product;

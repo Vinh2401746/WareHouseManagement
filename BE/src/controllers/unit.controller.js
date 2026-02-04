@@ -3,6 +3,7 @@ const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { unitService } = require('../services');
+const responseMessages = require('../constants/responseMessages');
 
 const createUnit = catchAsync(async (req, res) => {
   const unit = await unitService.createUnit(req.body);
@@ -19,7 +20,7 @@ const getUnits = catchAsync(async (req, res) => {
 const getUnit = catchAsync(async (req, res) => {
   const unit = await unitService.getUnitById(req.params.unitId);
   if (!unit) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Unit not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.unit.notFound);
   }
   res.send(unit);
 });

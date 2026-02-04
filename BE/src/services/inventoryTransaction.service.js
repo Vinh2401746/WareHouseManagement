@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const { InventoryTransaction, ProductBatch, Product } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { INVENTORY_TRANSACTION_TYPES, INVENTORY_TRANSACTION_REASONS } = require('../constants/inventoryTransaction.constant');
+const responseMessages = require('../constants/responseMessages');
 
 /**
  * Create a inventoryTransaction
@@ -100,7 +101,7 @@ const getInventoryTransactionById = async (id) => {
 const updateInventoryTransactionById = async (inventoryTransactionId, updateBody) => {
   const inventoryTransaction = await getInventoryTransactionById(inventoryTransactionId);
   if (!inventoryTransaction) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'InventoryTransaction not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.inventory.notFound);
   }
   Object.assign(inventoryTransaction, updateBody);
   await inventoryTransaction.save();
@@ -115,7 +116,7 @@ const updateInventoryTransactionById = async (inventoryTransactionId, updateBody
 const deleteInventoryTransactionById = async (inventoryTransactionId) => {
   const inventoryTransaction = await getInventoryTransactionById(inventoryTransactionId);
   if (!inventoryTransaction) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'InventoryTransaction not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.inventory.notFound);
   }
   await inventoryTransaction.remove();
   return inventoryTransaction;

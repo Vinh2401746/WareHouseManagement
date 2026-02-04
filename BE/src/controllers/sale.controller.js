@@ -3,6 +3,7 @@ const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { saleService } = require('../services');
+const responseMessages = require('../constants/responseMessages');
 
 const createSale = catchAsync(async (req, res) => {
   const sale = await saleService.createSale(req.body);
@@ -19,7 +20,7 @@ const getSales = catchAsync(async (req, res) => {
 const getSale = catchAsync(async (req, res) => {
   const sale = await saleService.getSaleById(req.params.saleId);
   if (!sale) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Sale not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.sale.notFound);
   }
   res.send(sale);
 });

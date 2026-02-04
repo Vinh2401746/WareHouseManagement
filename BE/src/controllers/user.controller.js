@@ -3,6 +3,7 @@ const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { userService } = require('../services');
+const responseMessages = require('../constants/responseMessages');
 
 const createUser = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
@@ -19,7 +20,7 @@ const getUsers = catchAsync(async (req, res) => {
 const getUser = catchAsync(async (req, res) => {
   const user = await userService.getUserById(req.params.userId);
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.user.notFound);
   }
   res.send(user);
 });
@@ -39,13 +40,13 @@ const changeUserPassword = catchAsync(async (req, res) => {
   const { password: newPassword, currentPassword } = req.body;
   const targetUser = await userService.getUserById(userId);
   if (!targetUser) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.user.notFound);
   }
 
   // If updating own password, require currentPassword to match
   if (req.user.id === String(targetUser.id)) {
     if (!currentPassword || !(await targetUser.isPasswordMatch(currentPassword))) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, 'Current password is incorrect');
+      throw new ApiError(httpStatus.UNAUTHORIZED, responseMessages.user.currentPasswordIncorrect);
     }
   }
 

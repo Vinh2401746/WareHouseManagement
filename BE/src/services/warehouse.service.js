@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { Warehouse } = require('../models');
 const ApiError = require('../utils/ApiError');
+const responseMessages = require('../constants/responseMessages');
 
 /**
  * Create a warehouse
@@ -45,7 +46,7 @@ const getWarehouseById = async (id) => {
 const updateWarehouseById = async (warehouseId, updateBody) => {
   const warehouse = await getWarehouseById(warehouseId);
   if (!warehouse) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Warehouse not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.warehouse.notFound);
   }
   Object.assign(warehouse, updateBody);
   await warehouse.save();
@@ -60,7 +61,7 @@ const updateWarehouseById = async (warehouseId, updateBody) => {
 const deleteWarehouseById = async (warehouseId) => {
   const warehouse = await getWarehouseById(warehouseId);
   if (!warehouse) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Warehouse not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.warehouse.notFound);
   }
   await warehouse.remove();
   return warehouse;

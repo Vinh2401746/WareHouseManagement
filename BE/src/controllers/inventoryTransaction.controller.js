@@ -3,6 +3,7 @@ const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { inventoryTransactionService } = require('../services');
+const responseMessages = require('../constants/responseMessages');
 
 const createInventoryTransaction = catchAsync(async (req, res) => {
   const inventoryTransaction = await inventoryTransactionService.createInventoryTransaction(req.body);
@@ -30,7 +31,7 @@ const getInventoryTransaction = catchAsync(async (req, res) => {
     req.params.inventoryTransactionId
   );
   if (!inventoryTransaction) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'InventoryTransaction not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.inventory.notFound);
   }
   res.send(inventoryTransaction);
 });

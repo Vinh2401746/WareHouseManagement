@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { Unit } = require('../models');
 const ApiError = require('../utils/ApiError');
+const responseMessages = require('../constants/responseMessages');
 
 /**
  * Create a unit
@@ -44,7 +45,7 @@ const getUnitById = async (id) => {
 const updateUnitById = async (unitId, updateBody) => {
   const unit = await getUnitById(unitId);
   if (!unit) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Unit not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.unit.notFound);
   }
   Object.assign(unit, updateBody);
   await unit.save();
@@ -59,7 +60,7 @@ const updateUnitById = async (unitId, updateBody) => {
 const deleteUnitById = async (unitId) => {
   const unit = await getUnitById(unitId);
   if (!unit) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Unit not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.unit.notFound);
   }
   await unit.remove();
   return unit;

@@ -3,6 +3,7 @@ const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { warehouseService } = require('../services');
+const responseMessages = require('../constants/responseMessages');
 
 const createWarehouse = catchAsync(async (req, res) => {
   const warehouse = await warehouseService.createWarehouse(req.body);
@@ -19,7 +20,7 @@ const getWarehouses = catchAsync(async (req, res) => {
 const getWarehouse = catchAsync(async (req, res) => {
   const warehouse = await warehouseService.getWarehouseById(req.params.warehouseId);
   if (!warehouse) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Warehouse not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.warehouse.notFound);
   }
   res.send(warehouse);
 });

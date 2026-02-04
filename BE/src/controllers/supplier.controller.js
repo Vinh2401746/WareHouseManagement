@@ -3,6 +3,7 @@ const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { supplierService } = require('../services');
+const responseMessages = require('../constants/responseMessages');
 
 const createSupplier = catchAsync(async (req, res) => {
   const supplier = await supplierService.createSupplier(req.body);
@@ -19,7 +20,7 @@ const getSuppliers = catchAsync(async (req, res) => {
 const getSupplier = catchAsync(async (req, res) => {
   const supplier = await supplierService.getSupplierById(req.params.supplierId);
   if (!supplier) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Supplier not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.supplier.notFound);
   }
   res.send(supplier);
 });

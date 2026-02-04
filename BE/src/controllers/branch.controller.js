@@ -3,6 +3,7 @@ const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { branchService } = require('../services');
+const responseMessages = require('../constants/responseMessages');
 
 const createBranch = catchAsync(async (req, res) => {
   const branch = await branchService.createBranch(req.body);
@@ -19,7 +20,7 @@ const getBranchs = catchAsync(async (req, res) => {
 const getBranch = catchAsync(async (req, res) => {
   const branch = await branchService.getBranchById(req.params.branchId);
   if (!branch) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Branch not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.branch.notFound);
   }
   res.send(branch);
 });

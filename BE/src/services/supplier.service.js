@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { Supplier } = require('../models');
 const ApiError = require('../utils/ApiError');
+const responseMessages = require('../constants/responseMessages');
 
 /**
  * Create a supplier
@@ -44,7 +45,7 @@ const getSupplierById = async (id) => {
 const updateSupplierById = async (supplierId, updateBody) => {
   const supplier = await getSupplierById(supplierId);
   if (!supplier) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Supplier not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.supplier.notFound);
   }
   Object.assign(supplier, updateBody);
   await supplier.save();
@@ -59,7 +60,7 @@ const updateSupplierById = async (supplierId, updateBody) => {
 const deleteSupplierById = async (supplierId) => {
   const supplier = await getSupplierById(supplierId);
   if (!supplier) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Supplier not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.supplier.notFound);
   }
   await supplier.remove();
   return supplier;

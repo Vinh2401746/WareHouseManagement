@@ -39,15 +39,18 @@ router
     validate(inventoryTransactionValidation.getInventoryTransaction),
     inventoryTransactionController.getInventoryTransaction
   )
-  .patch(
-    auth('manageInventoryTransactions'),
-    validate(inventoryTransactionValidation.updateInventoryTransaction),
-    inventoryTransactionController.updateInventoryTransaction
-  )
   .delete(
     auth('manageInventoryTransactions'),
     validate(inventoryTransactionValidation.deleteInventoryTransaction),
     inventoryTransactionController.deleteInventoryTransaction
+  );
+
+router
+  .route('/import/:inventoryTransactionId')
+  .put(
+    auth('manageInventoryTransactions'),
+    validate(inventoryTransactionValidation.updateInventoryTransaction),
+    inventoryTransactionController.updateInventoryTransaction
   );
 
 module.exports = router;

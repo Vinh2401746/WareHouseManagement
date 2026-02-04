@@ -3,6 +3,7 @@ const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { productBatchService } = require('../services');
+const responseMessages = require('../constants/responseMessages');
 
 const createProductBatch = catchAsync(async (req, res) => {
   const productBatch = await productBatchService.createProductBatch(req.body);
@@ -27,7 +28,7 @@ const getProductBatchs = catchAsync(async (req, res) => {
 const getProductBatch = catchAsync(async (req, res) => {
   const productBatch = await productBatchService.getProductBatchById(req.params.productBatchId);
   if (!productBatch) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'ProductBatch not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.productBatch.notFound);
   }
   res.send(productBatch);
 });

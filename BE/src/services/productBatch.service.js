@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { ProductBatch, Product } = require('../models');
 const ApiError = require('../utils/ApiError');
+const responseMessages = require('../constants/responseMessages');
 
 /**
  * Create a productBatch
@@ -15,10 +16,10 @@ const createProductBatch = async (productBatchBody) => {
     const mfg = new Date(manufactureDate);
     const exp = new Date(expiryDate);
     if (!Number.isFinite(mfg.getTime()) || !Number.isFinite(exp.getTime())) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid manufacture/expiry date');
+      throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.productBatch.invalidManufactureExpiryDate);
     }
     if (exp <= mfg) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Expiry date must be after manufacture date');
+      throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.productBatch.expiryDateAfterManufactureDate);
     }
   }
 
@@ -34,13 +35,13 @@ const createProductBatch = async (productBatchBody) => {
   // prevent duplicate batch per product & warehouse
   const existing = await ProductBatch.findOne({ product, warehouse, batchCode: normalizedCode });
   if (existing) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Batch code already exists for this product and warehouse');
+    throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.productBatch.batchCodeExists);
   }
 
   // cộng số lượng sản phẩm trong kho
   const thisProduct = await Product.findById(product);
   if (!thisProduct) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Product not found');
+    throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.product.notFound);
   }
   thisProduct.quantityInStock += quantity || 0;
   await thisProduct.save();
@@ -92,7 +93,7 @@ const getProductBatchById = async (id) => {
 const updateProductBatchById = async (productBatchId, updateBody) => {
   const productBatch = await getProductBatchById(productBatchId);
   if (!productBatch) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'ProductBatch not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.productBatch.notFound);
   }
   Object.assign(productBatch, updateBody);
   await productBatch.save();
@@ -107,7 +108,7 @@ const updateProductBatchById = async (productBatchId, updateBody) => {
 const deleteProductBatchById = async (productBatchId) => {
   const productBatch = await getProductBatchById(productBatchId);
   if (!productBatch) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'ProductBatch not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.productBatch.notFound);
   }
   await productBatch.remove();
   return productBatch;

@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { Branch } = require('../models');
 const ApiError = require('../utils/ApiError');
+const responseMessages = require('../constants/responseMessages');
 
 /**
  * Create a branch
@@ -44,7 +45,7 @@ const getBranchById = async (id) => {
 const updateBranchById = async (branchId, updateBody) => {
   const branch = await getBranchById(branchId);
   if (!branch) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Branch not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.branch.notFound);
   }
   Object.assign(branch, updateBody);
   await branch.save();
@@ -59,7 +60,7 @@ const updateBranchById = async (branchId, updateBody) => {
 const deleteBranchById = async (branchId) => {
   const branch = await getBranchById(branchId);
   if (!branch) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Branch not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.branch.notFound);
   }
   await branch.remove();
   return branch;

@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { Sale, InventoryTransaction, ProductBatch } = require('../models');
 const ApiError = require('../utils/ApiError');
+const responseMessages = require('../constants/responseMessages');
 
 /**
  * Create a sale
@@ -44,7 +45,7 @@ const createSale = async (req) => {
       }
 
       if (remainingQty > 0) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Not enough stock');
+        throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.sale.notEnoughStock);
       }
 
       await Promise.all(savePromises);
@@ -111,7 +112,7 @@ const getSaleById = async (id) => {
 const updateSaleById = async (saleId, updateBody) => {
   const sale = await getSaleById(saleId);
   if (!sale) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Sale not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.sale.notFound);
   }
   Object.assign(sale, updateBody);
   await sale.save();
@@ -126,7 +127,7 @@ const updateSaleById = async (saleId, updateBody) => {
 const deleteSaleById = async (saleId) => {
   const sale = await getSaleById(saleId);
   if (!sale) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Sale not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.sale.notFound);
   }
   await sale.remove();
   return sale;

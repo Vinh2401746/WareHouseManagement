@@ -3,6 +3,7 @@ const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { categoryService } = require('../services');
+const responseMessages = require('../constants/responseMessages');
 
 const createCategory = catchAsync(async (req, res) => {
   const category = await categoryService.createCategory(req.body);
@@ -19,7 +20,7 @@ const getCategories = catchAsync(async (req, res) => {
 const getCategory = catchAsync(async (req, res) => {
   const category = await categoryService.getCategoryById(req.params.categoryId);
   if (!category) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Category not found');
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.category.notFound);
   }
   res.send(category);
 });
