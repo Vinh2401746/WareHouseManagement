@@ -23,15 +23,15 @@ module.exports = router;
  * @swagger
  * tags:
  *   name: Categories
- *   description: Category management and retrieval
+ *   description: Quản lý và tra cứu danh mục
  */
 
 /**
  * @swagger
- * /categories:
+ * /category:
  *   post:
- *     summary: Create a category
- *     description: Can create categories.
+ *     summary: Tạo danh mục
+ *     description: Tạo mới danh mục sản phẩm.
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
@@ -42,84 +42,68 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - user
- *               - type
- *               - manufacturer
- *               - model
+ *               - code
+ *               - name
  *             properties:
- *               user:
+ *               code:
  *                 type: string
- *               type:
+ *                 description: Mã danh mục
+ *               name:
  *                 type: string
- *                 description: category type (car, var, bike, etc...)
- *               manufacturer:
- *                 type: string
- *               model:
- *                 type: string
- *                 description: category model (308, Demio, Aqua, etc...)
- *               numberplate:
- *                  type: string
- *               makeyear:
- *                  type: string
- *               registeryear:
- *                  type: string
- *               capacity:
- *                  type: string
- *               fuel:
- *                  type: string
- *               color:
- *                  type: string
+ *                 description: Tên danh mục
  *             example:
- *               user: (User ID)
- *               type: car
- *               manufacturer: Mazda
- *               model: Demio
- *               numberplate: KM-1898
- *               makeyear: 2007
- *               registeryear: 2011
- *               capacity: 5
- *               fuel: Petrol
- *               color: Red
+ *               code: CAT-001
+ *               name: Đồ gia dụng
  *     responses:
  *       "201":
- *         description: Created
+ *         description: Tạo thành công
  *         content:
  *           application/json:
  *             schema:
  *                $ref: '#/components/schemas/Category'
  *       "400":
- *         $ref: '#/components/responses/Duplicate'
+ *         $ref: '#/components/schemas/Error'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
  *         $ref: '#/components/responses/Forbidden'
  *
  *   get:
- *     summary: Get all categories
- *     description: Retrieve all categories.
+ *     summary: Lấy danh sách danh mục
+ *     description: Hỗ trợ lọc và phân trang.
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: user
+ *         name: code
  *         schema:
  *           type: string
- *         description: User id
+ *         description: Mã danh mục
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Tên danh mục
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *         description: Sắp xếp dạng field:asc|desc
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           minimum: 1
  *         default: 10
- *         description: Maximum number of categories
+ *         description: Số bản ghi tối đa
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           minimum: 1
  *           default: 1
- *         description: Page number
+ *         description: Trang hiện tại
  *     responses:
  *       "200":
  *         description: OK
@@ -152,20 +136,20 @@ module.exports = router;
 
 /**
  * @swagger
- * /categories/{id}:
+ * /category/{categoryId}:
  *   get:
- *     summary: Get a category
- *     description: fetch Categories by id
+ *     summary: Lấy chi tiết danh mục
+ *     description: Theo ID danh mục
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: categoryId
  *         required: true
  *         schema:
  *           type: string
- *         description: Category id
+ *         description: ID danh mục
  *     responses:
  *       "200":
  *         description: OK
@@ -180,19 +164,19 @@ module.exports = router;
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  *
- *   patch:
- *     summary: Update a category
- *     description: Update categories.
+ *   put:
+ *     summary: Cập nhật danh mục
+ *     description: Cập nhật thông tin danh mục theo ID.
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: categoryId
  *         required: true
  *         schema:
  *           type: string
- *         description: Category id
+ *         description: ID danh mục
  *     requestBody:
  *       required: true
  *       content:
@@ -200,39 +184,12 @@ module.exports = router;
  *           schema:
  *             type: object
  *             properties:
- *               user:
+ *               code:
  *                 type: string
- *               type:
+ *               name:
  *                 type: string
- *                 description: category type (car, var, bike, etc...)
- *               manufacturer:
- *                 type: string
- *               model:
- *                 type: string
- *                 description: category model (308, Demio, Aqua, etc...)
- *               numberplate:
- *                  type: string
- *               makeyear:
- *                  type: string
- *               registeryear:
- *                  type: string
- *               capacity:
- *                  type: string
- *               fuel:
- *                  type: string
- *               color:
- *                  type: string
  *             example:
- *               user: (User ID)
- *               type: car
- *               manufacturer: Mazda
- *               model: Demio
- *               numberplate: KM-1898
- *               makeyear: 2007
- *               registeryear: 2011
- *               capacity: 5
- *               fuel: Petrol
- *               color: Red
+ *               name: Đồ gia dụng (cập nhật)
  *     responses:
  *       "200":
  *         description: OK
@@ -241,7 +198,7 @@ module.exports = router;
  *             schema:
  *                $ref: '#/components/schemas/Category'
  *       "400":
- *         $ref: '#/components/responses/Duplicate'
+ *         $ref: '#/components/schemas/Error'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
@@ -250,20 +207,20 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   delete:
- *     summary: Delete a category
- *     description: Delete categories.
+ *     summary: Xóa danh mục
+ *     description: Xóa theo ID danh mục.
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: categoryId
  *         required: true
  *         schema:
  *           type: string
- *         description: Category id
+ *         description: ID danh mục
  *     responses:
- *       "200":
+ *       "204":
  *         description: No content
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'

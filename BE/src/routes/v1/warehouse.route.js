@@ -23,15 +23,15 @@ module.exports = router;
  * @swagger
  * tags:
  *   name: Warehouses
- *   description: Warehouse management and retrieval
+ *   description: Quản lý và tra cứu kho
  */
 
 /**
  * @swagger
- * /warehouses:
+ * /warehouse:
  *   post:
- *     summary: Create a warehouse
- *     description: Can create warehouses.
+ *     summary: Tạo kho
+ *     description: Tạo mới kho.
  *     tags: [Warehouses]
  *     security:
  *       - bearerAuth: []
@@ -42,84 +42,75 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - user
- *               - type
- *               - manufacturer
- *               - model
+ *               - name
+ *               - branch
  *             properties:
- *               user:
+ *               name:
  *                 type: string
- *               type:
+ *               branch:
  *                 type: string
- *                 description: warehouse type (car, var, bike, etc...)
- *               manufacturer:
+ *                 description: ID chi nhánh
+ *               address:
  *                 type: string
- *               model:
- *                 type: string
- *                 description: warehouse model (308, Demio, Aqua, etc...)
- *               numberplate:
- *                  type: string
- *               makeyear:
- *                  type: string
- *               registeryear:
- *                  type: string
- *               capacity:
- *                  type: string
- *               fuel:
- *                  type: string
- *               color:
- *                  type: string
  *             example:
- *               user: (User ID)
- *               type: car
- *               manufacturer: Mazda
- *               model: Demio
- *               numberplate: KM-1898
- *               makeyear: 2007
- *               registeryear: 2011
- *               capacity: 5
- *               fuel: Petrol
- *               color: Red
+ *               name: Kho Trung Tâm
+ *               branch: 65a1b2c3d4e5f6a7b8c9d012
+ *               address: 456 Đường B, Hà Nội
  *     responses:
  *       "201":
- *         description: Created
+ *         description: Tạo thành công
  *         content:
  *           application/json:
  *             schema:
  *                $ref: '#/components/schemas/Warehouse'
  *       "400":
- *         $ref: '#/components/responses/Duplicate'
+ *         $ref: '#/components/schemas/Error'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
  *         $ref: '#/components/responses/Forbidden'
  *
  *   get:
- *     summary: Get all warehouses
- *     description: Retrieve all warehouses.
+ *     summary: Lấy danh sách kho
+ *     description: Hỗ trợ lọc và phân trang.
  *     tags: [Warehouses]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: user
+ *         name: name
  *         schema:
  *           type: string
- *         description: User id
+ *         description: Tên kho
+ *       - in: query
+ *         name: branch
+ *         schema:
+ *           type: string
+ *         description: ID chi nhánh
+ *       - in: query
+ *         name: address
+ *         schema:
+ *           type: string
+ *         description: Địa chỉ
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *         description: Sắp xếp dạng field:asc|desc
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           minimum: 1
  *         default: 10
- *         description: Maximum number of warehouses
+ *         description: Số bản ghi tối đa
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           minimum: 1
  *           default: 1
- *         description: Page number
+ *         description: Trang hiện tại
  *     responses:
  *       "200":
  *         description: OK
@@ -152,20 +143,20 @@ module.exports = router;
 
 /**
  * @swagger
- * /warehouses/{id}:
+ * /warehouse/{warehouseId}:
  *   get:
- *     summary: Get a warehouse
- *     description: fetch Warehouses by id
+ *     summary: Lấy chi tiết kho
+ *     description: Theo ID kho
  *     tags: [Warehouses]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: warehouseId
  *         required: true
  *         schema:
  *           type: string
- *         description: Warehouse id
+ *         description: ID kho
  *     responses:
  *       "200":
  *         description: OK
@@ -180,19 +171,19 @@ module.exports = router;
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  *
- *   patch:
- *     summary: Update a warehouse
- *     description: Update warehouses.
+ *   put:
+ *     summary: Cập nhật kho
+ *     description: Cập nhật thông tin kho theo ID.
  *     tags: [Warehouses]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: warehouseId
  *         required: true
  *         schema:
  *           type: string
- *         description: Warehouse id
+ *         description: ID kho
  *     requestBody:
  *       required: true
  *       content:
@@ -200,39 +191,14 @@ module.exports = router;
  *           schema:
  *             type: object
  *             properties:
- *               user:
+ *               name:
  *                 type: string
- *               type:
+ *               branch:
  *                 type: string
- *                 description: warehouse type (car, var, bike, etc...)
- *               manufacturer:
+ *               address:
  *                 type: string
- *               model:
- *                 type: string
- *                 description: warehouse model (308, Demio, Aqua, etc...)
- *               numberplate:
- *                  type: string
- *               makeyear:
- *                  type: string
- *               registeryear:
- *                  type: string
- *               capacity:
- *                  type: string
- *               fuel:
- *                  type: string
- *               color:
- *                  type: string
  *             example:
- *               user: (User ID)
- *               type: car
- *               manufacturer: Mazda
- *               model: Demio
- *               numberplate: KM-1898
- *               makeyear: 2007
- *               registeryear: 2011
- *               capacity: 5
- *               fuel: Petrol
- *               color: Red
+ *               address: 789 Đường C, Hà Nội
  *     responses:
  *       "200":
  *         description: OK
@@ -241,7 +207,7 @@ module.exports = router;
  *             schema:
  *                $ref: '#/components/schemas/Warehouse'
  *       "400":
- *         $ref: '#/components/responses/Duplicate'
+ *         $ref: '#/components/schemas/Error'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
@@ -250,20 +216,20 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   delete:
- *     summary: Delete a warehouse
- *     description: Delete warehouses.
+ *     summary: Xóa kho
+ *     description: Xóa theo ID kho.
  *     tags: [Warehouses]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: warehouseId
  *         required: true
  *         schema:
  *           type: string
- *         description: Warehouse id
+ *         description: ID kho
  *     responses:
- *       "200":
+ *       "204":
  *         description: No content
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'

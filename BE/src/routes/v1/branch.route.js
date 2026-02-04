@@ -23,15 +23,15 @@ module.exports = router;
  * @swagger
  * tags:
  *   name: Branches
- *   description: Branch management and retrieval
+ *   description: Quản lý và tra cứu chi nhánh
  */
 
 /**
  * @swagger
  * /branch:
  *   post:
- *     summary: Create a branch
- *     description: Can create branches.
+ *     summary: Tạo chi nhánh
+ *     description: Tạo mới chi nhánh.
  *     tags: [Branches]
  *     security:
  *       - bearerAuth: []
@@ -42,84 +42,73 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - user
- *               - type
- *               - manufacturer
- *               - model
+ *               - name
  *             properties:
- *               user:
+ *               name:
  *                 type: string
- *               type:
+ *               address:
  *                 type: string
- *                 description: branch type (car, var, bike, etc...)
- *               manufacturer:
+ *               phone:
  *                 type: string
- *               model:
- *                 type: string
- *                 description: branch model (308, Demio, Aqua, etc...)
- *               numberplate:
- *                  type: string
- *               makeyear:
- *                  type: string
- *               registeryear:
- *                  type: string
- *               capacity:
- *                  type: string
- *               fuel:
- *                  type: string
- *               color:
- *                  type: string
  *             example:
- *               user: (User ID)
- *               type: car
- *               manufacturer: Mazda
- *               model: Demio
- *               numberplate: KM-1898
- *               makeyear: 2007
- *               registeryear: 2011
- *               capacity: 5
- *               fuel: Petrol
- *               color: Red
+ *               name: Chi nhánh Hà Nội
+ *               address: 123 Đường A, Hà Nội
+ *               phone: "0123456789"
  *     responses:
  *       "201":
- *         description: Created
+ *         description: Tạo thành công
  *         content:
  *           application/json:
  *             schema:
  *                $ref: '#/components/schemas/Branch'
  *       "400":
- *         $ref: '#/components/responses/Duplicate'
+ *         $ref: '#/components/schemas/Error'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
  *         $ref: '#/components/responses/Forbidden'
  *
  *   get:
- *     summary: Get all branches
- *     description: Retrieve all branches.
+ *     summary: Lấy danh sách chi nhánh
+ *     description: Hỗ trợ lọc và phân trang.
  *     tags: [Branches]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: user
+ *         name: name
  *         schema:
  *           type: string
- *         description: User id
+ *         description: Tên chi nhánh
+ *       - in: query
+ *         name: address
+ *         schema:
+ *           type: string
+ *         description: Địa chỉ
+ *       - in: query
+ *         name: phone
+ *         schema:
+ *           type: string
+ *         description: Số điện thoại
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *         description: Sắp xếp dạng field:asc|desc
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           minimum: 1
  *         default: 10
- *         description: Maximum number of branches
+ *         description: Số bản ghi tối đa
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           minimum: 1
  *           default: 1
- *         description: Page number
+ *         description: Trang hiện tại
  *     responses:
  *       "200":
  *         description: OK
@@ -152,20 +141,20 @@ module.exports = router;
 
 /**
  * @swagger
- * /branch/{id}:
+ * /branch/{branchId}:
  *   get:
- *     summary: Get a branch
- *     description: fetch Branches by id
+ *     summary: Lấy chi tiết chi nhánh
+ *     description: Theo ID chi nhánh
  *     tags: [Branches]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: branchId
  *         required: true
  *         schema:
  *           type: string
- *         description: Branch id
+ *         description: ID chi nhánh
  *     responses:
  *       "200":
  *         description: OK
@@ -180,19 +169,19 @@ module.exports = router;
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  *
- *   patch:
- *     summary: Update a branch
- *     description: Update branches.
+ *   put:
+ *     summary: Cập nhật chi nhánh
+ *     description: Cập nhật thông tin chi nhánh theo ID.
  *     tags: [Branches]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: branchId
  *         required: true
  *         schema:
  *           type: string
- *         description: Branch id
+ *         description: ID chi nhánh
  *     requestBody:
  *       required: true
  *       content:
@@ -200,39 +189,15 @@ module.exports = router;
  *           schema:
  *             type: object
  *             properties:
- *               user:
+ *               name:
  *                 type: string
- *               type:
+ *               address:
  *                 type: string
- *                 description: branch type (car, var, bike, etc...)
- *               manufacturer:
+ *               phone:
  *                 type: string
- *               model:
- *                 type: string
- *                 description: branch model (308, Demio, Aqua, etc...)
- *               numberplate:
- *                  type: string
- *               makeyear:
- *                  type: string
- *               registeryear:
- *                  type: string
- *               capacity:
- *                  type: string
- *               fuel:
- *                  type: string
- *               color:
- *                  type: string
  *             example:
- *               user: (User ID)
- *               type: car
- *               manufacturer: Mazda
- *               model: Demio
- *               numberplate: KM-1898
- *               makeyear: 2007
- *               registeryear: 2011
- *               capacity: 5
- *               fuel: Petrol
- *               color: Red
+ *               name: Chi nhánh Hà Nội (cập nhật)
+ *               phone: "0987654321"
  *     responses:
  *       "200":
  *         description: OK
@@ -241,7 +206,7 @@ module.exports = router;
  *             schema:
  *                $ref: '#/components/schemas/Branch'
  *       "400":
- *         $ref: '#/components/responses/Duplicate'
+ *         $ref: '#/components/schemas/Error'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
@@ -250,20 +215,20 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   delete:
- *     summary: Delete a branch
- *     description: Delete branches.
+ *     summary: Xóa chi nhánh
+ *     description: Xóa theo ID chi nhánh.
  *     tags: [Branches]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: branchId
  *         required: true
  *         schema:
  *           type: string
- *         description: Branch id
+ *         description: ID chi nhánh
  *     responses:
- *       "200":
+ *       "204":
  *         description: No content
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'

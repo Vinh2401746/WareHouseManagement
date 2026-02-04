@@ -21,14 +21,14 @@ module.exports = router;
  * @swagger
  * tags:
  *   name: Auth
- *   description: Authentication
+ *   description: Xác thực và quản lý phiên đăng nhập
  */
 
 /**
  * @swagger
  * /auth/register:
  *   post:
- *     summary: Register as user
+ *     summary: Đăng ký tài khoản
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -46,19 +46,19 @@ module.exports = router;
  *               email:
  *                 type: string
  *                 format: email
- *                 description: must be unique
+ *                 description: Email duy nhất
  *               password:
  *                 type: string
  *                 format: password
  *                 minLength: 8
- *                 description: At least one number and one letter
+ *                 description: Ít nhất 1 chữ cái và 1 chữ số
  *             example:
  *               name: fake name
  *               email: admin@gmail.com
  *               password: admin123
  *     responses:
  *       "201":
- *         description: Created
+ *         description: Tạo thành công
  *         content:
  *           application/json:
  *             schema:
@@ -76,7 +76,7 @@ module.exports = router;
  * @swagger
  * /auth/login:
  *   post:
- *     summary: Login
+ *     summary: Đăng nhập
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -110,21 +110,21 @@ module.exports = router;
  *                 tokens:
  *                   $ref: '#/components/schemas/AuthTokens'
  *       "401":
- *         description: Invalid email or password
+ *         description: Email hoặc mật khẩu không đúng
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *             example:
  *               code: 401
- *               message: Invalid email or password
+ *               message: Email hoặc mật khẩu không đúng
  */
 
 /**
  * @swagger
  * /auth/logout:
  *   post:
- *     summary: Logout
+ *     summary: Đăng xuất
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -150,7 +150,7 @@ module.exports = router;
  * @swagger
  * /auth/refresh-tokens:
  *   post:
- *     summary: Refresh auth tokens
+ *     summary: Làm mới token
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -180,8 +180,8 @@ module.exports = router;
  * @swagger
  * /auth/forgot-password:
  *   post:
- *     summary: Forgot password
- *     description: An email will be sent to reset password.
+ *     summary: Quên mật khẩu
+ *     description: Gửi email đặt lại mật khẩu.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -208,7 +208,7 @@ module.exports = router;
  * @swagger
  * /auth/reset-password:
  *   post:
- *     summary: Reset password
+ *     summary: Đặt lại mật khẩu
  *     tags: [Auth]
  *     parameters:
  *       - in: query
@@ -216,7 +216,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: The reset password token
+ *         description: Token đặt lại mật khẩu
  *     requestBody:
  *       required: true
  *       content:
@@ -230,29 +230,29 @@ module.exports = router;
  *                 type: string
  *                 format: password
  *                 minLength: 8
- *                 description: At least one number and one letter
+ *                 description: Ít nhất 1 chữ cái và 1 chữ số
  *             example:
  *               password: admin123
  *     responses:
  *       "204":
  *         description: No content
  *       "401":
- *         description: Password reset failed
+ *         description: Đặt lại mật khẩu thất bại
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *             example:
  *               code: 401
- *               message: Password reset failed
+ *               message: Đặt lại mật khẩu thất bại
  */
 
 /**
  * @swagger
  * /auth/send-verification-email:
  *   post:
- *     summary: Send verification email
- *     description: An email will be sent to verify email.
+ *     summary: Gửi email xác thực
+ *     description: Gửi email để xác thực tài khoản.
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
@@ -267,7 +267,7 @@ module.exports = router;
  * @swagger
  * /auth/verify-email:
  *   post:
- *     summary: verify email
+ *     summary: Xác thực email
  *     tags: [Auth]
  *     parameters:
  *       - in: query
@@ -275,17 +275,17 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: The verify email token
+ *         description: Token xác thực email
  *     responses:
  *       "204":
  *         description: No content
  *       "401":
- *         description: verify email failed
+ *         description: Xác thực email thất bại
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *             example:
  *               code: 401
- *               message: verify email failed
+ *               message: Xác thực email thất bại
  */

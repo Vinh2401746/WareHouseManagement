@@ -23,15 +23,15 @@ module.exports = router;
  * @swagger
  * tags:
  *   name: Suppliers
- *   description: Supplier management and retrieval
+ *   description: Quản lý và tra cứu nhà cung cấp
  */
 
 /**
  * @swagger
- * /suppliers:
+ * /supplier:
  *   post:
- *     summary: Create a supplier
- *     description: Can create suppliers.
+ *     summary: Tạo nhà cung cấp
+ *     description: Tạo mới nhà cung cấp.
  *     tags: [Suppliers]
  *     security:
  *       - bearerAuth: []
@@ -42,84 +42,82 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - user
- *               - type
- *               - manufacturer
- *               - model
+ *               - name
  *             properties:
- *               user:
+ *               name:
  *                 type: string
- *               type:
+ *               phone:
  *                 type: string
- *                 description: supplier type (car, var, bike, etc...)
- *               manufacturer:
+ *               email:
  *                 type: string
- *               model:
+ *                 format: email
+ *               address:
  *                 type: string
- *                 description: supplier model (308, Demio, Aqua, etc...)
- *               numberplate:
- *                  type: string
- *               makeyear:
- *                  type: string
- *               registeryear:
- *                  type: string
- *               capacity:
- *                  type: string
- *               fuel:
- *                  type: string
- *               color:
- *                  type: string
  *             example:
- *               user: (User ID)
- *               type: car
- *               manufacturer: Mazda
- *               model: Demio
- *               numberplate: KM-1898
- *               makeyear: 2007
- *               registeryear: 2011
- *               capacity: 5
- *               fuel: Petrol
- *               color: Red
+ *               name: Nhà cung cấp ABC
+ *               phone: "0987654321"
+ *               email: supplier@abc.com
+ *               address: 789 Đường C, Hà Nội
  *     responses:
  *       "201":
- *         description: Created
+ *         description: Tạo thành công
  *         content:
  *           application/json:
  *             schema:
  *                $ref: '#/components/schemas/Supplier'
  *       "400":
- *         $ref: '#/components/responses/Duplicate'
+ *         $ref: '#/components/schemas/Error'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
  *         $ref: '#/components/responses/Forbidden'
  *
  *   get:
- *     summary: Get all suppliers
- *     description: Retrieve all suppliers.
+ *     summary: Lấy danh sách nhà cung cấp
+ *     description: Hỗ trợ lọc và phân trang.
  *     tags: [Suppliers]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: user
+ *         name: name
  *         schema:
  *           type: string
- *         description: User id
+ *         description: Tên nhà cung cấp
+ *       - in: query
+ *         name: phone
+ *         schema:
+ *           type: string
+ *         description: Số điện thoại
+ *       - in: query
+ *         name: email
+ *         schema:
+ *           type: string
+ *         description: Email
+ *       - in: query
+ *         name: address
+ *         schema:
+ *           type: string
+ *         description: Địa chỉ
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *         description: Sắp xếp dạng field:asc|desc
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           minimum: 1
  *         default: 10
- *         description: Maximum number of suppliers
+ *         description: Số bản ghi tối đa
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           minimum: 1
  *           default: 1
- *         description: Page number
+ *         description: Trang hiện tại
  *     responses:
  *       "200":
  *         description: OK
@@ -152,20 +150,20 @@ module.exports = router;
 
 /**
  * @swagger
- * /suppliers/{id}:
+ * /supplier/{supplierId}:
  *   get:
- *     summary: Get a supplier
- *     description: fetch Suppliers by id
+ *     summary: Lấy chi tiết nhà cung cấp
+ *     description: Theo ID nhà cung cấp
  *     tags: [Suppliers]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: supplierId
  *         required: true
  *         schema:
  *           type: string
- *         description: Supplier id
+ *         description: ID nhà cung cấp
  *     responses:
  *       "200":
  *         description: OK
@@ -180,19 +178,19 @@ module.exports = router;
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  *
- *   patch:
- *     summary: Update a supplier
- *     description: Update suppliers.
+ *   put:
+ *     summary: Cập nhật nhà cung cấp
+ *     description: Cập nhật thông tin nhà cung cấp theo ID.
  *     tags: [Suppliers]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: supplierId
  *         required: true
  *         schema:
  *           type: string
- *         description: Supplier id
+ *         description: ID nhà cung cấp
  *     requestBody:
  *       required: true
  *       content:
@@ -200,39 +198,17 @@ module.exports = router;
  *           schema:
  *             type: object
  *             properties:
- *               user:
+ *               name:
  *                 type: string
- *               type:
+ *               phone:
  *                 type: string
- *                 description: supplier type (car, var, bike, etc...)
- *               manufacturer:
+ *               email:
  *                 type: string
- *               model:
+ *               address:
  *                 type: string
- *                 description: supplier model (308, Demio, Aqua, etc...)
- *               numberplate:
- *                  type: string
- *               makeyear:
- *                  type: string
- *               registeryear:
- *                  type: string
- *               capacity:
- *                  type: string
- *               fuel:
- *                  type: string
- *               color:
- *                  type: string
  *             example:
- *               user: (User ID)
- *               type: car
- *               manufacturer: Mazda
- *               model: Demio
- *               numberplate: KM-1898
- *               makeyear: 2007
- *               registeryear: 2011
- *               capacity: 5
- *               fuel: Petrol
- *               color: Red
+ *               phone: "0987654321"
+ *               address: 456 Đường B, Hà Nội
  *     responses:
  *       "200":
  *         description: OK
@@ -241,7 +217,7 @@ module.exports = router;
  *             schema:
  *                $ref: '#/components/schemas/Supplier'
  *       "400":
- *         $ref: '#/components/responses/Duplicate'
+ *         $ref: '#/components/schemas/Error'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
@@ -250,20 +226,20 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   delete:
- *     summary: Delete a supplier
- *     description: Delete suppliers.
+ *     summary: Xóa nhà cung cấp
+ *     description: Xóa theo ID nhà cung cấp.
  *     tags: [Suppliers]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: supplierId
  *         required: true
  *         schema:
  *           type: string
- *         description: Supplier id
+ *         description: ID nhà cung cấp
  *     responses:
- *       "200":
+ *       "204":
  *         description: No content
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'

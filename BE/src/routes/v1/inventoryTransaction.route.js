@@ -59,15 +59,15 @@ module.exports = router;
  * @swagger
  * tags:
  *   name: InventoryTransactions
- *   description: InventoryTransaction management and retrieval
+ *   description: Quản lý và tra cứu giao dịch tồn kho (nhập/xuất)
  */
 
 /**
  * @swagger
- * /inventoryTransactions:
+ * /inventory:
  *   post:
- *     summary: Create a inventoryTransaction
- *     description: Can create inventoryTransactions.
+ *     summary: Tạo giao dịch tồn kho
+ *     description: Tạo phiếu nhập/xuất tồn kho thủ công.
  *     tags: [InventoryTransactions]
  *     security:
  *       - bearerAuth: []
@@ -78,84 +78,141 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - user
  *               - type
- *               - manufacturer
- *               - model
+ *               - warehouse
+ *               - items
  *             properties:
- *               user:
- *                 type: string
  *               type:
  *                 type: string
- *                 description: inventoryTransaction type (car, var, bike, etc...)
- *               manufacturer:
+ *                 enum: [IMPORT, EXPORT]
+ *                 description: Loại giao dịch
+ *               reason:
  *                 type: string
- *               model:
+ *                 description: Lý do giao dịch
+ *               warehouse:
  *                 type: string
- *                 description: inventoryTransaction model (308, Demio, Aqua, etc...)
- *               numberplate:
- *                  type: string
- *               makeyear:
- *                  type: string
- *               registeryear:
- *                  type: string
- *               capacity:
- *                  type: string
- *               fuel:
- *                  type: string
- *               color:
- *                  type: string
+ *                 description: ID kho
+ *               supplier:
+ *                 type: string
+ *                 description: ID nhà cung cấp (nếu nhập)
+ *               sale:
+ *                 type: string
+ *                 description: ID đơn bán hàng (nếu xuất)
+ *               createdBy:
+ *                 type: string
+ *                 description: ID người tạo
+ *               transactionDate:
+ *                 type: string
+ *                 format: date-time
+ *               deliveryPerson:
+ *                 type: string
+ *                 description: Người giao hàng
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     product:
+ *                       type: string
+ *                     batch:
+ *                       type: string
+ *                     quantity:
+ *                       type: number
+ *                     price:
+ *                       type: number
  *             example:
- *               user: (User ID)
- *               type: car
- *               manufacturer: Mazda
- *               model: Demio
- *               numberplate: KM-1898
- *               makeyear: 2007
- *               registeryear: 2011
- *               capacity: 5
- *               fuel: Petrol
- *               color: Red
+ *               type: IMPORT
+ *               reason: PURCHASE
+ *               warehouse: 65a1b2c3d4e5f6a7b8c9d013
+ *               supplier: 65a1b2c3d4e5f6a7b8c9d016
+ *               deliveryPerson: Nguyễn Văn A
+ *               items:
+ *                 - product: 65a1b2c3d4e5f6a7b8c9d015
+ *                   batch: 65a1b2c3d4e5f6a7b8c9d018
+ *                   quantity: 10
+ *                   price: 150000
  *     responses:
  *       "201":
- *         description: Created
+ *         description: Tạo thành công
  *         content:
  *           application/json:
  *             schema:
  *                $ref: '#/components/schemas/InventoryTransaction'
  *       "400":
- *         $ref: '#/components/responses/Duplicate'
+ *         $ref: '#/components/schemas/Error'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
  *         $ref: '#/components/responses/Forbidden'
  *
  *   get:
- *     summary: Get all inventoryTransactions
- *     description: Retrieve all inventoryTransactions.
+ *     summary: Lấy danh sách giao dịch tồn kho
+ *     description: Hỗ trợ lọc và phân trang.
  *     tags: [InventoryTransactions]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: user
+ *         name: type
  *         schema:
  *           type: string
- *         description: User id
+ *           enum: [IMPORT, EXPORT]
+ *         description: Loại giao dịch
+ *       - in: query
+ *         name: reason
+ *         schema:
+ *           type: string
+ *         description: Lý do giao dịch
+ *       - in: query
+ *         name: warehouse
+ *         schema:
+ *           type: string
+ *         description: ID kho
+ *       - in: query
+ *         name: supplier
+ *         schema:
+ *           type: string
+ *         description: ID nhà cung cấp
+ *       - in: query
+ *         name: sale
+ *         schema:
+ *           type: string
+ *         description: ID đơn bán hàng
+ *       - in: query
+ *         name: createdBy
+ *         schema:
+ *           type: string
+ *         description: ID người tạo
+ *       - in: query
+ *         name: transactionDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Ngày giao dịch
+ *       - in: query
+ *         name: deliveryPerson
+ *         schema:
+ *           type: string
+ *         description: Người giao hàng
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *         description: Sắp xếp dạng field:asc|desc (vd: createdAt:desc)
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           minimum: 1
  *         default: 10
- *         description: Maximum number of inventoryTransactions
+ *         description: Số bản ghi tối đa
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           minimum: 1
  *           default: 1
- *         description: Page number
+ *         description: Trang hiện tại
  *     responses:
  *       "200":
  *         description: OK
@@ -188,20 +245,20 @@ module.exports = router;
 
 /**
  * @swagger
- * /inventoryTransactions/{id}:
+ * /inventory/{inventoryTransactionId}:
  *   get:
- *     summary: Get a inventoryTransaction
- *     description: fetch InventoryTransactions by id
+ *     summary: Lấy chi tiết giao dịch tồn kho
+ *     description: Theo ID giao dịch
  *     tags: [InventoryTransactions]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: inventoryTransactionId
  *         required: true
  *         schema:
  *           type: string
- *         description: InventoryTransaction id
+ *         description: ID giao dịch tồn kho
  *     responses:
  *       "200":
  *         description: OK
@@ -209,75 +266,6 @@ module.exports = router;
  *           application/json:
  *             schema:
  *                $ref: '#/components/schemas/InventoryTransaction'
- *       "401":
- *         $ref: '#/components/responses/Unauthorized'
- *       "403":
- *         $ref: '#/components/responses/Forbidden'
- *       "404":
- *         $ref: '#/components/responses/NotFound'
- *
- *   patch:
- *     summary: Update a inventoryTransaction
- *     description: Update inventoryTransactions.
- *     tags: [InventoryTransactions]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: InventoryTransaction id
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               user:
- *                 type: string
- *               type:
- *                 type: string
- *                 description: inventoryTransaction type (car, var, bike, etc...)
- *               manufacturer:
- *                 type: string
- *               model:
- *                 type: string
- *                 description: inventoryTransaction model (308, Demio, Aqua, etc...)
- *               numberplate:
- *                  type: string
- *               makeyear:
- *                  type: string
- *               registeryear:
- *                  type: string
- *               capacity:
- *                  type: string
- *               fuel:
- *                  type: string
- *               color:
- *                  type: string
- *             example:
- *               user: (User ID)
- *               type: car
- *               manufacturer: Mazda
- *               model: Demio
- *               numberplate: KM-1898
- *               makeyear: 2007
- *               registeryear: 2011
- *               capacity: 5
- *               fuel: Petrol
- *               color: Red
- *     responses:
- *       "200":
- *         description: OK
- *         content:
- *           application/json:
- *             schema:
- *                $ref: '#/components/schemas/InventoryTransaction'
- *       "400":
- *         $ref: '#/components/responses/Duplicate'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
@@ -286,21 +274,237 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   delete:
- *     summary: Delete a inventoryTransaction
- *     description: Delete inventoryTransactions.
+ *     summary: Xóa giao dịch tồn kho
+ *     description: Xóa theo ID
  *     tags: [InventoryTransactions]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: inventoryTransactionId
  *         required: true
  *         schema:
  *           type: string
- *         description: InventoryTransaction id
+ *         description: ID giao dịch tồn kho
+ *     responses:
+ *       "204":
+ *         description: No content
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ *       "404":
+ *         $ref: '#/components/responses/NotFound'
+ */
+
+/**
+ * @swagger
+ * /inventory/import:
+ *   post:
+ *     summary: Nhập kho theo danh sách sản phẩm
+ *     description: Tự tạo sản phẩm nếu chưa tồn tại, tạo lô và phiếu nhập.
+ *     tags: [InventoryTransactions]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - warehouse
+ *               - supplier
+ *               - items
+ *             properties:
+ *               warehouse:
+ *                 type: string
+ *               supplier:
+ *                 type: string
+ *               reason:
+ *                 type: string
+ *               deliveryPerson:
+ *                 type: string
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - productCode
+ *                     - productName
+ *                     - unit
+ *                     - quantity
+ *                     - price
+ *                     - expiryDate
+ *                     - category
+ *                   properties:
+ *                     productCode:
+ *                       type: string
+ *                     productName:
+ *                       type: string
+ *                     unit:
+ *                       type: string
+ *                     packaging:
+ *                       type: string
+ *                     quantity:
+ *                       type: number
+ *                     price:
+ *                       type: number
+ *                     expiryDate:
+ *                       type: string
+ *                       format: date
+ *                     category:
+ *                       type: string
+ *             example:
+ *               warehouse: 65a1b2c3d4e5f6a7b8c9d013
+ *               supplier: 65a1b2c3d4e5f6a7b8c9d016
+ *               reason: PURCHASE
+ *               deliveryPerson: Nguyễn Văn A
+ *               items:
+ *                 - productCode: PRD-001
+ *                   productName: Nồi cơm điện
+ *                   unit: cái
+ *                   packaging: Hộp
+ *                   quantity: 10
+ *                   price: 150000
+ *                   expiryDate: 2026-12-01
+ *                   category: 65a1b2c3d4e5f6a7b8c9d014
+ *     responses:
+ *       "201":
+ *         description: Tạo phiếu nhập thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/InventoryTransaction'
+ *       "400":
+ *         $ref: '#/components/schemas/Error'
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ *
+ *   get:
+ *     summary: Danh sách phiếu nhập
+ *     description: Lấy danh sách giao dịch tồn kho (có thể lọc theo loại, kho, nhà cung cấp...)
+ *     tags: [InventoryTransactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [IMPORT, EXPORT]
+ *         description: Loại giao dịch
+ *       - in: query
+ *         name: warehouse
+ *         schema:
+ *           type: string
+ *         description: ID kho
+ *       - in: query
+ *         name: supplier
+ *         schema:
+ *           type: string
+ *         description: ID nhà cung cấp
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Trang
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Số bản ghi
  *     responses:
  *       "200":
- *         description: No content
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/InventoryTransaction'
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 totalResults:
+ *                   type: integer
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ */
+
+/**
+ * @swagger
+ * /inventory/import/{inventoryTransactionId}:
+ *   put:
+ *     summary: Cập nhật phiếu nhập
+ *     description: Cập nhật thông tin giao dịch nhập kho theo ID.
+ *     tags: [InventoryTransactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: inventoryTransactionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID giao dịch tồn kho
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 enum: [IMPORT, EXPORT]
+ *               reason:
+ *                 type: string
+ *               warehouse:
+ *                 type: string
+ *               supplier:
+ *                 type: string
+ *               sale:
+ *                 type: string
+ *               createdBy:
+ *                 type: string
+ *               transactionDate:
+ *                 type: string
+ *                 format: date-time
+ *               deliveryPerson:
+ *                 type: string
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     product:
+ *                       type: string
+ *                     batch:
+ *                       type: string
+ *                     quantity:
+ *                       type: number
+ *                     price:
+ *                       type: number
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/InventoryTransaction'
+ *       "400":
+ *         $ref: '#/components/schemas/Error'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":

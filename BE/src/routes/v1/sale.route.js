@@ -23,15 +23,15 @@ module.exports = router;
  * @swagger
  * tags:
  *   name: Sales
- *   description: Sale management and retrieval
+ *   description: Quản lý và tra cứu đơn bán hàng
  */
 
 /**
  * @swagger
- * /sales:
+ * /sale:
  *   post:
- *     summary: Create a sale
- *     description: Can create sales.
+ *     summary: Tạo đơn bán hàng
+ *     description: Tạo mới đơn bán hàng.
  *     tags: [Sales]
  *     security:
  *       - bearerAuth: []
@@ -42,84 +42,108 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - user
- *               - type
- *               - manufacturer
- *               - model
+ *               - branch
+ *               - warehouse
+ *               - items
  *             properties:
- *               user:
+ *               branch:
  *                 type: string
- *               type:
+ *                 description: ID chi nhánh
+ *               warehouse:
  *                 type: string
- *                 description: sale type (car, var, bike, etc...)
- *               manufacturer:
- *                 type: string
- *               model:
- *                 type: string
- *                 description: sale model (308, Demio, Aqua, etc...)
- *               numberplate:
- *                  type: string
- *               makeyear:
- *                  type: string
- *               registeryear:
- *                  type: string
- *               capacity:
- *                  type: string
- *               fuel:
- *                  type: string
- *               color:
- *                  type: string
+ *                 description: ID kho
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - product
+ *                     - quantity
+ *                     - price
+ *                   properties:
+ *                     product:
+ *                       type: string
+ *                     quantity:
+ *                       type: number
+ *                     price:
+ *                       type: number
  *             example:
- *               user: (User ID)
- *               type: car
- *               manufacturer: Mazda
- *               model: Demio
- *               numberplate: KM-1898
- *               makeyear: 2007
- *               registeryear: 2011
- *               capacity: 5
- *               fuel: Petrol
- *               color: Red
+ *               branch: 65a1b2c3d4e5f6a7b8c9d012
+ *               warehouse: 65a1b2c3d4e5f6a7b8c9d013
+ *               items:
+ *                 - product: 65a1b2c3d4e5f6a7b8c9d015
+ *                   quantity: 2
+ *                   price: 150000
  *     responses:
  *       "201":
- *         description: Created
+ *         description: Tạo thành công
  *         content:
  *           application/json:
  *             schema:
  *                $ref: '#/components/schemas/Sale'
  *       "400":
- *         $ref: '#/components/responses/Duplicate'
+ *         $ref: '#/components/schemas/Error'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
  *         $ref: '#/components/responses/Forbidden'
  *
  *   get:
- *     summary: Get all sales
- *     description: Retrieve all sales.
+ *     summary: Lấy danh sách đơn bán hàng
+ *     description: Hỗ trợ lọc và phân trang.
  *     tags: [Sales]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: user
+ *         name: code
  *         schema:
  *           type: string
- *         description: User id
+ *         description: Mã đơn bán
+ *       - in: query
+ *         name: branch
+ *         schema:
+ *           type: string
+ *         description: ID chi nhánh
+ *       - in: query
+ *         name: warehouse
+ *         schema:
+ *           type: string
+ *         description: ID kho
+ *       - in: query
+ *         name: soldBy
+ *         schema:
+ *           type: string
+ *         description: ID người bán
+ *       - in: query
+ *         name: saleDate
+ *         schema:
+ *           type: string
+ *         description: Ngày bán
+ *       - in: query
+ *         name: totalAmount
+ *         schema:
+ *           type: number
+ *         description: Tổng tiền
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *         description: Sắp xếp dạng field:asc|desc
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           minimum: 1
  *         default: 10
- *         description: Maximum number of sales
+ *         description: Số bản ghi tối đa
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           minimum: 1
  *           default: 1
- *         description: Page number
+ *         description: Trang hiện tại
  *     responses:
  *       "200":
  *         description: OK
@@ -152,20 +176,20 @@ module.exports = router;
 
 /**
  * @swagger
- * /sales/{id}:
+ * /sale/{saleId}:
  *   get:
- *     summary: Get a sale
- *     description: fetch Sales by id
+ *     summary: Lấy chi tiết đơn bán hàng
+ *     description: Theo ID đơn bán
  *     tags: [Sales]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: saleId
  *         required: true
  *         schema:
  *           type: string
- *         description: Sale id
+ *         description: ID đơn bán hàng
  *     responses:
  *       "200":
  *         description: OK
@@ -181,18 +205,18 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   patch:
- *     summary: Update a sale
- *     description: Update sales.
+ *     summary: Cập nhật đơn bán hàng
+ *     description: Cập nhật thông tin đơn bán theo ID.
  *     tags: [Sales]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: saleId
  *         required: true
  *         schema:
  *           type: string
- *         description: Sale id
+ *         description: ID đơn bán hàng
  *     requestBody:
  *       required: true
  *       content:
@@ -200,39 +224,26 @@ module.exports = router;
  *           schema:
  *             type: object
  *             properties:
- *               user:
+ *               branch:
  *                 type: string
- *               type:
+ *               warehouse:
  *                 type: string
- *                 description: sale type (car, var, bike, etc...)
- *               manufacturer:
- *                 type: string
- *               model:
- *                 type: string
- *                 description: sale model (308, Demio, Aqua, etc...)
- *               numberplate:
- *                  type: string
- *               makeyear:
- *                  type: string
- *               registeryear:
- *                  type: string
- *               capacity:
- *                  type: string
- *               fuel:
- *                  type: string
- *               color:
- *                  type: string
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     product:
+ *                       type: string
+ *                     quantity:
+ *                       type: number
+ *                     price:
+ *                       type: number
  *             example:
- *               user: (User ID)
- *               type: car
- *               manufacturer: Mazda
- *               model: Demio
- *               numberplate: KM-1898
- *               makeyear: 2007
- *               registeryear: 2011
- *               capacity: 5
- *               fuel: Petrol
- *               color: Red
+ *               items:
+ *                 - product: 65a1b2c3d4e5f6a7b8c9d015
+ *                   quantity: 3
+ *                   price: 150000
  *     responses:
  *       "200":
  *         description: OK
@@ -241,7 +252,7 @@ module.exports = router;
  *             schema:
  *                $ref: '#/components/schemas/Sale'
  *       "400":
- *         $ref: '#/components/responses/Duplicate'
+ *         $ref: '#/components/schemas/Error'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
@@ -250,20 +261,20 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   delete:
- *     summary: Delete a sale
- *     description: Delete sales.
+ *     summary: Xóa đơn bán hàng
+ *     description: Xóa theo ID đơn bán.
  *     tags: [Sales]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: saleId
  *         required: true
  *         schema:
  *           type: string
- *         description: Sale id
+ *         description: ID đơn bán hàng
  *     responses:
- *       "200":
+ *       "204":
  *         description: No content
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'

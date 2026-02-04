@@ -23,15 +23,15 @@ module.exports = router;
  * @swagger
  * tags:
  *   name: Units
- *   description: Unit management and retrieval
+ *   description: Quản lý và tra cứu đơn vị tính
  */
 
 /**
  * @swagger
- * /units:
+ * /unit:
  *   post:
- *     summary: Create a unit
- *     description: Can create units.
+ *     summary: Tạo đơn vị tính
+ *     description: Tạo mới đơn vị tính.
  *     tags: [Units]
  *     security:
  *       - bearerAuth: []
@@ -42,84 +42,66 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - user
- *               - type
- *               - manufacturer
- *               - model
+ *               - code
+ *               - name
  *             properties:
- *               user:
+ *               code:
  *                 type: string
- *               type:
+ *               name:
  *                 type: string
- *                 description: unit type (car, var, bike, etc...)
- *               manufacturer:
- *                 type: string
- *               model:
- *                 type: string
- *                 description: unit model (308, Demio, Aqua, etc...)
- *               numberplate:
- *                  type: string
- *               makeyear:
- *                  type: string
- *               registeryear:
- *                  type: string
- *               capacity:
- *                  type: string
- *               fuel:
- *                  type: string
- *               color:
- *                  type: string
  *             example:
- *               user: (User ID)
- *               type: car
- *               manufacturer: Mazda
- *               model: Demio
- *               numberplate: KM-1898
- *               makeyear: 2007
- *               registeryear: 2011
- *               capacity: 5
- *               fuel: Petrol
- *               color: Red
+ *               code: UNIT-001
+ *               name: Cái
  *     responses:
  *       "201":
- *         description: Created
+ *         description: Tạo thành công
  *         content:
  *           application/json:
  *             schema:
  *                $ref: '#/components/schemas/Unit'
  *       "400":
- *         $ref: '#/components/responses/Duplicate'
+ *         $ref: '#/components/schemas/Error'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
  *         $ref: '#/components/responses/Forbidden'
  *
  *   get:
- *     summary: Get all units
- *     description: Retrieve all units.
+ *     summary: Lấy danh sách đơn vị tính
+ *     description: Hỗ trợ lọc và phân trang.
  *     tags: [Units]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: user
+ *         name: code
  *         schema:
  *           type: string
- *         description: User id
+ *         description: Mã đơn vị
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Tên đơn vị
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *         description: Sắp xếp dạng field:asc|desc
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           minimum: 1
  *         default: 10
- *         description: Maximum number of units
+ *         description: Số bản ghi tối đa
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           minimum: 1
  *           default: 1
- *         description: Page number
+ *         description: Trang hiện tại
  *     responses:
  *       "200":
  *         description: OK
@@ -152,20 +134,20 @@ module.exports = router;
 
 /**
  * @swagger
- * /units/{id}:
+ * /unit/{unitId}:
  *   get:
- *     summary: Get a unit
- *     description: fetch Units by id
+ *     summary: Lấy chi tiết đơn vị tính
+ *     description: Theo ID đơn vị
  *     tags: [Units]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: unitId
  *         required: true
  *         schema:
  *           type: string
- *         description: Unit id
+ *         description: ID đơn vị
  *     responses:
  *       "200":
  *         description: OK
@@ -181,18 +163,18 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   patch:
- *     summary: Update a unit
- *     description: Update units.
+ *     summary: Cập nhật đơn vị tính
+ *     description: Cập nhật thông tin đơn vị theo ID.
  *     tags: [Units]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: unitId
  *         required: true
  *         schema:
  *           type: string
- *         description: Unit id
+ *         description: ID đơn vị
  *     requestBody:
  *       required: true
  *       content:
@@ -200,39 +182,12 @@ module.exports = router;
  *           schema:
  *             type: object
  *             properties:
- *               user:
+ *               code:
  *                 type: string
- *               type:
+ *               name:
  *                 type: string
- *                 description: unit type (car, var, bike, etc...)
- *               manufacturer:
- *                 type: string
- *               model:
- *                 type: string
- *                 description: unit model (308, Demio, Aqua, etc...)
- *               numberplate:
- *                  type: string
- *               makeyear:
- *                  type: string
- *               registeryear:
- *                  type: string
- *               capacity:
- *                  type: string
- *               fuel:
- *                  type: string
- *               color:
- *                  type: string
  *             example:
- *               user: (User ID)
- *               type: car
- *               manufacturer: Mazda
- *               model: Demio
- *               numberplate: KM-1898
- *               makeyear: 2007
- *               registeryear: 2011
- *               capacity: 5
- *               fuel: Petrol
- *               color: Red
+ *               name: Cái (cập nhật)
  *     responses:
  *       "200":
  *         description: OK
@@ -241,7 +196,7 @@ module.exports = router;
  *             schema:
  *                $ref: '#/components/schemas/Unit'
  *       "400":
- *         $ref: '#/components/responses/Duplicate'
+ *         $ref: '#/components/schemas/Error'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
@@ -250,20 +205,20 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   delete:
- *     summary: Delete a unit
- *     description: Delete units.
+ *     summary: Xóa đơn vị tính
+ *     description: Xóa theo ID đơn vị.
  *     tags: [Units]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: unitId
  *         required: true
  *         schema:
  *           type: string
- *         description: Unit id
+ *         description: ID đơn vị
  *     responses:
- *       "200":
+ *       "204":
  *         description: No content
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'

@@ -31,15 +31,15 @@ module.exports = router;
  * @swagger
  * tags:
  *   name: Users
- *   description: User management and retrieval
+ *   description: Quản lý và tra cứu người dùng
  */
 
 /**
  * @swagger
  * /users:
  *   post:
- *     summary: Create a user
- *     description: Only admins can create other users.
+ *     summary: Tạo người dùng
+ *     description: Chỉ admin mới có quyền tạo người dùng.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -60,12 +60,12 @@ module.exports = router;
  *               email:
  *                 type: string
  *                 format: email
- *                 description: must be unique
+ *                 description: Email duy nhất
  *               password:
  *                 type: string
  *                 format: password
  *                 minLength: 8
- *                 description: At least one number and one letter
+ *                 description: Ít nhất 1 chữ cái và 1 chữ số
  *               role:
  *                  type: string
  *                  enum: [user, admin]
@@ -76,7 +76,7 @@ module.exports = router;
  *               role: user
  *     responses:
  *       "201":
- *         description: Created
+ *         description: Tạo thành công
  *         content:
  *           application/json:
  *             schema:
@@ -89,8 +89,8 @@ module.exports = router;
  *         $ref: '#/components/responses/Forbidden'
  *
  *   get:
- *     summary: Get all users
- *     description: Only admins can retrieve all users.
+ *     summary: Lấy danh sách người dùng
+ *     description: Chỉ admin mới có quyền xem danh sách người dùng.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -99,31 +99,31 @@ module.exports = router;
  *         name: name
  *         schema:
  *           type: string
- *         description: User name
+ *         description: Tên người dùng
  *       - in: query
  *         name: role
  *         schema:
  *           type: string
- *         description: User role
+ *         description: Vai trò người dùng
  *       - in: query
  *         name: sortBy
  *         schema:
  *           type: string
- *         description: sort by query in the form of field:desc/asc (ex. name:asc)
+ *         description: Sắp xếp dạng field:asc|desc (vd: name:asc)
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           minimum: 1
  *         default: 10
- *         description: Maximum number of users
+ *         description: Số bản ghi tối đa
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           minimum: 1
  *           default: 1
- *         description: Page number
+ *         description: Trang hiện tại
  *     responses:
  *       "200":
  *         description: OK
@@ -156,20 +156,20 @@ module.exports = router;
 
 /**
  * @swagger
- * /users/{id}:
+ * /users/{userId}:
  *   get:
- *     summary: Get a user
- *     description: Logged in users can fetch only their own user information. Only admins can fetch other users.
+ *     summary: Lấy thông tin người dùng
+ *     description: Người dùng chỉ xem được thông tin của mình; admin xem được người khác.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: ID người dùng
  *     responses:
  *       "200":
  *         description: OK
@@ -185,18 +185,18 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   patch:
- *     summary: Update a user
- *     description: Logged in users can only update their own information. Only admins can update other users.
+ *     summary: Cập nhật người dùng
+ *     description: Người dùng chỉ cập nhật thông tin của mình; admin cập nhật người khác.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: ID người dùng
  *     requestBody:
  *       required: true
  *       content:
@@ -209,12 +209,12 @@ module.exports = router;
  *               email:
  *                 type: string
  *                 format: email
- *                 description: must be unique
+ *                 description: Email duy nhất
  *               password:
  *                 type: string
  *                 format: password
  *                 minLength: 8
- *                 description: At least one number and one letter
+ *                 description: Ít nhất 1 chữ cái và 1 chữ số
  *             example:
  *               name: fake name
  *               email: admin@gmail.com
@@ -236,20 +236,20 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   delete:
- *     summary: Delete a user
- *     description: Logged in users can delete only themselves. Only admins can delete other users.
+ *     summary: Xóa người dùng
+ *     description: Người dùng chỉ xóa được chính mình; admin xóa được người khác.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: ID người dùng
  *     responses:
- *       "200":
+ *       "204":
  *         description: No content
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
@@ -260,20 +260,20 @@ module.exports = router;
  */
 /**
  * @swagger
- * /users/{id}/password:
- *   patch:
- *     summary: Update user password
- *     description: Users can update their own password. Admins can update any user's password.
+ * /users/{userId}/password:
+ *   put:
+ *     summary: Cập nhật mật khẩu người dùng
+ *     description: Người dùng đổi mật khẩu của mình; admin đổi mật khẩu cho người khác.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: ID người dùng
  *     requestBody:
  *       required: true
  *       content:
@@ -287,11 +287,11 @@ module.exports = router;
  *                 type: string
  *                 format: password
  *                 minLength: 8
- *                 description: At least one number and one letter
+ *                 description: Ít nhất 1 chữ cái và 1 chữ số
  *               currentPassword:
  *                 type: string
  *                 format: password
- *                 description: Required when the requester updates their own password
+ *                 description: Bắt buộc khi người dùng tự đổi mật khẩu
  *             example:
  *               password: admin123
  *               currentPassword: admin123

@@ -19,6 +19,238 @@ components:
         name: fake name
         role: user
 
+    Branch:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+      example:
+        id: 65a1b2c3d4e5f6a7b8c9d012
+        name: Chi nhánh Hà Nội
+        address: 123 Đường A, Hà Nội
+        phone: "0123456789"
+
+    Warehouse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        branch:
+          type: string
+        address:
+          type: string
+      example:
+        id: 65a1b2c3d4e5f6a7b8c9d013
+        name: Kho Trung Tâm
+        branch: 65a1b2c3d4e5f6a7b8c9d012
+        address: 456 Đường B, Hà Nội
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+      example:
+        id: 65a1b2c3d4e5f6a7b8c9d014
+        code: CAT-001
+        name: Đồ gia dụng
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        unit:
+          type: string
+        minStock:
+          type: number
+        package:
+          type: string
+      example:
+        id: 65a1b2c3d4e5f6a7b8c9d015
+        code: PRD-001
+        name: Nồi cơm điện
+        category: 65a1b2c3d4e5f6a7b8c9d014
+        unit: cái
+        minStock: 10
+        package: Hộp
+
+    Supplier:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+      example:
+        id: 65a1b2c3d4e5f6a7b8c9d016
+        name: Nhà cung cấp ABC
+        phone: "0987654321"
+        email: supplier@abc.com
+        address: 789 Đường C, Hà Nội
+
+    Unit:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+      example:
+        id: 65a1b2c3d4e5f6a7b8c9d017
+        code: UNIT-001
+        name: Cái
+
+    ProductBatch:
+      type: object
+      properties:
+        id:
+          type: string
+        product:
+          type: string
+        warehouse:
+          type: string
+        batchCode:
+          type: string
+        manufactureDate:
+          type: string
+          format: date
+        expiryDate:
+          type: string
+          format: date
+        quantity:
+          type: number
+        importPrice:
+          type: number
+      example:
+        id: 65a1b2c3d4e5f6a7b8c9d018
+        product: 65a1b2c3d4e5f6a7b8c9d015
+        warehouse: 65a1b2c3d4e5f6a7b8c9d013
+        batchCode: B20260101-ABC123
+        manufactureDate: 2025-12-01
+        expiryDate: 2026-12-01
+        quantity: 100
+        importPrice: 150000
+
+    InventoryTransaction:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [IMPORT, EXPORT]
+        reason:
+          type: string
+        warehouse:
+          type: string
+        supplier:
+          type: string
+        sale:
+          type: string
+        createdBy:
+          type: string
+        transactionDate:
+          type: string
+          format: date-time
+        deliveryPerson:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              product:
+                type: string
+              batch:
+                type: string
+              quantity:
+                type: number
+              price:
+                type: number
+      example:
+        id: 65a1b2c3d4e5f6a7b8c9d019
+        type: IMPORT
+        reason: PURCHASE
+        warehouse: 65a1b2c3d4e5f6a7b8c9d013
+        supplier: 65a1b2c3d4e5f6a7b8c9d016
+        createdBy: 5ebac534954b54139806c112
+        transactionDate: 2026-02-04T09:30:00.000Z
+        deliveryPerson: Nguyễn Văn A
+        items:
+          - product: 65a1b2c3d4e5f6a7b8c9d015
+            batch: 65a1b2c3d4e5f6a7b8c9d018
+            quantity: 10
+            price: 150000
+
+    Sale:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        branch:
+          type: string
+        warehouse:
+          type: string
+        soldBy:
+          type: string
+        saleDate:
+          type: string
+          format: date-time
+        totalAmount:
+          type: number
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              product:
+                type: string
+              quantity:
+                type: number
+              price:
+                type: number
+      example:
+        id: 65a1b2c3d4e5f6a7b8c9d020
+        code: SALE-1707031222333
+        branch: 65a1b2c3d4e5f6a7b8c9d012
+        warehouse: 65a1b2c3d4e5f6a7b8c9d013
+        soldBy: 5ebac534954b54139806c112
+        saleDate: 2026-02-04T10:30:00.000Z
+        totalAmount: 300000
+        items:
+          - product: 65a1b2c3d4e5f6a7b8c9d015
+            quantity: 2
+            price: 150000
+
     Token:
       type: object
       properties:
@@ -49,41 +281,50 @@ components:
 
   responses:
     DuplicateEmail:
-      description: Email already taken
+      description: Email đã được sử dụng
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
           example:
             code: 400
-            message: Email already taken
+            message: Email đã được sử dụng
+    BadRequest:
+      description: Dữ liệu không hợp lệ
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            message: Dữ liệu không hợp lệ
     Unauthorized:
-      description: Unauthorized
+      description: Chưa xác thực
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
           example:
             code: 401
-            message: Please authenticate
+            message: Vui lòng đăng nhập
     Forbidden:
-      description: Forbidden
+      description: Không có quyền
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
           example:
             code: 403
-            message: Forbidden
+            message: Bạn không có quyền truy cập
     NotFound:
-      description: Not found
+      description: Không tìm thấy
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
           example:
             code: 404
-            message: Not found
+            message: Không tìm thấy dữ liệu
 
   securitySchemes:
     bearerAuth:
