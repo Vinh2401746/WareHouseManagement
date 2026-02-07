@@ -37,6 +37,7 @@ export const UnitPage = memo(() => {
 
   useEffect(()=>{
     if(isError){
+      console.log(error)
       dispatchToast("error", error.message)
     }
   },[error, isError])
