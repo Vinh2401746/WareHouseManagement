@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QueryKeys } from "../../../constants/query-keys";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Button, Flex, Pagination, Popconfirm, Tag } from "antd";
@@ -19,13 +19,19 @@ export const ProductsPage = memo(() => {
   const [limit, setLimit] = useState(10);
   const formRef = useRef<ProductFormRef>(null);
 
-  const { data, refetch, isFetching } = useQuery({
+  const { data, refetch, isFetching, isError, error } = useQuery({
     queryKey: [QueryKeys.products.list, { page, limit }],
     queryFn: ({ queryKey }) => {
       const [, payload] = queryKey as [string, GetProductsRequestType];
       return getProductsApi(payload);
     },
   });
+
+    useEffect(()=>{
+    if(isError){
+      dispatchToast("error", error.message)
+    }
+  },[error, isError])
 
   const { mutate, isPending } = useMutation({
     mutationFn: (payload: { id: string }) =>

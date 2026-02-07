@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QueryKeys } from "../../../constants/query-keys";
 import { deleteUser, getUsers } from "../../../api/users/users";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -21,10 +21,17 @@ export const UserPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<UserFormRef>(null);
-  const { data, isFetching } = useQuery({
+  const { data, isFetching, isError, error } = useQuery({
     queryKey: [QueryKeys.users.users, page, limit],
     queryFn: () => getUsers({ page, limit }),
+    
   });
+
+  useEffect(()=>{
+    if(isError){
+      dispatchToast("error", error.message)
+    }
+  },[error, isError])
 
   const { mutate } = useMutation({
     mutationFn: (payload: { id: string }) => deleteUser({ id: payload.id }),

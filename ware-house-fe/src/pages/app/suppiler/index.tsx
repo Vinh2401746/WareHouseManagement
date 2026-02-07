@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QueryKeys } from "../../../constants/query-keys";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Button, Flex, Pagination, Popconfirm, Tag } from "antd";
@@ -17,13 +17,19 @@ export const SuppilerPage = memo(() => {
   const [limit, setLimit] = useState(10);
   const formRef = useRef<SupplierFormRef>(null);
 
-  const { data, refetch, isFetching } = useQuery({
+  const { data, refetch, isFetching, error,isError } = useQuery({
     queryKey: [QueryKeys.supplier.list, { page, limit }],
     queryFn: ({ queryKey }) => {
       const [, payload] = queryKey as [string, GetSuppliersRequestType];
       return getSuppliersApi(payload);
     },
   });
+
+    useEffect(()=>{
+    if(isError){
+      dispatchToast("error", error.message)
+    }
+  },[error, isError])
 
   const { mutate, isPending } = useMutation({
     mutationFn: (payload: { id: string }) =>

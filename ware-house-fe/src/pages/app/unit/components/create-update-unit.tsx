@@ -23,10 +23,10 @@ const initForm: UnitFormData = {
 };
 const UnitFormModal = forwardRef<UnitFormRef>((_, ref) => {
   const [open, setOpen] = useState(false);
-  const [category, setCategory] = useState<UnitFormData>(initForm);
+  const [unit, setUnit] = useState<UnitFormData>(initForm);
   const [form] = Form.useForm<UnitFormData>();
 
-  const isUpdate = useMemo(() => category.id, [category.id]);
+  const isUpdate = useMemo(() => unit.id, [unit.id]);
   const queryClient = useQueryClient();
   useImperativeHandle(ref, () => ({
     show: (data) => {
@@ -34,19 +34,19 @@ const UnitFormModal = forwardRef<UnitFormRef>((_, ref) => {
       
       setOpen(true)
       form.setFieldsValue(data ? data : initForm);
-      setCategory((data ? data : initForm) as UnitFormData);
+      setUnit((data ? data : initForm) as UnitFormData);
     },
     hide: () => {
       setOpen(false);
       form.resetFields();
-      setCategory(initForm as UnitFormData);
+      setUnit(initForm as UnitFormData);
     },
   }));
 
   const { mutate } = useMutation({
     mutationFn: (payload: UnitFormData) =>{
      return isUpdate
-        ? updateUnit({ ...payload, unitId: category.id })
+        ? updateUnit({ ...payload, unitId: unit.id })
         : createUnit(payload)},
     onSuccess: () => {
       dispatchToast(
@@ -55,7 +55,7 @@ const UnitFormModal = forwardRef<UnitFormRef>((_, ref) => {
       );
       setOpen(false);
       queryClient.invalidateQueries({
-        queryKey: [QueryKeys.category.list],
+        queryKey: [QueryKeys.unit.list],
       });
     },
     onError: (error: any) => {

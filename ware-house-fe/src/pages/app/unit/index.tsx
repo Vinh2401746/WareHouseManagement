@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QueryKeys } from "../../../constants/query-keys";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
@@ -26,7 +26,7 @@ export const UnitPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<UnitFormRef>(null);
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch, error, isError } = useQuery({
     queryKey: [QueryKeys.category.list, page, limit],
     queryFn: ({ queryKey }) => {
     const [, payload] = queryKey as [string, GetCategoriesRequestType];
@@ -34,6 +34,12 @@ export const UnitPage = memo(() => {
   },
     gcTime: 15 * 60 * 1000 // 15 phut cache
   });
+
+  useEffect(()=>{
+    if(isError){
+      dispatchToast("error", error.message)
+    }
+  },[error, isError])
 
   const { mutate, isPending } = useMutation({
     mutationFn: (payload: DeleteUnitType) => deleteUnit(payload),
