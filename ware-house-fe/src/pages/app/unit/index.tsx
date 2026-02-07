@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QueryKeys } from "../../../constants/query-keys";
-import { deleteUser, getUsers } from "../../../api/users/users";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Breadcrumb,
@@ -11,20 +10,29 @@ import {
   Tag,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import type { UserFormRef } from "./components/creat-update-user";
-import UserFormModal from "./components/creat-update-user";
+import type { UnitFormRef } from "./components/create-update-unit";
+import UnitFormModal from "./components/create-update-unit";
 import dispatchToast from "../../../constants/toast";
 import { UserOutlined } from "@ant-design/icons";
 import './index.css'
 import { TableCommon } from "../../../components/table/table";
-export const UserPage = memo(() => {
+import { AppRoutes } from "../../../router/routes";
+
+
+import type { GetCategoriesRequestType } from "../../../types/category";
+import { getUnitApi, deleteUnit } from "../../../api/unit";
+import type { DeleteUnitType } from "../../../types/unit";
+export const UnitPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const formRef = useRef<UserFormRef>(null);
-  const { data, isFetching, isError, error } = useQuery({
-    queryKey: [QueryKeys.users.users, page, limit],
-    queryFn: () => getUsers({ page, limit }),
-    
+  const formRef = useRef<UnitFormRef>(null);
+  const { data, isLoading, refetch, error, isError } = useQuery({
+    queryKey: [QueryKeys.category.list, page, limit],
+    queryFn: ({ queryKey }) => {
+    const [, payload] = queryKey as [string, GetCategoriesRequestType];
+    return getUnitApi(payload);
+  },
+    gcTime: 15 * 60 * 1000 // 15 phut cache
   });
 
   useEffect(()=>{
@@ -33,31 +41,28 @@ export const UserPage = memo(() => {
     }
   },[error, isError])
 
-  const { mutate } = useMutation({
-    mutationFn: (payload: { id: string }) => deleteUser({ id: payload.id }),
+  const { mutate, isPending } = useMutation({
+    mutationFn: (payload: DeleteUnitType) => deleteUnit(payload),
     onSuccess: () => {
       console.log("data");
-      dispatchToast("success", "Xoá người dùng thành công!");
+      dispatchToast("success", "Xoá đơn vị thành công!");
+      refetch()
     },
     onError: () => {
-      dispatchToast("error", "Xoá người dùng thất bại!");
+      dispatchToast("error", "Xoá đơn vị thất bại!");
     },
   });
 
-  const users = useMemo(() => data?.results ?? [], [data?.results]);
+  const categories = useMemo(() => data?.results ?? [], [data?.results]);
 
   const onAction = useCallback(
     (type: "delete" | "update" | "reset-pass", record: any) => {
       switch (type) {
         case "delete":
-          mutate({ id: record.id });
+          mutate({ unitId: record.id  } as DeleteUnitType);
           break;
         case "update":
           formRef.current?.show(record);
-          break;
-        case "reset-pass":
-          dispatchToast("warning", "Tính năng đang phát triển");
-          // formRef.current?.show(record);
           break;
         default:
           break;
@@ -73,24 +78,18 @@ export const UserPage = memo(() => {
       key: "id",
       render: (_, __, index) => index + 1,
       align: "center",
-      width: 100,
+      width: 80,
     },
     {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
+      title: "Mã đơn vị",
+      dataIndex: "code",
+      key: "code",
       align: "center",
     },
     {
-      title: "Tên",
+      title: "Tên Đơn Vị",
       dataIndex: "name",
       key: "name",
-      align: "center",
-    },
-    {
-      title: "Quyền",
-      dataIndex: "role",
-      key: "role",
       align: "center",
     },
     {
@@ -114,17 +113,7 @@ export const UserPage = memo(() => {
               Cập nhật
             </Tag>
             <Popconfirm
-              title="Xác nhận đặt lại mật khẩu user này?"
-              cancelText="Huỷ"
-              okText="Xác nhận"
-              onConfirm={() => onAction("reset-pass", record)}
-            >
-              <Tag color={"yellow"} variant={"outlined"}>
-                Đặt lại mật khẩu
-              </Tag>
-            </Popconfirm>
-            <Popconfirm
-              title="Xác nhận xoá user này?"
+              title="Xác nhận xoá đơn vị này?"
               cancelText="Huỷ"
               okText="Xác nhận"
               onConfirm={() => onAction("delete", record)}
@@ -140,15 +129,15 @@ export const UserPage = memo(() => {
   ],[onAction]);
 
   return (
-    <div style={{ rowGap: 12,  display: "flex",flexDirection:'column'}}>
+    <div style={{ rowGap: 24,  display: "flex",flexDirection:'column'}}>
       <Breadcrumb
         items={[
           {
-            href: "/users",
+            href: AppRoutes.category,
             title: (
               <>
                 <UserOutlined />
-                <span>Người dùng</span>
+                <span>Đơn vị</span>
               </>
             ),
           },
@@ -156,16 +145,15 @@ export const UserPage = memo(() => {
       />
       <Flex justify="end">
         <Button type="primary" onClick={() => formRef.current?.show()}>
-          Thêm Người Dùng
+          Thêm đơn vị
         </Button>
       </Flex>
       <TableCommon
         size="middle"
-        dataSource={users}
+        dataSource={categories}
         columns={columns}
         pagination={false}
-        loading={isFetching}
-        
+        loading={isLoading || isPending}
         rowKey={"id"}
         onRow={(record) => {
           return {
@@ -182,13 +170,12 @@ export const UserPage = memo(() => {
             console.log("current", current, size);
             setLimit(size);
           }}
-          pageSize={limit}
           // pageSize={page}
           total={data?.totalResults || 0}
           onChange={(page) => setPage(page)}
         />
       </Flex>
-      <UserFormModal ref={formRef} />
+      <UnitFormModal ref={formRef} />
     </div>
   );
 });

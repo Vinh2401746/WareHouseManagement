@@ -11,6 +11,7 @@ import { SettingPasswordPage } from "../pages/auth/setting-password";
 import { ProductsPage } from "../pages/app/products";
 import { CategoryPage } from "../pages/app/category";
 import { SuppilerPage } from "../pages/app/suppiler";
+import { UnitPage } from "../pages/app/unit";
 
 export const router = createBrowserRouter(
   [
@@ -84,6 +85,11 @@ export const router = createBrowserRouter(
           id: AppRoutes.sales_invoice,
           element: <DevelopingPage />,
         },
+        {
+          path: AppRoutes.unit.list,
+          id: AppRoutes.unit.list,
+          element : <UnitPage />
+        }
       ],
       errorElement: <NotFoundPage />,
     },
