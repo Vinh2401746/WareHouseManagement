@@ -10,5 +10,8 @@ export const QueryKeys = {
   },
   supplier:{
     list: 'supplier'
+  },
+  unit: {
+    list: 'list'
   }
 };
