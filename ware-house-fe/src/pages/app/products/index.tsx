@@ -97,8 +97,7 @@ export const ProductsPage = memo(() => {
         dataIndex: "unit",
         key: "unit",
         align: "center",
-        render: (value) =>
-          UNITS.find((item) => item.value == value)?.label || "",
+        render: (value:object) => value?.name || ''
       },
       {
         title: "Tồn kho tối thiểu",

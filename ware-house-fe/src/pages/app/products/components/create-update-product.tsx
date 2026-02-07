@@ -13,7 +13,7 @@ export type ProductFormData = {
   name: string;
   category: string;
   unit: string;
-  minStock: number;
+  minStock: number | null;
   id: string;
 };
 
@@ -27,7 +27,7 @@ const initForm: ProductFormData = {
   name: "",
   category: "",
   unit: "",
-  minStock: 0,
+  minStock: null,
   id: "",
 };
 
@@ -83,8 +83,11 @@ const ProductFormModal = forwardRef<ProductFormRef,ProductFormModalProps>(({onSu
 
   useImperativeHandle(ref, () => ({
     show: (data) => {
+      console.log("data", data)
       setOpen(true);
-      form.setFieldsValue(data ? {...data,
+      form.setFieldsValue(data ? {
+        ...data,
+        unit:data?.unit?.id || '',
         category:data?.category?.id || ''
       } : initForm);
       setproduct((data ? data : initForm) as ProductFormData);
@@ -185,7 +188,7 @@ const ProductFormModal = forwardRef<ProductFormRef,ProductFormModalProps>(({onSu
           name="unit"
           rules={[{ required: true, message: "Vui lòng nhập đơn vị" }]}
         >
-          <Select showSearch={{ optionFilterProp: 'label' }} options={units || []} />
+          <Select showSearch={{ optionFilterProp: 'label' }}  options={units || []} />
         </Form.Item>
         <Form.Item
           label="Tồn kho tối thiểu"
@@ -211,7 +214,7 @@ const ProductFormModal = forwardRef<ProductFormRef,ProductFormModalProps>(({onSu
             }
           ]}
         >
-          <Input />
+          <Input defaultValue={''} />
         </Form.Item>
       </Form>
     </Modal>
