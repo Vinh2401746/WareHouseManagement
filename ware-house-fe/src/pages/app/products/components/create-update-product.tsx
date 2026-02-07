@@ -1,11 +1,12 @@
 import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { Modal, Form, Input, Select } from "antd";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { QueryKeys } from "../../../../constants/query-keys";
 import { getCategorysApi } from "../../../../api/category";
 import { createProductApi, updateProductsApi } from "../../../../api/products";
 import dispatchToast from "../../../../constants/toast";
 import { ONLY_NUMBER } from "../../../../utils/regex";
+import { getUnitsApi } from "../../../../api/unit";
 
 export type ProductFormData = {
   code: string;
@@ -40,20 +41,42 @@ const ProductFormModal = forwardRef<ProductFormRef,ProductFormModalProps>(({onSu
   const [product, setproduct] = useState<ProductFormData>(initForm);
   const [form] = Form.useForm<ProductFormData>();
 
-  const { data } = useQuery({
-    queryKey: [QueryKeys.category.list],
-    queryFn: () => {
-      return getCategorysApi({ page: 0, limit: 1000000000 });
-    },
+  // const { data } = useQuery({
+  //   queryKey: [QueryKeys.category.list],
+  //   queryFn: () => {
+  //     return getCategorysApi({ page: 0, limit: 1000000000 });
+  //   },
+  // });
+
+  const multiData = useQueries({
+    queries: [
+      {
+        queryKey: [QueryKeys.category.list],
+        queryFn: () => getCategorysApi({ page: 1, limit: 1000000000 })
+      },
+      {
+        queryKey: [QueryKeys.unit.list],
+        queryFn: () => getUnitsApi({page:1, limit:1000000})
+      },
+    ],
   });
 
   const category = useMemo(
     () =>
-      data?.results?.map((item:any) => ({
+      multiData[0]?.data?.results?.map((item:any) => ({
         value: item.id,
         label: item.name,
-      })),
-    [data?.results],
+      })) || [],
+    [multiData],
+  );
+
+  const units = useMemo(
+    () =>
+      multiData[1]?.data?.results?.map((item:any) => ({
+        value: item.id,
+        label: item.name,
+      })) || [],
+    [multiData],
   );
 
   const isUpdate = useMemo(() => product.id, [product.id]);
@@ -155,15 +178,14 @@ const ProductFormModal = forwardRef<ProductFormRef,ProductFormModalProps>(({onSu
             { required: true, message: "Vui lòng chọn danh mục sản phẩm" },
           ]}
         >
-          <Select options={category || []} />
+          <Select  showSearch={{ optionFilterProp: 'label' }} options={category || []} />
         </Form.Item>
         <Form.Item
           label="Đơn vị"
           name="unit"
           rules={[{ required: true, message: "Vui lòng nhập đơn vị" }]}
         >
-          <Input />
-          {/* <Select options={UNITS} /> */}
+          <Select showSearch={{ optionFilterProp: 'label' }} options={units || []} />
         </Form.Item>
         <Form.Item
           label="Tồn kho tối thiểu"

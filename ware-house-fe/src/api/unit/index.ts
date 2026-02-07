@@ -5,7 +5,7 @@ import type { CommonListResponse } from "../../types/common";
 import { keyQueryFilterString } from "../../utils/helper";
 import AxiosClient from "../axiosClient";
 
-export const getUnitApi = async (payload: GetUnitRequestType):Promise<CommonListResponse | any>  => {
+export const getUnitsApi = async (payload: GetUnitRequestType):Promise<CommonListResponse | any>  => {
   const queryString = keyQueryFilterString(payload);
   return AxiosClient.get(`unit?${queryString}`);
 };

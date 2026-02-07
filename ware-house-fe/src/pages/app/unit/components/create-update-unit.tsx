@@ -1,7 +1,6 @@
 import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { Modal, Form, Input } from "antd";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { QueryKeys } from "../../../../constants/query-keys";
+import { useMutation } from "@tanstack/react-query";
 import { createUnit, updateUnit } from "../../../../api/unit";
 import dispatchToast from "../../../../constants/toast";
 
@@ -14,6 +13,7 @@ export type UnitFormData = {
 export type UnitFormRef = {
   show: (data?: Partial<UnitFormData>) => void;
   hide: () => void;
+  onSuccessUnit?: () => void;
 };
 
 const initForm: UnitFormData = {
@@ -21,13 +21,16 @@ const initForm: UnitFormData = {
   name: "",
   id: "",
 };
-const UnitFormModal = forwardRef<UnitFormRef>((_, ref) => {
+
+type UnitFormModalProps = {
+  onSuccessModal:()=> void,
+}
+const UnitFormModal = forwardRef<UnitFormRef,UnitFormModalProps>(({onSuccessModal}, ref) => {
   const [open, setOpen] = useState(false);
   const [unit, setUnit] = useState<UnitFormData>(initForm);
   const [form] = Form.useForm<UnitFormData>();
 
   const isUpdate = useMemo(() => unit.id, [unit.id]);
-  const queryClient = useQueryClient();
   useImperativeHandle(ref, () => ({
     show: (data) => {
       console.log("data", data);
@@ -54,9 +57,7 @@ const UnitFormModal = forwardRef<UnitFormRef>((_, ref) => {
         `${isUpdate ? "Cập nhật" : "Tạo"} đơn vị thành công`,
       );
       setOpen(false);
-      queryClient.invalidateQueries({
-        queryKey: [QueryKeys.unit.list],
-      });
+      onSuccessModal()
     },
     onError: (error: any) => {
       console.log("error", error);
