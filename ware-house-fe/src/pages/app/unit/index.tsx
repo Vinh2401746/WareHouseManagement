@@ -27,7 +27,7 @@ export const UnitPage = memo(() => {
   const [limit, setLimit] = useState(10);
   const formRef = useRef<UnitFormRef>(null);
   const { data, isLoading, refetch, error, isError } = useQuery({
-    queryKey: [QueryKeys.category.list, page, limit],
+    queryKey: [QueryKeys.category.list, { page, limit }],
     queryFn: ({ queryKey }) => {
     const [, payload] = queryKey as [string, GetCategoriesRequestType];
     return getUnitApi(payload);
@@ -53,7 +53,7 @@ export const UnitPage = memo(() => {
     },
   });
 
-  const categories = useMemo(() => data?.results ?? [], [data?.results]);
+  const units = useMemo(() => data?.results ?? [], [data?.results]);
 
   const onAction = useCallback(
     (type: "delete" | "update" | "reset-pass", record: any) => {
@@ -150,7 +150,7 @@ export const UnitPage = memo(() => {
       </Flex>
       <TableCommon
         size="middle"
-        dataSource={categories}
+        dataSource={units}
         columns={columns}
         pagination={false}
         loading={isLoading || isPending}
@@ -175,7 +175,9 @@ export const UnitPage = memo(() => {
           onChange={(page) => setPage(page)}
         />
       </Flex>
-      <UnitFormModal ref={formRef} />
+      <UnitFormModal onSuccessModal={() =>{ 
+          alert("onScucess")
+        ;refetch()}} ref={formRef} />
     </div>
   );
 });

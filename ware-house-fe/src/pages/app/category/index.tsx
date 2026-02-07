@@ -42,7 +42,6 @@ export const CategoryPage = memo(() => {
   const { mutate, isPending } = useMutation({
     mutationFn: (payload: { id: string }) => deleteCategory({ id: payload.id }),
     onSuccess: () => {
-      console.log("data");
       dispatchToast("success", "Xoá danh mục thành công!");
       refetch()
     },
