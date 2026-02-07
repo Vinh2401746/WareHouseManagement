@@ -20,9 +20,9 @@ const productSchema = mongoose.Schema(
       required: true,
     },
     unit: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Unit',
       required: true,
-      trim: true,
     },
     minStock: {
       type: Number,
