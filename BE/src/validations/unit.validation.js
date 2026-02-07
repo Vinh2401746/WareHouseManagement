@@ -40,6 +40,19 @@ const getUnits = {
         'string.base': 'Tên đơn vị phải là chuỗi',
         'string.empty': 'Tên đơn vị không được để trống',
       }),
+      limit: Joi.number().integer().allow(null, '').min(1).messages({
+        'number.base': 'limit phải là số',
+        'number.integer': 'limit phải là số nguyên',
+        'number.min': 'limit phải lớn hơn hoặc bằng 1',
+      }),
+      page: Joi.number().integer().allow(null, '').min(1).messages({
+        'number.base': 'page phải là số',
+        'number.integer': 'page phải là số nguyên',
+        'number.min': 'page phải lớn hơn hoặc bằng 1',
+      }),
+      sortBy: Joi.string().allow(null, '').trim().messages({
+        'string.base': 'sortBy phải là chuỗi',
+      }),
     })
     .messages({
       'object.base': 'Tham số truy vấn phải là một đối tượng',
