@@ -1,5 +1,5 @@
-import { memo, useCallback, useEffect, useState } from "react";
-import { useAppDispatch } from "../../store/hooks";
+import { memo, useCallback, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { loginRequest } from "../../store/toolkit/auth";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Flex, Form, Input, Typography } from "antd";
@@ -19,8 +19,9 @@ const { Title } = Typography;
 export const LoginPage = memo(() => {
   const [form] = useForm<FieldType>();
   const dispatch = useAppDispatch();
+  const loading = useAppSelector((state)=>state.auth.loading)
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false)
+
   useEffect(() => {
     const un_store = localStorage.getItem(LOCAL_KEYS.USER_NAME);
     const pw_store = localStorage.getItem(LOCAL_KEYS.PASSWORD);
@@ -40,14 +41,13 @@ export const LoginPage = memo(() => {
 
   const onFinish = useCallback(
     async (values: FieldType) => {
-      setLoading(true)
-      dispatch(
-        loginRequest({
-          email: values.email,
-          password: values.password,
-        }),
-      );
-      setLoading(false)
+        dispatch(
+          loginRequest({
+            email: values.email,
+            password: values.password
+          }),
+        );
+
       if (values.remember) {
         localStorage.setItem(LOCAL_KEYS.USER_NAME, values.email);
         localStorage.setItem(LOCAL_KEYS.PASSWORD, values.password);
@@ -116,8 +116,10 @@ export const LoginPage = memo(() => {
           </Flex>
 
           <Form.Item label={null}>
+
             <Button
-            disabled={loading}
+              // disabled={loading}
+              loading={loading}
               type="primary"
               htmlType="submit"
               style={{ width: "100%", height: 48 }}
