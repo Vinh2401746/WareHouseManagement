@@ -56,9 +56,8 @@ const UnitFormModal = forwardRef<UnitFormRef,UnitFormModalProps>(({onSuccessModa
         "success",
         `${isUpdate ? "Cập nhật" : "Tạo"} đơn vị thành công`,
       );
-      onSuccessModal()
-      alert("123123")
       setOpen(false);
+      onSuccessModal()
     },
     onError: (error: any) => {
       console.log("error", error);

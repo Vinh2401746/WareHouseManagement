@@ -20,7 +20,7 @@ import { AppRoutes } from "../../../router/routes";
 
 
 import type { GetCategoriesRequestType } from "../../../types/category";
-import { getUnitApi, deleteUnit } from "../../../api/unit";
+import { getUnitsApi, deleteUnit } from "../../../api/unit";
 import type { DeleteUnitType } from "../../../types/unit";
 export const UnitPage = memo(() => {
   const [page, setPage] = useState(1);
@@ -30,7 +30,7 @@ export const UnitPage = memo(() => {
     queryKey: [QueryKeys.category.list, { page, limit }],
     queryFn: ({ queryKey }) => {
     const [, payload] = queryKey as [string, GetCategoriesRequestType];
-    return getUnitApi(payload);
+    return getUnitsApi(payload);
   },
     gcTime: 15 * 60 * 1000 // 15 phut cache
   });
@@ -176,9 +176,7 @@ export const UnitPage = memo(() => {
           onChange={(page) => setPage(page)}
         />
       </Flex>
-      <UnitFormModal onSuccessModal={() =>{ 
-          alert("onScucess")
-        ;refetch()}} ref={formRef} />
+      <UnitFormModal onSuccessModal={() =>{ refetch()}} ref={formRef} />
     </div>
   );
 });
