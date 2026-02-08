@@ -13,6 +13,7 @@ import { CategoryPage } from "../pages/app/category";
 import { SuppilerPage } from "../pages/app/suppiler";
 import { UnitPage } from "../pages/app/unit";
 import { WarehousePage } from "../pages/app/warehouse";
+import { BranchPage } from "../pages/app/branch";
 
 export const router = createBrowserRouter(
   [
@@ -90,6 +91,11 @@ export const router = createBrowserRouter(
           path: AppRoutes.unit.list,
           id: AppRoutes.unit.list,
           element : <UnitPage />
+        },
+          {
+          path: AppRoutes.branch.list,
+          id: AppRoutes.branch.list,
+          element : <BranchPage />
         }
       ],
       errorElement: <NotFoundPage />,

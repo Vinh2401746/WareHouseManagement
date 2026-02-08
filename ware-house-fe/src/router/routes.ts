@@ -22,5 +22,8 @@ export const AppRoutes = {
   sales_invoice: '/sales_invoice',
   unit:{
     list:'/unit'
+  },
+  branch: {
+    list: '/branch'
   }
 };
