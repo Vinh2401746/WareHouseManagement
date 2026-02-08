@@ -95,6 +95,12 @@ export const WarehousePage = memo(() => {
       key: "name",
       align: "center",
     },
+        {
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
+      align: "center",
+    },
     {
       title: "Tuỳ chọn",
       dataIndex: "",
