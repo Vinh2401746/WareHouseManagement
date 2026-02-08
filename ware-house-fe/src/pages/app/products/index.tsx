@@ -97,7 +97,7 @@ export const ProductsPage = memo(() => {
         dataIndex: "unit",
         key: "unit",
         align: "center",
-        render: (value:object) => value?.name || ''
+        render: (value:any) => value?.name || ''
       },
       {
         title: "Tồn kho tối thiểu",
@@ -111,7 +111,7 @@ export const ProductsPage = memo(() => {
         dataIndex: "category",
         key: "category",
         align: "center",
-        render: (value: any) => `${value?.name || ""}-${value?.code || ""}`,
+        render: (value: any) => `${value?.name || ""}`,
       },
       {
         title: "Tuỳ chọn",
