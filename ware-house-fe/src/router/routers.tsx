@@ -12,6 +12,7 @@ import { ProductsPage } from "../pages/app/products";
 import { CategoryPage } from "../pages/app/category";
 import { SuppilerPage } from "../pages/app/suppiler";
 import { UnitPage } from "../pages/app/unit";
+import { WarehousePage } from "../pages/app/warehouse";
 
 export const router = createBrowserRouter(
   [
@@ -66,9 +67,9 @@ export const router = createBrowserRouter(
           element: <SuppilerPage />,
         },
         {
-          path: AppRoutes.warehouse,
-          id: AppRoutes.warehouse,
-          element: <DevelopingPage />,
+          path: AppRoutes.warehouse.list,
+          id: AppRoutes.warehouse.list,
+          element: <WarehousePage />,
         },
         {
           path: AppRoutes.store,

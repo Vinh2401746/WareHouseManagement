@@ -13,5 +13,8 @@ export const QueryKeys = {
   },
   unit: {
     list: 'list'
+  },
+  branch:{
+    list:'branch'
   }
 };

@@ -46,7 +46,7 @@ const items: ItemType<MenuItemType>[] = [
     label: "Đơn vị",
   },
    {
-    key: AppRoutes.warehouse,
+    key: AppRoutes.warehouse.list,
     icon: <UploadOutlined />,
     label: "Kho",
   },
