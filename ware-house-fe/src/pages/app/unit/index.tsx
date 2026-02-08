@@ -22,7 +22,7 @@ import { AppRoutes } from "../../../router/routes";
 import type { GetCategoriesRequestType } from "../../../types/category";
 import { getUnitsApi, deleteUnit } from "../../../api/unit";
 import type { DeleteUnitType } from "../../../types/unit";
-export const UnitPage = memo(() => {
+const UnitPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<UnitFormRef>(null);
@@ -180,3 +180,4 @@ export const UnitPage = memo(() => {
     </div>
   );
 });
+export default UnitPage

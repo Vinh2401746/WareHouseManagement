@@ -15,7 +15,7 @@ type FieldType = {
 };
 const { Title } = Typography;
 
-export const SettingPasswordPage = memo(() => {
+const SettingPasswordPage = memo(() => {
   const [form] = useForm<FieldType>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -122,3 +122,6 @@ export const SettingPasswordPage = memo(() => {
     </div>
   );
 });
+
+
+export default SettingPasswordPage

@@ -30,6 +30,7 @@ export const TableCommon = memo((props: TableCommonProps) => {
       rowKey={"id"}
       size="middle"
       styles={styles}
+      
       // bordered
       {...props}
     />

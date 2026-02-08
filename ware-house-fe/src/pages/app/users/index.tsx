@@ -17,7 +17,7 @@ import dispatchToast from "../../../constants/toast";
 import { UserOutlined } from "@ant-design/icons";
 import './index.css'
 import { TableCommon } from "../../../components/table/table";
-export const UserPage = memo(() => {
+const UserPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<UserFormRef>(null);
@@ -192,3 +192,4 @@ export const UserPage = memo(() => {
     </div>
   );
 });
+export default UserPage;

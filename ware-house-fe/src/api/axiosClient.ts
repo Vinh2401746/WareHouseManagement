@@ -16,7 +16,7 @@ const AxiosClient = axios.create({
     Accept: 'application/json',
     transactionId: new Date().getTime().toString(),
   },
-  timeout: 2000,
+  timeout: 20000,
 });
 
 AxiosClient.interceptors.request.use(

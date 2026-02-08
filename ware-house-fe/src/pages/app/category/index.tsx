@@ -20,7 +20,7 @@ import { AppRoutes } from "../../../router/routes";
 
 import { deleteCategory, getCategorysApi } from "../../../api/category";
 import type { GetCategoriesRequestType } from "../../../types/category";
-export const CategoryPage = memo(() => {
+const CategoryPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<CategoryFormRef>(null);
@@ -176,3 +176,6 @@ export const CategoryPage = memo(() => {
     </div>
   );
 });
+
+
+export default CategoryPage

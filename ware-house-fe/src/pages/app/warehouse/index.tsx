@@ -23,7 +23,7 @@ import type { GetCategoriesRequestType } from "../../../types/category";
 
 import { getWarehousesApi,deleteWarehouseApi } from "../../../api/warehouse";
 import type { DeleteWarehouseRequestType } from "../../../types/warehouse";
-export const WarehousePage = memo(() => {
+ const WarehousePage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<UnitFormRef>(null);
@@ -188,3 +188,4 @@ export const WarehousePage = memo(() => {
     </div>
   );
 });
+export default WarehousePage

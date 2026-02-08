@@ -14,7 +14,7 @@ import { deleteProductApi, getProductsApi } from "../../../api/products";
 import type { GetProductsRequestType } from "../../../types/products";
 import { UNITS } from "../../../constants/common";
 import { formatNumber } from "../../../utils/helper";
-export const ProductsPage = memo(() => {
+const ProductsPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<ProductFormRef>(null);
@@ -210,3 +210,6 @@ export const ProductsPage = memo(() => {
     </div>
   );
 });
+
+
+export default ProductsPage

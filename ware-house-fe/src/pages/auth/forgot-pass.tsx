@@ -13,7 +13,7 @@ type FieldType = {
 };
 const { Title } = Typography;
 
-export const ForgotPasswordPage = memo(() => {
+const ForgotPasswordPage = memo(() => {
   const [form] = useForm<FieldType>();
   const navigate = useNavigate();
   const { mutate, isPending } = useMutation({
@@ -92,3 +92,6 @@ export const ForgotPasswordPage = memo(() => {
     </div>
   );
 });
+
+
+export default ForgotPasswordPage;

@@ -20,7 +20,7 @@ import { AppRoutes } from "../../../router/routes";
 
 import type { GetCategoriesRequestType } from "../../../types/category";
 import { deleteBranchApi, getBranchsApi } from "../../../api/branch";
-export const BranchPage = memo(() => {
+ const BranchPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<BranchFormRef>(null);
@@ -182,3 +182,4 @@ export const BranchPage = memo(() => {
     </div>
   );
 });
+export default BranchPage

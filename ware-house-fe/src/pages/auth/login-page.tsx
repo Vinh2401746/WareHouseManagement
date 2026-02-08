@@ -16,7 +16,7 @@ type FieldType = {
 };
 const { Title } = Typography;
 
-export const LoginPage = memo(() => {
+const LoginPage = memo(() => {
   const [form] = useForm<FieldType>();
   const dispatch = useAppDispatch();
   const loading = useAppSelector((state)=>state.auth.loading)
@@ -132,3 +132,4 @@ export const LoginPage = memo(() => {
     </div>
   );
 });
+export default LoginPage
