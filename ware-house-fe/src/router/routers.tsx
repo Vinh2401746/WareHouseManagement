@@ -1,18 +1,24 @@
+import Loadable from "../layouts/sysnc/loadable";
+import { lazy } from "react";
+
 import { createBrowserRouter } from "react-router-dom";
 import { AppRoutes } from "./routes";
 import { GuestRoute, PrivateRoute } from "../components/protect-route";
-import { LoginPage } from "../pages/auth/login-page";
-import { UserPage } from "../pages/app/users";
-import { DashBoardPage } from "../pages/app/dardboard/dashboard";
-import NotFoundPage from "../pages/404-developing";
-import DevelopingPage from "../pages/404-developing/developing";
-import { ForgotPasswordPage } from "../pages/auth/forgot-pass";
-import { SettingPasswordPage } from "../pages/auth/setting-password";
-import { ProductsPage } from "../pages/app/products";
-import { CategoryPage } from "../pages/app/category";
-import { SuppilerPage } from "../pages/app/suppiler";
-import { UnitPage } from "../pages/app/unit";
 
+
+const LoginPage = Loadable(lazy(() => import('../pages/auth/login-page')));
+const UserPage = Loadable(lazy(() => import('../pages/app/users')));
+const DashBoardPage = Loadable(lazy(() => import('../pages/app/dardboard/dashboard')));
+const NotFoundPage = Loadable(lazy(() => import('../pages/404-developing/index')));
+const DevelopingPage = Loadable(lazy(() => import('../pages/404-developing/developing')));
+const ForgotPasswordPage = Loadable(lazy(() => import('../pages/auth/forgot-pass')));
+const SettingPasswordPage = Loadable(lazy(() => import('../pages/auth/setting-password')));
+const ProductsPage = Loadable(lazy(() => import('../pages/app/products')));
+const CategoryPage = Loadable(lazy(() => import('../pages/app/category')));
+const SuppilerPage = Loadable(lazy(() => import('../pages/app/suppiler')));
+const UnitPage = Loadable(lazy(() => import('../pages/app/unit')));
+const WarehousePage = Loadable(lazy(() => import('../pages/app/warehouse')));
+const BranchPage = Loadable(lazy( async () => import('../pages/app/branch')));
 export const router = createBrowserRouter(
   [
     {
@@ -66,9 +72,9 @@ export const router = createBrowserRouter(
           element: <SuppilerPage />,
         },
         {
-          path: AppRoutes.warehouse,
-          id: AppRoutes.warehouse,
-          element: <DevelopingPage />,
+          path: AppRoutes.warehouse.list,
+          id: AppRoutes.warehouse.list,
+          element: <WarehousePage />,
         },
         {
           path: AppRoutes.store,
@@ -89,6 +95,11 @@ export const router = createBrowserRouter(
           path: AppRoutes.unit.list,
           id: AppRoutes.unit.list,
           element : <UnitPage />
+        },
+          {
+          path: AppRoutes.branch.list,
+          id: AppRoutes.branch.list,
+          element : <BranchPage />
         }
       ],
       errorElement: <NotFoundPage />,

@@ -14,9 +14,11 @@ const queryClient = new QueryClient({
       gcTime: 0,
       retry: false,
       placeholderData: (previousData:any) => previousData,
+      
     },
     mutations: {
       // gcTime: 0,
+      retry:false
     },
   },
 });

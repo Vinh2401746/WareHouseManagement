@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QueryKeys } from "../../../constants/query-keys";
-import { deleteUser, getUsers } from "../../../api/users/users";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Breadcrumb,
@@ -11,53 +10,61 @@ import {
   Tag,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import type { UserFormRef } from "./components/creat-update-user";
-import UserFormModal from "./components/creat-update-user";
+import type { UnitFormRef } from "./components/create-update-warehouse";
+import UnitFormModal from "./components/create-update-warehouse";
 import dispatchToast from "../../../constants/toast";
 import { UserOutlined } from "@ant-design/icons";
 import './index.css'
 import { TableCommon } from "../../../components/table/table";
-const UserPage = memo(() => {
+import { AppRoutes } from "../../../router/routes";
+
+
+import type { GetCategoriesRequestType } from "../../../types/category";
+
+import { getWarehousesApi,deleteWarehouseApi } from "../../../api/warehouse";
+import type { DeleteWarehouseRequestType } from "../../../types/warehouse";
+ const WarehousePage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const formRef = useRef<UserFormRef>(null);
-  const { data, isFetching, isError, error } = useQuery({
-    queryKey: [QueryKeys.users.users, page, limit],
-    queryFn: () => getUsers({ page, limit }),
-    
+  const formRef = useRef<UnitFormRef>(null);
+  const { data, isLoading, refetch, error, isError } = useQuery({
+    queryKey: [QueryKeys.category.list, { page, limit }],
+    queryFn: ({ queryKey }) => {
+    const [, payload] = queryKey as [string, GetCategoriesRequestType];
+    return getWarehousesApi(payload);
+  },
+    gcTime: 15 * 60 * 1000 // 15 phut cache
   });
 
   useEffect(()=>{
     if(isError){
+      console.log(error)
       dispatchToast("error", error.message)
     }
   },[error, isError])
 
-  const { mutate } = useMutation({
-    mutationFn: (payload: { id: string }) => deleteUser({ id: payload.id }),
+  const { mutate, isPending } = useMutation({
+    mutationFn: (payload: DeleteWarehouseRequestType) => deleteWarehouseApi(payload),
     onSuccess: () => {
       console.log("data");
-      dispatchToast("success", "Xoá người dùng thành công!");
+      dispatchToast("success", "Xoá kho thành công!");
+      refetch()
     },
     onError: () => {
-      dispatchToast("error", "Xoá người dùng thất bại!");
+      dispatchToast("error", "Xoá kho thất bại!");
     },
   });
 
-  const users = useMemo(() => data?.results ?? [], [data?.results]);
+  const units = useMemo(() => data?.results ?? [], [data?.results]);
 
   const onAction = useCallback(
     (type: "delete" | "update" | "reset-pass", record: any) => {
       switch (type) {
         case "delete":
-          mutate({ id: record.id });
+          mutate({ warehouseId: record.id  } as DeleteWarehouseRequestType);
           break;
         case "update":
           formRef.current?.show(record);
-          break;
-        case "reset-pass":
-          dispatchToast("warning", "Tính năng đang phát triển");
-          // formRef.current?.show(record);
           break;
         default:
           break;
@@ -73,24 +80,25 @@ const UserPage = memo(() => {
       key: "id",
       render: (_, __, index) => index + 1,
       align: "center",
-      width: 100,
+      width: 80,
     },
     {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
+      title: "Chi Nhánh",
+      dataIndex: "branch",
+      key: "branch",
       align: "center",
+      render: (record) => record?.name || ''
     },
     {
-      title: "Tên",
+      title: "Tên Kho",
       dataIndex: "name",
       key: "name",
       align: "center",
     },
-    {
-      title: "Quyền",
-      dataIndex: "role",
-      key: "role",
+        {
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
       align: "center",
     },
     {
@@ -114,17 +122,7 @@ const UserPage = memo(() => {
               Cập nhật
             </Tag>
             <Popconfirm
-              title="Xác nhận đặt lại mật khẩu user này?"
-              cancelText="Huỷ"
-              okText="Xác nhận"
-              onConfirm={() => onAction("reset-pass", record)}
-            >
-              <Tag color={"yellow"} variant={"outlined"}>
-                Đặt lại mật khẩu
-              </Tag>
-            </Popconfirm>
-            <Popconfirm
-              title="Xác nhận xoá user này?"
+              title="Xác nhận xoá đơn vị này?"
               cancelText="Huỷ"
               okText="Xác nhận"
               onConfirm={() => onAction("delete", record)}
@@ -140,15 +138,15 @@ const UserPage = memo(() => {
   ],[onAction]);
 
   return (
-    <div style={{ rowGap: 12,  display: "flex",flexDirection:'column'}}>
+    <div style={{ rowGap: 24,  display: "flex",flexDirection:'column'}}>
       <Breadcrumb
         items={[
           {
-            href: "/users",
+            href: AppRoutes.warehouse.list,
             title: (
               <>
                 <UserOutlined />
-                <span>Người dùng</span>
+                <span>Kho</span>
               </>
             ),
           },
@@ -156,16 +154,15 @@ const UserPage = memo(() => {
       />
       <Flex justify="end">
         <Button type="primary" onClick={() => formRef.current?.show()}>
-          Thêm Người Dùng
+          Thêm kho
         </Button>
       </Flex>
       <TableCommon
         size="middle"
-        dataSource={users}
+        dataSource={units}
         columns={columns}
         pagination={false}
-        loading={isFetching}
-        
+        loading={isLoading || isPending}
         rowKey={"id"}
         onRow={(record) => {
           return {
@@ -182,14 +179,13 @@ const UserPage = memo(() => {
             console.log("current", current, size);
             setLimit(size);
           }}
-          pageSize={limit}
           // pageSize={page}
           total={data?.totalResults || 0}
           onChange={(page) => setPage(page)}
         />
       </Flex>
-      <UserFormModal ref={formRef} />
+      <UnitFormModal onSuccessModal={() =>{ refetch()}} ref={formRef} />
     </div>
   );
 });
-export default UserPage;
+export default WarehousePage

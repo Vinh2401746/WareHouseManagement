@@ -12,7 +12,7 @@ import { TableCommon } from "../../../components/table/table";
 import { AppRoutes } from "../../../router/routes";
 import type { GetSuppliersRequestType } from "../../../types/supplier";
 import { getSuppliersApi,deleteSuplierApi } from "../../../api/supplier";
-export const SuppilerPage = memo(() => {
+const SuppilerPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<SupplierFormRef>(null);
@@ -199,3 +199,6 @@ export const SuppilerPage = memo(() => {
     </div>
   );
 });
+
+
+export default SuppilerPage

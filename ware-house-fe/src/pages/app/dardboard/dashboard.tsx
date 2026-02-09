@@ -30,7 +30,7 @@ const pieData = [
 
 const COLORS = ["#ff4d4f", "#faad14", "#13c2c2", "#ff7875"];
 
-export const DashBoardPage = () => {
+const DashBoardPage = () => {
   return (
     <Flex vertical gap={24}>
       <Row gutter={[16, 16]}>
@@ -111,3 +111,5 @@ export const DashBoardPage = () => {
     </Flex>
   );
 };
+
+export default DashBoardPage

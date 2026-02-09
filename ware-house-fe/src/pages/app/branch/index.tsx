@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QueryKeys } from "../../../constants/query-keys";
-import { deleteUser, getUsers } from "../../../api/users/users";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Breadcrumb,
@@ -11,40 +10,47 @@ import {
   Tag,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import type { UserFormRef } from "./components/creat-update-user";
-import UserFormModal from "./components/creat-update-user";
+import type { BranchFormRef } from "./components/create-update-branch";
+import CategoryFormModal from "./components/create-update-branch";
 import dispatchToast from "../../../constants/toast";
 import { UserOutlined } from "@ant-design/icons";
 import './index.css'
 import { TableCommon } from "../../../components/table/table";
-const UserPage = memo(() => {
+import { AppRoutes } from "../../../router/routes";
+
+import type { GetCategoriesRequestType } from "../../../types/category";
+import { deleteBranchApi, getBranchsApi } from "../../../api/branch";
+ const BranchPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const formRef = useRef<UserFormRef>(null);
-  const { data, isFetching, isError, error } = useQuery({
-    queryKey: [QueryKeys.users.users, page, limit],
-    queryFn: () => getUsers({ page, limit }),
-    
+  const formRef = useRef<BranchFormRef>(null);
+  const { data, isLoading, refetch, isError, error } = useQuery({
+    queryKey: [QueryKeys.category.list, {page, limit}],
+    queryFn: ({ queryKey }) => {
+    const [, payload] = queryKey as [string, GetCategoriesRequestType];
+    return getBranchsApi(payload);
+  },
+    gcTime: 15 * 60 * 1000 // 15 phut cache
   });
 
-  useEffect(()=>{
+    useEffect(()=>{
     if(isError){
       dispatchToast("error", error.message)
     }
   },[error, isError])
 
-  const { mutate } = useMutation({
-    mutationFn: (payload: { id: string }) => deleteUser({ id: payload.id }),
+  const { mutate, isPending } = useMutation({
+    mutationFn: (payload: { id: string }) => deleteBranchApi({ branchId: payload.id }),
     onSuccess: () => {
-      console.log("data");
-      dispatchToast("success", "Xoá người dùng thành công!");
+      dispatchToast("success", "Xoá Chi nhánh thành công!");
+      refetch()
     },
     onError: () => {
-      dispatchToast("error", "Xoá người dùng thất bại!");
+      dispatchToast("error", "Xoá Chi nhánh thất bại!");
     },
   });
 
-  const users = useMemo(() => data?.results ?? [], [data?.results]);
+  const categories = useMemo(() => data?.results ?? [], [data?.results]);
 
   const onAction = useCallback(
     (type: "delete" | "update" | "reset-pass", record: any) => {
@@ -54,10 +60,6 @@ const UserPage = memo(() => {
           break;
         case "update":
           formRef.current?.show(record);
-          break;
-        case "reset-pass":
-          dispatchToast("warning", "Tính năng đang phát triển");
-          // formRef.current?.show(record);
           break;
         default:
           break;
@@ -73,24 +75,24 @@ const UserPage = memo(() => {
       key: "id",
       render: (_, __, index) => index + 1,
       align: "center",
-      width: 100,
+      width: 80,
     },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-      align: "center",
-    },
-    {
-      title: "Tên",
+      {
+      title: "Tên Chi nhánh",
       dataIndex: "name",
       key: "name",
       align: "center",
     },
     {
-      title: "Quyền",
-      dataIndex: "role",
-      key: "role",
+      title: "Số điện thoại",
+      dataIndex: "phone",
+      key: "phone",
+      align: "center",
+    },
+     {
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
       align: "center",
     },
     {
@@ -114,17 +116,7 @@ const UserPage = memo(() => {
               Cập nhật
             </Tag>
             <Popconfirm
-              title="Xác nhận đặt lại mật khẩu user này?"
-              cancelText="Huỷ"
-              okText="Xác nhận"
-              onConfirm={() => onAction("reset-pass", record)}
-            >
-              <Tag color={"yellow"} variant={"outlined"}>
-                Đặt lại mật khẩu
-              </Tag>
-            </Popconfirm>
-            <Popconfirm
-              title="Xác nhận xoá user này?"
+              title="Xác nhận xoá chi nhánh này?"
               cancelText="Huỷ"
               okText="Xác nhận"
               onConfirm={() => onAction("delete", record)}
@@ -140,15 +132,15 @@ const UserPage = memo(() => {
   ],[onAction]);
 
   return (
-    <div style={{ rowGap: 12,  display: "flex",flexDirection:'column'}}>
+    <div style={{ rowGap: 24,  display: "flex",flexDirection:'column'}}>
       <Breadcrumb
         items={[
           {
-            href: "/users",
+            href: AppRoutes.category,
             title: (
               <>
                 <UserOutlined />
-                <span>Người dùng</span>
+                <span>Chi nhánh</span>
               </>
             ),
           },
@@ -156,16 +148,15 @@ const UserPage = memo(() => {
       />
       <Flex justify="end">
         <Button type="primary" onClick={() => formRef.current?.show()}>
-          Thêm Người Dùng
+          Thêm chi nhánh
         </Button>
       </Flex>
       <TableCommon
         size="middle"
-        dataSource={users}
+        dataSource={categories}
         columns={columns}
         pagination={false}
-        loading={isFetching}
-        
+        loading={isLoading || isPending}
         rowKey={"id"}
         onRow={(record) => {
           return {
@@ -182,14 +173,13 @@ const UserPage = memo(() => {
             console.log("current", current, size);
             setLimit(size);
           }}
-          pageSize={limit}
           // pageSize={page}
           total={data?.totalResults || 0}
           onChange={(page) => setPage(page)}
         />
       </Flex>
-      <UserFormModal ref={formRef} />
+      <CategoryFormModal ref={formRef} />
     </div>
   );
 });
-export default UserPage;
+export default BranchPage

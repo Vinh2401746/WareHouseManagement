@@ -14,7 +14,7 @@ import { deleteProductApi, getProductsApi } from "../../../api/products";
 import type { GetProductsRequestType } from "../../../types/products";
 import { UNITS } from "../../../constants/common";
 import { formatNumber } from "../../../utils/helper";
-export const ProductsPage = memo(() => {
+const ProductsPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<ProductFormRef>(null);
@@ -97,8 +97,7 @@ export const ProductsPage = memo(() => {
         dataIndex: "unit",
         key: "unit",
         align: "center",
-        render: (value) =>
-          UNITS.find((item) => item.value == value)?.label || "",
+        render: (value:any) => value?.name || ''
       },
       {
         title: "Tồn kho tối thiểu",
@@ -112,7 +111,7 @@ export const ProductsPage = memo(() => {
         dataIndex: "category",
         key: "category",
         align: "center",
-        render: (value: any) => `${value?.name || ""}-${value?.code || ""}`,
+        render: (value: any) => `${value?.name || ""}`,
       },
       {
         title: "Tuỳ chọn",
@@ -211,3 +210,6 @@ export const ProductsPage = memo(() => {
     </div>
   );
 });
+
+
+export default ProductsPage
