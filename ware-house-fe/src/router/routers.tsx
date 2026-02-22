@@ -19,6 +19,7 @@ const SuppilerPage = Loadable(lazy(() => import('../pages/app/suppiler')));
 const UnitPage = Loadable(lazy(() => import('../pages/app/unit')));
 const WarehousePage = Loadable(lazy(() => import('../pages/app/warehouse')));
 const BranchPage = Loadable(lazy( async () => import('../pages/app/branch')));
+const WarehouseImportAndExport = Loadable(lazy( async () => import('../pages/app/warehouse_import_export')));
 export const router = createBrowserRouter(
   [
     {
@@ -82,9 +83,9 @@ export const router = createBrowserRouter(
           element: <DevelopingPage />,
         },
         {
-          path: AppRoutes.invoice_import_export,
-          id: AppRoutes.invoice_import_export,
-          element: <DevelopingPage />,
+          path: AppRoutes.warehouse_import_export,
+          id: AppRoutes.warehouse_import_export,
+          element: <WarehouseImportAndExport />,
         },
         {
           path: AppRoutes.sales_invoice,

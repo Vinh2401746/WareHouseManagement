@@ -61,9 +61,9 @@ const items: ItemType<MenuItemType>[] = [
     label: "Cửa hàng",
   },
    {
-    key: AppRoutes.invoice_import_export,
+    key: AppRoutes.warehouse_import_export,
     icon: <UploadOutlined />,
-    label: "Hoá đơn nhập/xuất",
+    label: "Nhập/xuất kho",
   },
    {
     key: AppRoutes.sales_invoice,

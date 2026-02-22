@@ -16,5 +16,11 @@ export const QueryKeys = {
   },
   branch:{
     list:'branch'
+  },
+  inventory:{
+    list: 'inventory'
+  },
+  warehouse: {
+    list: 'warehouse'
   }
 };
