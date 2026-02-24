@@ -21,6 +21,7 @@ import { QueryKeys } from "../../../../constants/query-keys";
 import { getSuppliersApi } from "../../../../api/supplier";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { getCategorysApi } from "../../../../api/category";
+import { getProductsApi } from "../../../../api/products";
 
 export type WarehouseImExFormData = {
   warehouse: string;
@@ -34,7 +35,6 @@ export type WarehouseImExFormData = {
 export type UnitFormRef = {
   show: (
     data: Partial<WarehouseImExFormData>,
-    type: "IMPORT" | "EXPORT",
   ) => void;
   hide: () => void;
   onSuccessUnit?: () => void;
@@ -54,9 +54,8 @@ type WarehouseFormModalProps = {
 const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
   ({ onSuccessModal }, ref) => {
     const [open, setOpen] = useState(false);
-    const [type, setType] = useState("IMPORT" as "IMPORT" | "EXPORT");
     const [warehouseImEx, setWarehouseImEx] =
-      useState<WarehouseImExFormData>(initForm);
+      useState<any>(initForm);
     const [form] = Form.useForm<WarehouseImExFormData>();
 
     const { data } = useQuery({
@@ -70,7 +69,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
       () =>
         data?.results?.map((item: any) => ({
           value: item.id,
-          label: `${item?.name}-${item?.branch.name || ""}`,
+          label: `${item?.name || ''}-${item?.branch.name || ""}`,
         })),
       [data?.results],
     );
@@ -107,9 +106,42 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
       [categoryData?.results],
     );
 
+    const { data: productData } = useQuery({
+      queryKey: [QueryKeys.products.list],
+      queryFn: () => {
+        return getProductsApi({ page: 1, limit: 1000000000 });
+      },
+    });
+
+    const products = useMemo(
+      () =>
+        productData?.results?.map((item: any) => ({
+          value: item.id,
+          label: `${item?.code}-${item?.name || ""}`,
+        })),
+      [productData?.results],
+    );
+
+     const { data: unitData } = useQuery({
+      queryKey: [QueryKeys.unit.list],
+      queryFn: () => {
+        return getProductsApi({ page: 1, limit: 1000000000 });
+      },
+    });
+
+    const units = useMemo(
+      () =>
+        unitData?.results?.map((item: any) => ({
+          value: item.id,
+          label: `${item?.code}-${item?.name || ""}`,
+        })),
+      [unitData?.results],
+    );
+
+
     const isUpdate = useMemo(() => warehouseImEx.id, [warehouseImEx.id]);
     useImperativeHandle(ref, () => ({
-      show: (data: WarehouseImExFormData | any, type: "IMPORT" | "EXPORT") => {
+      show: (data: WarehouseImExFormData | any) => {
         console.log("data", data);
         setOpen(true);
         form.setFieldsValue(
@@ -118,10 +150,15 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
                 ...data,
                 warehouse: data?.warehouse?.id || "",
                 supplier: data?.supplier?.id || "",
+                items: data?.items.map((item: any) => ({
+                  ...item,
+                  productCode: item?.product?.id || "",
+                  unit: item?.unit?.id || "",
+                  category: item?.category?.id || "",
+                })) || [],
               }
             : initForm,
         );
-        setType(type);
         setWarehouseImEx(
           (data.id ? { ...data } : initForm) as WarehouseImExFormData,
         );
@@ -233,34 +270,25 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
                   >
                     <Col span={23}>
                       <Row gutter={8}>
-                        <Col span={12}>
+                        <Col span={24}>
                           <Form.Item
                             {...restField}
                             name={[name, "productCode"]}
                             rules={[
                               {
                                 required: true,
-                                message: "Vui lòng nhập mã sản phẩm",
+                                message: "Vui lòng chọn sản phẩm",
                               },
                             ]}
                           >
-                            <Input placeholder="Mã sản phẩm" />
+                          <Select
+                            options={products || []}
+                            placeholder="Vui lòng chọn sản phẩm"
+                          />
+                            {/* <Input placeholder="Mã sản phẩm" /> */}
                           </Form.Item>
                         </Col>
-                        <Col span={12}>
-                          <Form.Item
-                            {...restField}
-                            name={[name, "productName"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Vui lòng nhập tên sản phẩm",
-                              },
-                            ]}
-                          >
-                            <Input placeholder="Tên sản phẩm" />
-                          </Form.Item>
-                        </Col>
+               
                       </Row>
 
                       <Row gutter={8}>
@@ -275,7 +303,10 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
                               },
                             ]}
                           >
-                            <Input placeholder="Vui lòng chọn đơn vị" />
+                            <Select
+                              options={units || []}
+                              placeholder="Vui lòng chọn đơn vị"
+                            />
                           </Form.Item>
                         </Col>
                         <Col span={12}>
