@@ -28,7 +28,7 @@ import type { DeleteWarehouseRequestType } from "../../../types/warehouse";
   const [limit, setLimit] = useState(10);
   const formRef = useRef<UnitFormRef>(null);
   const { data, isLoading, refetch, error, isError } = useQuery({
-    queryKey: [QueryKeys.category.list, { page, limit }],
+    queryKey: [QueryKeys.warehouse.list, { page, limit }],
     queryFn: ({ queryKey }) => {
     const [, payload] = queryKey as [string, GetCategoriesRequestType];
     return getWarehousesApi(payload);
