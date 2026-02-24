@@ -198,7 +198,7 @@ module.exports = router;
  *         name: sortBy
  *         schema:
  *           type: string
- *         description: Sắp xếp dạng field:asc|desc (vd: createdAt:desc)
+ *         description:
  *       - in: query
  *         name: limit
  *         schema:
