@@ -64,7 +64,7 @@ const WarehouseImportAndExport = memo(() => {
           mutate({ warehouseId: record.id } as DeleteWarehouseRequestType);
           break;
         case "update":
-            formRef.current?.show(record,record.type);
+            formRef.current?.show(record);
           break;
         default:
           break;
@@ -187,14 +187,14 @@ const WarehouseImportAndExport = memo(() => {
         <Button
           type="primary"
           icon={<DownloadOutlined />}
-          onClick={() => formRef.current?.show({},'IMPORT')}
+          onClick={() => formRef.current?.show({})}
         >
           Nhập kho
         </Button>
         <Button
           type="primary"
           icon={<UploadOutlined />}
-         onClick={() => formRef.current?.show({},'EXPORT')}
+         onClick={() => formRef.current?.show({})}
         >
           Xuất kho
         </Button>
@@ -209,7 +209,7 @@ const WarehouseImportAndExport = memo(() => {
         onRow={(record) => {
           return {
             onDoubleClick: () => {
-                formRef.current?.show({ ...record },record.type);
+                formRef.current?.show({ ...record });
             },
           };
         }}
