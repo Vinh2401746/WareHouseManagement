@@ -129,23 +129,22 @@ const deleteInventoryTransactionById = async (inventoryTransactionId) => {
  * @returns {Promise<InventoryTransaction>}
  */
 const importInventory = async (importInventoryBody, req) => {
-  const { warehouse, supplier, items, reason, deliveryPerson } = importInventoryBody;
+  const { warehouse, supplier, items, reason, deliveryPerson, totalAmount, totalAmountAfterFax, discountMoney, taxMoney } =
+    importInventoryBody;
 
   const batches = await Promise.all(
     items.map(async (item) => {
       // 1. Tìm hoặc tạo sản phẩm
       let product = await Product.findOne({ code: item.productCode });
-      console.log({ item });
       if (!product) {
         product = await Product.create({
           code: item.productCode,
           name: item.productName,
           unit: item.unit,
-          package: item.package,
-          category: item.category,
+          // package: item.package,
+          // category: item.category,
         });
       }
-      console.log({ product });
       const batchCode = `B${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.random()
         .toString(36)
         .slice(2, 8)
@@ -154,12 +153,17 @@ const importInventory = async (importInventoryBody, req) => {
       // 2. Tạo batch cho sản phẩm
       const batch = await ProductBatch.create({
         product: product._id,
+        productCode: item.productCode,
+        productName: item.productName,
+        unit: item.unit,
         batchCode,
         warehouse,
         expiryDate: item.expiryDate,
         quantity: item.quantity,
         importPrice: item.price,
-        reason: reason || INVENTORY_TRANSACTION_REASONS.PURCHASE,
+        taxRate: item.taxRate,
+        discountRate: item.discountRate,
+        totalAmount: item.quantity * item.price || 0,
       });
 
       // 3. Ghi vào danh sách transaction
@@ -168,18 +172,24 @@ const importInventory = async (importInventoryBody, req) => {
         batch: batch._id,
         quantity: item.quantity,
         price: item.price,
+        totalAmount: item.quantity * item.price || 0,
       };
     })
   );
 
   const transaction = await InventoryTransaction.create({
     type: INVENTORY_TRANSACTION_TYPES.IMPORT,
-    reason: importInventoryBody.reason || INVENTORY_TRANSACTION_REASONS.PURCHASE,
+    reason: reason || INVENTORY_TRANSACTION_REASONS.PURCHASE,
     warehouse,
     supplier,
     createdBy: req.user.id,
     items: batches,
     deliveryPerson,
+    // category: item.category,
+    totalAmountAfterFax: totalAmountAfterFax || 0,
+    discountMoney: discountMoney || 0,
+    taxMoney: taxMoney || 0,
+    totalAmount: totalAmount || 0,
   });
 
   return transaction;

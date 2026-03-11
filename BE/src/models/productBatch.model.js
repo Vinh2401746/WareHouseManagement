@@ -8,6 +8,18 @@ const productBatchSchema = mongoose.Schema(
       ref: 'Product',
       required: true,
     },
+    productCode: {
+      type: String,
+      trim: true,
+    },
+    productName: {
+      type: String,
+      trim: true,
+    },
+    unit: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Unit',
+    },
     warehouse: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Warehouse',
@@ -30,6 +42,21 @@ const productBatchSchema = mongoose.Schema(
     importPrice: {
       type: Number,
       required: true,
+    },
+    taxRate: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    discountRate: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    totalAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
   },
   {

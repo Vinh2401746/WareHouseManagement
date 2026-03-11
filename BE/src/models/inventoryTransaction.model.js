@@ -38,11 +38,40 @@ const inventoryTransactionSchema = mongoose.Schema(
       default: Date.now,
       comment: 'Ngày giao dịch',
     },
-    // người giao hàng
     deliveryPerson: {
       type: String,
       required: false,
       comment: 'Người giao hàng (áp dụng cho nhập hàng)',
+    },
+    totalAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
+      comment: 'Tổng tiền hàng trước thuế/CK',
+    },
+    discountMoney: {
+      type: Number,
+      default: 0,
+      min: 0,
+      comment: 'Tiền chiết khấu',
+    },
+    taxMoney: {
+      type: Number,
+      default: 0,
+      min: 0,
+      comment: 'Tiền thuế',
+    },
+    totalAmountAfterFax: {
+      type: Number,
+      default: 0,
+      min: 0,
+      comment: 'Tổng tiền sau thuế và chiết khấu',
+    },
+    status: {
+      type: String,
+      enum: ['PENDING', 'COMPLETED', 'CANCELED'],
+      default: 'PENDING',
+      comment: 'Trạng thái của giao dịch',
     },
     items: [
       {
@@ -61,6 +90,12 @@ const inventoryTransactionSchema = mongoose.Schema(
         },
         price: {
           type: Number,
+          min: 0,
+        },
+        totalAmount: {
+          type: Number,
+          default: 0,
+          min: 0,
         },
       },
     ],

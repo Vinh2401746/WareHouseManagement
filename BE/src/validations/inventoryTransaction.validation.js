@@ -76,6 +76,22 @@ const importInventory = {
     deliveryPerson: Joi.string().messages({
       'string.base': 'Người giao hàng phải là chuỗi',
     }),
+    totalAmount: Joi.number().min(0).messages({
+      'number.base': 'Tổng tiền hàng phải là số',
+      'number.min': 'Tổng tiền hàng phải lớn hơn hoặc bằng 0',
+    }),
+    discountMoney: Joi.number().min(0).default(0).messages({
+      'number.base': 'Tiền chiết khấu phải là số',
+      'number.min': 'Tiền chiết khấu phải lớn hơn hoặc bằng 0',
+    }),
+    taxMoney: Joi.number().min(0).default(0).messages({
+      'number.base': 'Tiền thuế phải là số',
+      'number.min': 'Tiền thuế phải lớn hơn hoặc bằng 0',
+    }),
+    totalAmountAfterFax: Joi.number().min(0).messages({
+      'number.base': 'Tổng tiền sau thuế phải là số',
+      'number.min': 'Tổng tiền sau thuế phải lớn hơn hoặc bằng 0',
+    }),
     items: Joi.array()
       .items(
         Joi.object().keys({
