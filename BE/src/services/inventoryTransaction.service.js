@@ -141,6 +141,7 @@ const importInventory = async (importInventoryBody, req) => {
           code: item.productCode,
           name: item.productName,
           unit: item.unit,
+          category: item.category,
           // package: item.package,
           // category: item.category,
         });
