@@ -195,6 +195,115 @@ const importInventory = async (importInventoryBody, req) => {
   return transaction;
 };
 
+/**
+ * Xác nhận nhập kho - chuyển PENDING -> COMPLETED
+ * @param {ObjectId} transactionId
+ * @returns {Promise<InventoryTransaction>}
+ */
+const confirmImport = async (transactionId) => {
+  const transaction = await InventoryTransaction.findById(transactionId);
+  if (!transaction) {
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.inventory.notFound);
+  }
+  if (transaction.status === 'CANCELED') {
+    throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.inventory.alreadyCanceled);
+  }
+  if (transaction.status === 'COMPLETED') {
+    throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.inventory.alreadyConfirmed);
+  }
+
+  transaction.status = 'COMPLETED';
+  await transaction.save();
+  return getInventoryTransactionById(transactionId);
+};
+
+/**
+ * Hủy nhập kho - chuyển PENDING -> CANCELED, hoàn trả tồn batch
+ * @param {ObjectId} transactionId
+ * @param {string} [cancelReason]
+ * @returns {Promise<InventoryTransaction>}
+ */
+const cancelImport = async (transactionId, cancelReason) => {
+  const transaction = await InventoryTransaction.findById(transactionId);
+  if (!transaction) {
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.inventory.notFound);
+  }
+  if (transaction.status === 'CANCELED') {
+    throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.inventory.alreadyCanceled);
+  }
+  if (transaction.status === 'COMPLETED') {
+    throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.inventory.cannotCancelCompleted);
+  }
+
+  // Hoàn trả tồn kho batch
+  await Promise.all(
+    transaction.items.map(async (item) => {
+      if (item.batch) {
+        const batch = await ProductBatch.findById(item.batch);
+        if (batch) {
+          batch.quantity = Math.max(0, batch.quantity - item.quantity);
+          await batch.save();
+        }
+      }
+    })
+  );
+
+  transaction.status = 'CANCELED';
+  if (cancelReason) {
+    transaction.reason = cancelReason;
+  }
+  await transaction.save();
+  return getInventoryTransactionById(transactionId);
+};
+
+/**
+ * Thay đổi status phiếu nhập
+ * @param {ObjectId} transactionId
+ * @param {string} newStatus
+ * @returns {Promise<InventoryTransaction>}
+ */
+const changeImportStatus = async (transactionId, newStatus) => {
+  const transaction = await InventoryTransaction.findById(transactionId);
+  if (!transaction) {
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.inventory.notFound);
+  }
+
+  const allowedTransitions = {
+    PENDING: ['COMPLETED', 'CANCELED'],
+    COMPLETED: [],
+    CANCELED: [],
+  };
+
+  const allowed = allowedTransitions[transaction.status] || [];
+  if (!allowed.includes(newStatus)) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      responseMessages.inventory.invalidStatusTransition
+        .replace('{from}', transaction.status)
+        .replace('{to}', newStatus)
+    );
+  }
+
+  // Nếu chuyển sang CANCELED thì hoàn trả batch
+  if (newStatus === 'CANCELED') {
+    await Promise.all(
+      transaction.items.map(async (item) => {
+        if (item.batch) {
+          const batch = await ProductBatch.findById(item.batch);
+          if (batch) {
+            batch.quantity = Math.max(0, batch.quantity - item.quantity);
+            await batch.save();
+          }
+        }
+      })
+    );
+  }
+
+  transaction.status = newStatus;
+  await transaction.save();
+  return getInventoryTransactionById(transactionId);
+};
+
 module.exports = {
   createInventoryTransaction,
   queryInventoryTransactions,
@@ -202,4 +311,7 @@ module.exports = {
   updateInventoryTransactionById,
   deleteInventoryTransactionById,
   importInventory,
+  confirmImport,
+  cancelImport,
+  changeImportStatus,
 };

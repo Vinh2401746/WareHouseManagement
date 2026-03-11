@@ -61,6 +61,27 @@ const importInventory = catchAsync(async (req, res) => {
   res.status(httpStatus.CREATED).send(inventoryTransaction);
 });
 
+const confirmImport = catchAsync(async (req, res) => {
+  const result = await inventoryTransactionService.confirmImport(req.params.inventoryTransactionId);
+  res.send(result);
+});
+
+const cancelImport = catchAsync(async (req, res) => {
+  const result = await inventoryTransactionService.cancelImport(
+    req.params.inventoryTransactionId,
+    req.body.cancelReason
+  );
+  res.send(result);
+});
+
+const changeImportStatus = catchAsync(async (req, res) => {
+  const result = await inventoryTransactionService.changeImportStatus(
+    req.params.inventoryTransactionId,
+    req.body.status
+  );
+  res.send(result);
+});
+
 module.exports = {
   createInventoryTransaction,
   getInventoryTransactions,
@@ -68,4 +89,7 @@ module.exports = {
   updateInventoryTransaction,
   deleteInventoryTransaction,
   importInventory,
+  confirmImport,
+  cancelImport,
+  changeImportStatus,
 };

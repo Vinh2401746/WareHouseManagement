@@ -141,6 +141,41 @@ const importInventory = {
   }),
 };
 
+const confirmImport = {
+  params: Joi.object().keys({
+    inventoryTransactionId: Joi.string().required().custom(objectId).messages({
+      'any.required': 'Mã phiếu nhập là bắt buộc',
+    }),
+  }),
+};
+
+const cancelImport = {
+  params: Joi.object().keys({
+    inventoryTransactionId: Joi.string().required().custom(objectId).messages({
+      'any.required': 'Mã phiếu nhập là bắt buộc',
+    }),
+  }),
+  body: Joi.object().keys({
+    cancelReason: Joi.string().messages({
+      'string.base': 'Lý do hủy phải là chuỗi',
+    }),
+  }),
+};
+
+const changeImportStatus = {
+  params: Joi.object().keys({
+    inventoryTransactionId: Joi.string().required().custom(objectId).messages({
+      'any.required': 'Mã phiếu nhập là bắt buộc',
+    }),
+  }),
+  body: Joi.object().keys({
+    status: Joi.string().required().valid('PENDING', 'COMPLETED', 'CANCELED').messages({
+      'any.required': 'Trạng thái là bắt buộc',
+      'any.only': 'Trạng thái chỉ nhận PENDING, COMPLETED hoặc CANCELED',
+    }),
+  }),
+};
+
 module.exports = {
   createInventoryTransaction,
   getInventoryTransactions,
@@ -148,4 +183,7 @@ module.exports = {
   updateInventoryTransaction,
   deleteInventoryTransaction,
   importInventory,
+  confirmImport,
+  cancelImport,
+  changeImportStatus,
 };
