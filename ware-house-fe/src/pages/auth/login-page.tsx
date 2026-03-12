@@ -22,18 +22,18 @@ const LoginPage = memo(() => {
   const loading = useAppSelector((state)=>state.auth.loading)
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const un_store = localStorage.getItem(LOCAL_KEYS.USER_NAME);
-    const pw_store = localStorage.getItem(LOCAL_KEYS.PASSWORD);
-    if (un_store && pw_store) {
-      form.setFieldsValue({
-        email: un_store,
-        password: pw_store,
-        remember: "true",
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   const un_store = localStorage.getItem(LOCAL_KEYS.USER_NAME);
+  //   const pw_store = localStorage.getItem(LOCAL_KEYS.PASSWORD);
+  //   if (un_store && pw_store) {
+  //     form.setFieldsValue({
+  //       email: un_store,
+  //       password: pw_store,
+  //       remember: "true",
+  //     });
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   const onNavigateForgot = () => {
     navigate(AppRoutes.auth.forgot_pass);
@@ -72,11 +72,11 @@ const LoginPage = memo(() => {
           //   labelCol={{ span: 8 }}
           //   wrapperCol={{ span: 16 }}
           //   style={{ maxWidth: 600 }}
-          // initialValues={{
-          //   remember: true,
-          //   email: "admin@gmail.com",
-          //   password: "admin123",
-          // }}
+          initialValues={{
+            remember: true,
+            email: "admin@gmail.com",
+            password: "admin123",
+          }}
           onFinish={onFinish}
           //   onFinishFailed={onFinishFailed}
           autoComplete="off"

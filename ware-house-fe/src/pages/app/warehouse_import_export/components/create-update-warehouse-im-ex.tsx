@@ -9,6 +9,7 @@ import {
   DatePicker,
   Row,
   Col,
+  Tag,
 } from "antd";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import dispatchToast from "../../../../constants/toast";
@@ -19,10 +20,15 @@ import {
 } from "../../../../api/warehouse";
 import { QueryKeys } from "../../../../constants/query-keys";
 import { getSuppliersApi } from "../../../../api/supplier";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { MinusCircleOutlined, MinusOutlined, PlusOutlined } from "@ant-design/icons";
 import { getCategorysApi } from "../../../../api/category";
 import { getProductsApi } from "../../../../api/products";
-
+import { createInventoriesApi } from "../../../../api/inventory/inventory";
+import { TableCommon } from "../../../../components/table/table";
+import type { ColumnsType } from "antd/es/table";
+import { v4 as UUID } from 'uuid';
+import { produce } from 'immer';
+import './style.css'
 export type WarehouseImExFormData = {
   warehouse: string;
   supplier: string;
@@ -51,9 +57,36 @@ const initForm: WarehouseImExFormData = {
 type WarehouseFormModalProps = {
   onSuccessModal: () => void;
 };
+
+type Item = {
+  product: string,
+  unit: string,
+  quantity: number,
+  price: number,
+  category: object
+  isTemplate?: boolean,
+  idPath: string
+}
+
+const ItemTemplate: Omit<Item, 'idPath'> = {
+  product: '',
+  unit: '',
+  quantity: 0,
+  price: 0,
+  category: {
+    id: '',
+    name: ''
+  },
+  isTemplate: true
+}
 const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
   ({ onSuccessModal }, ref) => {
     const [open, setOpen] = useState(false);
+    const [itemsData, setItemsData] = useState<Item[]>([{
+      ...ItemTemplate,
+      idPath: UUID()
+    }])
+    const [errorRows, setErrorRows] = useState<string[]>([]);
     const [warehouseImEx, setWarehouseImEx] =
       useState<any>(initForm);
     const [form] = Form.useForm<WarehouseImExFormData>();
@@ -63,6 +96,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
       queryFn: () => {
         return getWarehousesApi({ page: 1, limit: 1000000000 });
       },
+      enabled: false
     });
 
     const warehouses = useMemo(
@@ -79,6 +113,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
       queryFn: () => {
         return getSuppliersApi({ page: 1, limit: 1000000000 });
       },
+      enabled: false
     });
 
     const suppliers = useMemo(
@@ -90,27 +125,14 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
       [supplierData?.results],
     );
 
-    const { data: categoryData } = useQuery({
-      queryKey: [QueryKeys.warehouse.list],
-      queryFn: () => {
-        return getCategorysApi({ page: 1, limit: 1000000000 });
-      },
-    });
 
-    const categories = useMemo(
-      () =>
-        categoryData?.results?.map((item: any) => ({
-          value: item.id,
-          label: `${item?.name}-${item?.branch.name || ""}`,
-        })),
-      [categoryData?.results],
-    );
 
     const { data: productData } = useQuery({
       queryKey: [QueryKeys.products.list],
       queryFn: () => {
         return getProductsApi({ page: 1, limit: 1000000000 });
       },
+      enabled: false
     });
 
     const products = useMemo(
@@ -122,41 +144,25 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
       [productData?.results],
     );
 
-     const { data: unitData } = useQuery({
-      queryKey: [QueryKeys.unit.list],
-      queryFn: () => {
-        return getProductsApi({ page: 1, limit: 1000000000 });
-      },
-    });
-
-    const units = useMemo(
-      () =>
-        unitData?.results?.map((item: any) => ({
-          value: item.id,
-          label: `${item?.code}-${item?.name || ""}`,
-        })),
-      [unitData?.results],
-    );
 
 
     const isUpdate = useMemo(() => warehouseImEx.id, [warehouseImEx.id]);
     useImperativeHandle(ref, () => ({
       show: (data: WarehouseImExFormData | any) => {
-        console.log("data", data);
         setOpen(true);
         form.setFieldsValue(
           data.id
             ? {
-                ...data,
-                warehouse: data?.warehouse?.id || "",
-                supplier: data?.supplier?.id || "",
-                items: data?.items.map((item: any) => ({
-                  ...item,
-                  productCode: item?.product?.id || "",
-                  unit: item?.unit?.id || "",
-                  category: item?.category?.id || "",
-                })) || [],
-              }
+              ...data,
+              warehouse: data?.warehouse?.id || "",
+              supplier: data?.supplier?.id || "",
+              items: data?.items.map((item: any) => ({
+                ...item,
+                productCode: item?.product?.id || "",
+                unit: item?.unit?.id || "",
+                category: item?.category?.id || "",
+              })) || [],
+            }
             : initForm,
         );
         setWarehouseImEx(
@@ -174,7 +180,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
       mutationFn: (payload: WarehouseImExFormData) => {
         return isUpdate
           ? updateWarehousesApi({ ...payload, warehouseId: warehouse.id })
-          : createWarehouseApi(payload);
+          : createInventoriesApi(payload);
       },
       onSuccess: () => {
         dispatchToast(
@@ -190,21 +196,204 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
         dispatchToast(
           "warning",
           error?.response?.data?.message ||
-            `${isUpdate ? "Cập nhật" : "Tạo"} kho thất bại`,
+          `${isUpdate ? "Cập nhật" : "Tạo"} kho thất bại`,
         );
       },
     });
 
+    const validateItems = () => {
+      const invalidIds: string[] = [];
+
+      itemsData.forEach((item) => {
+        if (
+          !item.product ||
+          !item.quantity ||
+          item.quantity <= 0 ||
+          !item.price ||
+          item.price <= 0
+        ) {
+          invalidIds.push(item.idPath);
+        }
+      });
+
+      setErrorRows(invalidIds);
+
+      return invalidIds.length === 0;
+    };
+
+    const disableErrorRows = () => {
+      if (errorRows.length > 0) return setErrorRows([])
+    }
+
     const onFinish = (values: WarehouseImExFormData) => {
+      const isValid = validateItems();
+      console.log("temsData", itemsData)
+
+      if (!isValid) {
+        dispatchToast("warning", "Vui lòng kiểm tra lại các dòng sản phẩm");
+        return;
+      }
       mutate(values);
     };
 
+    const columns: ColumnsType = [
+      {
+        title: "STT",
+        dataIndex: "id",
+        key: "id",
+        render: (_, __, index) => index + 1,
+        align: "center",
+        width: 20,
+      },
+      {
+        title: "Sản phẩm",
+        dataIndex: "product",
+        key: "id",
+        render: () => <Select
+          onFocus={disableErrorRows}
+          showSearch
+          options={products || []}
+          onChange={(value) => {
+            console.log(value)
+          }}
+          placeholder="Vui lòng chọn sản phẩm"
+          popupRender={(menu) => {
+            return <>
+              <Button type="link">Thêm sản phẩm</Button>
+              {menu}
+            </>
+          }}
+        />,
+        align: "center",
+        width: 80,
+      },
+      {
+        title: "Số lượng",
+        dataIndex: "quantity",
+        key: "quantity",
+        render: (value, item, index) => <Input
+          onFocus={disableErrorRows}
+          onBlur={(event) => {
+            const newValue = Number(event.target.value);
+            setItemsData(produce((draft) => {
+              const itemToUpdate = draft.find((draftItem) => draftItem.idPath === item.idPath);
+              if (itemToUpdate) {
+                itemToUpdate.quantity = newValue;
+              }
+            }));
+          }}
+          onKeyDown={(e) => {
+             if(['Backspace', 'Delete', 'Meta' ].includes(e.key)) return ;
+             if (!/[0-9]/.test(e.key) ) {
+              e.preventDefault();
+            }
+          }}
+          // onChange={(e) => {
+          //   const value = e.target.value.replace(/\D/g, ""); // chỉ giữ số
+          //   console.log("value", value)
+          //   e.target.value = value;
+          // }}
+          placeholder="Số lượng"
+          inputMode="numeric"
+
+        // value={value}
+        />,
+        align: "center",
+        width: 80,
+      },
+      {
+        title: "Giá",
+        dataIndex: "price",
+        key: "price",
+        render: (_, item, index) => <Input
+          onFocus={disableErrorRows}
+          onKeyDown={(e) => {
+             if(['Backspace', 'Delete', 'Meta' ].includes(e.key)) return ;
+             if (!/[0-9]/.test(e.key) ) {
+              e.preventDefault();
+            }
+          }}
+          placeholder="Giá sản phẩm"
+          inputMode="numeric"
+          onBlur={(event) => {
+            const newValue = Number(event.target.value);
+            setItemsData(produce((draft) => {
+              const itemToUpdate = draft.find((draftItem) => draftItem.idPath === item.idPath);
+              if (itemToUpdate) {
+                itemToUpdate.price = newValue;
+              }
+            }));
+          }}
+        />,
+        align: "center",
+        width: 80,
+      },
+      {
+        title: "Đơn vị",
+        dataIndex: "unit",
+        key: "unit",
+        // render: (_, __, index) => <Select
+        //   options={units || []}
+        //   placeholder="Vui lòng chọn đơn vị"
+        // />,
+        align: "center",
+        width: 80,
+      },
+      {
+        title: "Danh mục",
+        dataIndex: "category",
+        key: "category",
+        // render: () => <Select
+        //                       options={categories || []}
+        //                       placeholder="Vui lòng chọn danh mục"
+        //                     />,
+        align: "center",
+        width: 80,
+      },
+      {
+        title: "Tuỳ chọn",
+        dataIndex: "",
+        key: "",
+        render: (_, __, index) => <Row justify={'center'} gutter={8}>
+          <Col>
+            <Tag onClick={() =>
+              setItemsData((prev) => [...prev, {
+                ...ItemTemplate,
+                idPath: UUID()
+              }])
+            } style={{
+              cursor: 'pointer'
+            }} key={'green'} color={'green'} variant={'filled'}>
+              <PlusOutlined style={{ fontSize: 22 }} />
+            </Tag>
+
+          </Col>
+
+          <Col>
+
+            <Tag onClick={() => {
+              if (itemsData.length === 1) return;
+              setItemsData((prev) => prev.filter((_, i) => i !== index))
+            }} style={{
+              cursor: 'pointer'
+            }} key={'red'} color={'red'} variant={'filled'}>
+              <MinusOutlined style={{ fontSize: 22 }} />
+            </Tag>
+          </Col>
+
+        </Row>,
+        align: "center",
+        width: 120,
+      },
+    ]
+    console.log("123")
     return (
       <Modal
         open={open}
-        title="Chi tiết"
+        title="Nhập kho"
         onCancel={() => setOpen(false)}
-        onOk={() => form.submit()}
+        // onOk={() => form.submit()}
+        onOk={() => onFinish({})}
         // destroyOnHidden
         okText={`${!isUpdate ? "Tạo" : "Cập nhật"}`}
         cancelText="Đóng"
@@ -216,212 +405,67 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
           onFinish={onFinish}
           initialValues={initForm}
         >
-          <Form.Item
-            label="Lý do"
-            name="reason"
-            rules={[{ required: true, message: "Vui lòng nhập lý do" }]}
-          >
-            <Input maxLength={200} />
-          </Form.Item>
+          <Row gutter={8}>
 
-          <Form.Item
-            label="Kho"
-            name="warehouse"
-            rules={[{ required: true, message: "Vui lòng chọn kho" }]}
-          >
-            <Select
-              showSearch={{ optionFilterProp: "label" }}
-              options={warehouses || []}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Nhà cung cấp"
-            name="supplier"
-            rules={[{ required: true, message: "Vui lòng chọn nhà cung cấp" }]}
-          >
-            <Select
-              showSearch={{ optionFilterProp: "label" }}
-              options={suppliers || []}
-            />
-          </Form.Item>
+            <Col span={12}>
+              <Form.Item
+                label="Kho"
+                name="warehouse"
+                rules={[{ required: true, message: "Vui lòng chọn kho" }]}
+              >
+                <Select
+                  showSearch={{ optionFilterProp: "label" }}
+                  options={warehouses || []}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="Nhà cung cấp"
+                name="supplier"
+                rules={[{ required: true, message: "Vui lòng chọn nhà cung cấp" }]}
+              >
+                <Select
+                  showSearch={{ optionFilterProp: "label" }}
+                  options={suppliers || []}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
-          <Form.Item
-            label="Người chuyển"
-            name="deliveryPerson"
-            rules={[{ required: true, message: "Vui lòng nhập người chuyển" }]}
-          >
-            <Input maxLength={24} />
-          </Form.Item>
-          <Form.List name="items">
-            {(fields, { add, remove }) => (
-              <>
-                {fields.map(({ key, name, ...restField }) => (
-                  <Row
-                    key={key}
-                    style={{
-                      paddingBottom: 8,
-                      paddingTop: 8,
-                      borderTop: "1px solid #ccc",
-                      borderBottom: "1px solid #ccc",
-                    }}
-                    justify={"space-between"}
-                    align={"middle"}
-                    gutter={8}
-                  >
-                    <Col span={23}>
-                      <Row gutter={8}>
-                        <Col span={24}>
-                          <Form.Item
-                            {...restField}
-                            name={[name, "productCode"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Vui lòng chọn sản phẩm",
-                              },
-                            ]}
-                          >
-                          <Select
-                            options={products || []}
-                            placeholder="Vui lòng chọn sản phẩm"
-                          />
-                            {/* <Input placeholder="Mã sản phẩm" /> */}
-                          </Form.Item>
-                        </Col>
-               
-                      </Row>
+          <Row gutter={8}>
 
-                      <Row gutter={8}>
-                        <Col span={12}>
-                          <Form.Item
-                            {...restField}
-                            name={[name, "unit"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Vui lòng chọn đơn vị",
-                              },
-                            ]}
-                          >
-                            <Select
-                              options={units || []}
-                              placeholder="Vui lòng chọn đơn vị"
-                            />
-                          </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                          <Form.Item
-                            {...restField}
-                            name={[name, "package"]}
-                            rules={[{ required: true, message: "Gói" }]}
-                          >
-                            <Input placeholder="Vui lòng nhập gói sản phẩm" />
-                          </Form.Item>
-                        </Col>
-                      </Row>
+            <Col span={12}>
+              <Form.Item
+                label="Người vận chuyển"
+                name="deliveryPerson"
+                rules={[{ required: true, message: "Vui lòng nhập người vận chuyển" }]}
+              >
+                <Input maxLength={24} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
 
-                      <Row gutter={8}>
-                        <Col span={12}>
-                          <Form.Item
-                            {...restField}
-                            name={[name, "quantity"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Vui lòng nhập số lượng",
-                              },
-                            ]}
-                          >
-                            <Input placeholder="Số lượng" />
-                          </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                          <Form.Item
-                            {...restField}
-                            name={[name, "price"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Vui lòng nhập giá sản phẩm",
-                              },
-                            ]}
-                          >
-                            <Input
-                              placeholder="Giá sản phẩm"
-                              inputMode="numeric"
-                            />
-                          </Form.Item>
-                        </Col>
-                      </Row>
+              <Form.Item
+                label="Lý do"
+                name="reason"
+                rules={[{ required: true, message: "Vui lòng nhập lý do" }]}
+              >
+                <Input maxLength={200} />
+              </Form.Item>
+            </Col>
+          </Row>
+          <TableCommon
+            columns={columns}
+            rowKey={'id'}
+            dataSource={itemsData}
+            rowClassName={(record) => {
+              return errorRows.includes(record.idPath) ? "error-row" : ""
+            }
+              // errorRows.includes(record.idPath) ? "error-row" : ""
+            }
+          />
 
-                      <Row gutter={8}>
-                        <Col span={12}>
-                          <Form.Item
-                            {...restField}
-                            name={[name, "expiryDate"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Vui lòng chọn ngày hết hạn",
-                              },
-                            ]}
-                          >
-                            <DatePicker
-                              placeholder="Ngày hết hạn"
-                              style={{ width: "100%" }}
-                            />
-                          </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                          <Form.Item
-                            {...restField}
-                            name={[name, "category"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Vui lòng chọn danh mục",
-                              },
-                            ]}
-                          >
-                            <Select
-                              options={categories || []}
-                              placeholder="Vui lòng chọn danh mục"
-                            />
-                          </Form.Item>
-                        </Col>
-                      </Row>
-                    </Col>
-
-                    <Col span={1}>
-                      <MinusCircleOutlined onClick={() => remove(name)} />
-                    </Col>
-                  </Row>
-                ))}
-                <Form.Item>
-                  <Button
-                    type="dashed"
-                    onClick={() => add()}
-                    block
-                    icon={<PlusOutlined />}
-                  >
-                    Thêm sản phẩm
-                  </Button>
-                </Form.Item>
-              </>
-            )}
-          </Form.List>
-          {/* {!isUpdate && (
-          <Form.Item
-            label="Mật khẩu"
-            name="password"
-            rules={[
-              { required: true, message: "Vui lòng nhập mật khẩu" },
-              { min: 6, message: "Mật khẩu ít nhất 6 ký tự" },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-        )} */}
         </Form>
       </Modal>
     );

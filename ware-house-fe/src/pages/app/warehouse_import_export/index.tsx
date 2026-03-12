@@ -32,6 +32,7 @@ const WarehouseImportAndExport = memo(() => {
       return getInventoriesApi(payload);
     },
     gcTime: 15 * 60 * 1000, // 15 phut cache
+    enabled:false
   });
 
   console.log("data", data);
@@ -111,7 +112,7 @@ const WarehouseImportAndExport = memo(() => {
         render:(record) => record?.name + " - " + record?.email
       },
           {
-        title: "Người chuyển",
+        title: "Người vận chuyển",  
         dataIndex: "deliveryPerson",
         key: "deliveryPerson",
         align: "center",

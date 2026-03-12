@@ -14,6 +14,8 @@ const queryClient = new QueryClient({
       gcTime: 0,
       retry: false,
       placeholderData: (previousData:any) => previousData,
+      refetchOnWindowFocus:false,
+      
       
     },
     mutations: {

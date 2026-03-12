@@ -42,7 +42,7 @@ AxiosClient.interceptors.response.use(
     return Promise.resolve(res.data);
   },
   async (err: AxiosResponse | any) => {
-    // console.log("rrror", err);
+    console.log("rrror", err);
     
     if ([err?.response?.status,err.status].includes(401) && !err.config.url.includes('auth')) {
       store.dispatch(removeCurrentUser());
