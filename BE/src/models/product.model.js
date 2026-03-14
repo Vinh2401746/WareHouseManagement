@@ -14,11 +14,6 @@ const productSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
-      required: true,
-    },
     unit: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Unit',

@@ -141,9 +141,7 @@ const importInventory = async (importInventoryBody, req) => {
           code: item.productCode,
           name: item.productName,
           unit: item.unit,
-          category: item.category,
           // package: item.package,
-          // category: item.category,
         });
       }
       const batchCode = `B${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.random()
@@ -186,7 +184,6 @@ const importInventory = async (importInventoryBody, req) => {
     createdBy: req.user.id,
     items: batches,
     deliveryPerson,
-    // category: item.category,
     totalAmountAfterFax: totalAmountAfterFax || 0,
     discountMoney: discountMoney || 0,
     taxMoney: taxMoney || 0,

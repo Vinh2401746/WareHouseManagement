@@ -23,7 +23,7 @@ const createProduct = async (productBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryProducts = async (filter, options) => {
-  options.populate = 'category unit';
+  options.populate = 'unit';
   const products = await Product.paginate(filter, options);
   return products;
 };
@@ -34,7 +34,7 @@ const queryProducts = async (filter, options) => {
  * @returns {Promise<Product>}
  */
 const getProductById = async (id) => {
-  return Product.findById(id).populate('category unit');
+  return Product.findById(id).populate('unit');
 };
 
 /**

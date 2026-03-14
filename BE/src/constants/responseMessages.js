@@ -30,9 +30,6 @@ const responseMessages = {
   warehouse: {
     notFound: 'Không tìm thấy kho',
   },
-  category: {
-    notFound: 'Không tìm thấy danh mục',
-  },
   product: {
     notFound: 'Không tìm thấy sản phẩm',
   },

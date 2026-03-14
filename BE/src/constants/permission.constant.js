@@ -5,8 +5,6 @@ const PERMISSIONS = {
   MANAGE_BRANCHES: 'manageBranches',
   GET_WAREHOUSES: 'getWarehouses',
   MANAGE_WAREHOUSES: 'manageWarehouses',
-  GET_CATEGORIES: 'getCategories',
-  MANAGE_CATEGORIES: 'manageCategories',
   GET_PRODUCTS: 'getProducts',
   MANAGE_PRODUCTS: 'manageProducts',
   GET_SUPPLIERS: 'getSuppliers',

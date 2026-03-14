@@ -2,7 +2,6 @@ module.exports.authValidation = require('./auth.validation');
 module.exports.userValidation = require('./user.validation');
 module.exports.branchValidation = require('./branch.validation');
 module.exports.warehouseValidation = require('./warehouse.validation');
-module.exports.categoryValidation = require('./category.validation');
 module.exports.productValidation = require('./product.validation');
 module.exports.supplierValidation = require('./supplier.validation');
 module.exports.productBatchValidation = require('./productBatch.validation');

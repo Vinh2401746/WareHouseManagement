@@ -44,7 +44,6 @@ module.exports = router;
  *             required:
  *               - code
  *               - name
- *               - category
  *               - unit
  *               - minStock
  *             properties:
@@ -53,9 +52,6 @@ module.exports = router;
  *                 description: Mã sản phẩm (duy nhất)
  *               name:
  *                 type: string
- *               category:
- *                 type: string
- *                 description: ID danh mục
  *               unit:
  *                 type: string
  *               minStock:
@@ -66,7 +62,6 @@ module.exports = router;
  *             example:
  *               code: PRD-001
  *               name: Nồi cơm điện
- *               category: 65a1b2c3d4e5f6a7b8c9d014
  *               unit: cái
  *               minStock: 10
  *               package: Hộp
@@ -101,11 +96,6 @@ module.exports = router;
  *         schema:
  *           type: string
  *         description: Tên sản phẩm
- *       - in: query
- *         name: category
- *         schema:
- *           type: string
- *         description: ID danh mục
  *       - in: query
  *         name: unit
  *         schema:
@@ -218,8 +208,6 @@ module.exports = router;
  *               code:
  *                 type: string
  *               name:
- *                 type: string
- *               category:
  *                 type: string
  *               unit:
  *                 type: string

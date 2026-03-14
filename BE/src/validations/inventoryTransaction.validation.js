@@ -125,10 +125,6 @@ const importInventory = {
             'any.required': 'Ngày hết hạn là bắt buộc',
             'date.base': 'Ngày hết hạn phải là ngày hợp lệ',
           }),
-          category: Joi.string().required().custom(objectId).messages({
-            'any.required': 'Danh mục sản phẩm là bắt buộc',
-            'string.base': 'Danh mục sản phẩm phải là chuỗi',
-          }),
         })
       )
       .min(1)

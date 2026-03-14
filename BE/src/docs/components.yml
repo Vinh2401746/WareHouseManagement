@@ -53,20 +53,6 @@ components:
         branch: 65a1b2c3d4e5f6a7b8c9d012
         address: 456 Đường B, Hà Nội
 
-    Category:
-      type: object
-      properties:
-        id:
-          type: string
-        code:
-          type: string
-        name:
-          type: string
-      example:
-        id: 65a1b2c3d4e5f6a7b8c9d014
-        code: CAT-001
-        name: Đồ gia dụng
-
     Product:
       type: object
       properties:
@@ -75,8 +61,6 @@ components:
         code:
           type: string
         name:
-          type: string
-        category:
           type: string
         unit:
           type: string
@@ -88,7 +72,6 @@ components:
         id: 65a1b2c3d4e5f6a7b8c9d015
         code: PRD-001
         name: Nồi cơm điện
-        category: 65a1b2c3d4e5f6a7b8c9d014
         unit: cái
         minStock: 10
         package: Hộp

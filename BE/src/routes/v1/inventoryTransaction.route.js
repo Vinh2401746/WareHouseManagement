@@ -383,7 +383,6 @@ module.exports = router;
  *                     - quantity
  *                     - price
  *                     - expiryDate
- *                     - category
  *                   properties:
  *                     productCode:
  *                       type: string
@@ -406,9 +405,6 @@ module.exports = router;
  *                       type: string
  *                       format: date
  *                       description: Ngày hết hạn
- *                     category:
- *                       type: string
- *                       description: ID danh mục sản phẩm
  *             example:
  *               warehouse: 65a1b2c3d4e5f6a7b8c9d013
  *               supplier: 65a1b2c3d4e5f6a7b8c9d016
@@ -426,7 +422,6 @@ module.exports = router;
  *                   quantity: 10
  *                   price: 150000
  *                   expiryDate: 2026-12-01
- *                   category: 65a1b2c3d4e5f6a7b8c9d014
  *                 - productCode: PRD-002
  *                   productName: Ấm siêu tốc
  *                   unit: 65a1b2c3d4e5f6a7b8c9d020
@@ -434,7 +429,6 @@ module.exports = router;
  *                   quantity: 5
  *                   price: 200000
  *                   expiryDate: 2027-06-15
- *                   category: 65a1b2c3d4e5f6a7b8c9d014
  *     responses:
  *       "201":
  *         description: Tạo phiếu nhập thành công

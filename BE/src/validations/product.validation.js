@@ -11,9 +11,6 @@ const createProduct = {
       'any.required': 'Tên sản phẩm là bắt buộc',
       'string.base': 'Tên sản phẩm phải là chuỗi',
     }),
-    category: Joi.custom(objectId).required().messages({
-      'any.required': 'Danh mục là bắt buộc',
-    }),
     unit: Joi.string().required().messages({
       'any.required': 'Đơn vị là bắt buộc',
       'string.base': 'Đơn vị phải là chuỗi',
@@ -34,7 +31,6 @@ const getProducts = {
   query: Joi.object().keys({
     code: Joi.string(),
     name: Joi.string(),
-    category: Joi.custom(objectId),
     unit: Joi.string(),
     minStock: Joi.number().integer().min(0),
     package: Joi.string(),
@@ -58,7 +54,6 @@ const updateProduct = {
     .keys({
       code: Joi.string(),
       name: Joi.string(),
-      category: Joi.custom(objectId),
       unit: Joi.string(),
       minStock: Joi.number().integer().min(0),
       package: Joi.string(),
