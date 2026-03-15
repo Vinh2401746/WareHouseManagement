@@ -6,7 +6,7 @@ const { saleService } = require('../services');
 const responseMessages = require('../constants/responseMessages');
 
 const createSale = catchAsync(async (req, res) => {
-  const sale = await saleService.createSale(req.body);
+  const sale = await saleService.createSale(req.body, req.user);
   res.status(httpStatus.CREATED).send(sale);
 });
 

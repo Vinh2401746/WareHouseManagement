@@ -51,6 +51,8 @@ const responseMessages = {
   sale: {
     notFound: 'Không tìm thấy đơn bán hàng',
     notEnoughStock: 'Không đủ tồn kho',
+    batchExpired: 'Lô sản phẩm đã hết hạn, vui lòng chọn lô khác',
+    branchWarehouseMismatch: 'Chi nhánh không khớp với kho xuất',
   },
   productBatch: {
     notFound: 'Không tìm thấy lô sản phẩm',

@@ -1,27 +1,41 @@
 const Joi = require('joi');
 const { objectId } = require('./custom.validation');
 
+const saleItemSchema = Joi.object({
+  product: Joi.string().required().custom(objectId),
+  batch: Joi.string().custom(objectId),
+  quantity: Joi.number().strict().positive().required(),
+  price: Joi.number().strict().min(0).required(),
+});
+
 const createSale = {
-  body: Joi.object().keys({
-    code: Joi.string(),
-    branch: Joi.string(),
-    warehouse: Joi.string(),
-    soldBy: Joi.string(),
-    saleDate: Joi.string(),
-    totalAmount: Joi.string(),
-    items: Joi.string(),
-  }),
+  body: Joi.object()
+    .keys({
+      code: Joi.string().trim(),
+      customerName: Joi.string().trim().required(),
+      note: Joi.string().allow('', null),
+      branch: Joi.string().required().custom(objectId),
+      warehouse: Joi.string().required().custom(objectId),
+      saleDate: Joi.date(),
+      items: Joi.array().items(saleItemSchema).min(1).required(),
+    })
+    .unknown(false),
 };
 
 const getSales = {
   query: Joi.object().keys({
     code: Joi.string(),
-    branch: Joi.string(),
-    warehouse: Joi.string(),
-    soldBy: Joi.string(),
-    saleDate: Joi.string(),
-    totalAmount: Joi.string(),
-    items: Joi.string(),
+    customerName: Joi.string(),
+    branch: Joi.string().custom(objectId),
+    warehouse: Joi.string().custom(objectId),
+    soldBy: Joi.string().custom(objectId),
+    saleDate: Joi.date(),
+    totalAmount: Joi.number().min(0),
+    minTotalAmount: Joi.number().min(0),
+    maxTotalAmount: Joi.number().min(0),
+    sortBy: Joi.string(),
+    limit: Joi.number().integer().min(1),
+    page: Joi.number().integer().min(1),
   }),
 };
 
@@ -37,13 +51,13 @@ const updateSale = {
   }),
   body: Joi.object()
     .keys({
-      code: Joi.string(),
-      branch: Joi.string(),
-      warehouse: Joi.string(),
-      soldBy: Joi.string(),
-      saleDate: Joi.string(),
-      totalAmount: Joi.string(),
-      items: Joi.string(),
+      code: Joi.string().trim(),
+      customerName: Joi.string().trim(),
+      note: Joi.string().allow('', null),
+      branch: Joi.string().custom(objectId),
+      warehouse: Joi.string().custom(objectId),
+      saleDate: Joi.date(),
+      items: Joi.array().items(saleItemSchema).min(1),
     })
     .min(1),
 };

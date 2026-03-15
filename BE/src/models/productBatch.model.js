@@ -43,16 +43,6 @@ const productBatchSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
-    taxRate: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-    discountRate: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
     totalAmount: {
       type: Number,
       default: 0,

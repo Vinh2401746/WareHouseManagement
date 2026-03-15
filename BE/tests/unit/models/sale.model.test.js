@@ -1,4 +1,5 @@
 const faker = require('faker');
+const mongoose = require('mongoose');
 const { Sale } = require('../../../src/models');
 
 describe('Sale model', () => {
@@ -7,13 +8,26 @@ describe('Sale model', () => {
 
     beforeEach(() => {
       newSale = {
-        code: faker.random.word(),
-        branch: faker.random.word(),
-        warehouse: faker.random.word(),
-        soldBy: faker.random.word(),
-        saleDate: faker.random.word(),
-        totalAmount: faker.random.word(),
-        items: faker.random.word(),
+        code: `SALE-${Date.now()}`,
+        customerName: faker.name.findName(),
+        note: faker.lorem.sentence(),
+        branch: new mongoose.Types.ObjectId(),
+        warehouse: new mongoose.Types.ObjectId(),
+        soldBy: new mongoose.Types.ObjectId(),
+        saleDate: new Date(),
+        totalAmount: 1000000,
+        discountMoney: 50000,
+        taxMoney: 95000,
+        totalAmountAfterFax: 1045000,
+        items: [
+          {
+            product: new mongoose.Types.ObjectId(),
+            batch: new mongoose.Types.ObjectId(),
+            quantity: 10,
+            price: 100000,
+            lineTotal: 1045000,
+          },
+        ],
       };
     });
 

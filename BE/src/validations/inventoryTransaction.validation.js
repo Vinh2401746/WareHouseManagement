@@ -64,14 +64,6 @@ const importInventoryBody = Joi.object().keys({
           'number.base': 'Giá phải là số',
           'number.min': 'Giá phải lớn hơn hoặc bằng 0',
         }),
-        taxRate: Joi.number().min(0).messages({
-          'number.base': 'Thuế suất phải là số',
-          'number.min': 'Thuế suất phải lớn hơn hoặc bằng 0',
-        }),
-        discountRate: Joi.number().min(0).messages({
-          'number.base': 'Chiết khấu (%) phải là số',
-          'number.min': 'Chiết khấu (%) phải lớn hơn hoặc bằng 0',
-        }),
         totalAmount: Joi.number().min(0).messages({
           'number.base': 'Thành tiền phải là số',
           'number.min': 'Thành tiền phải lớn hơn hoặc bằng 0',

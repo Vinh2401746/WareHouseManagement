@@ -32,9 +32,39 @@ const saleSchema = mongoose.Schema(
       default: Date.now,
     },
 
+    customerName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    note: {
+      type: String,
+      trim: true,
+    },
+
     totalAmount: {
       type: Number,
       required: true,
+      min: 0,
+    },
+
+    discountMoney: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    taxMoney: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    totalAmountAfterFax: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
 
     items: [
@@ -44,13 +74,24 @@ const saleSchema = mongoose.Schema(
           ref: 'Product',
           required: true,
         },
+        batch: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'ProductBatch',
+        },
         quantity: {
           type: Number,
           required: true,
+          min: 0,
         },
         price: {
           type: Number,
           required: true,
+          min: 0,
+        },
+        lineTotal: {
+          type: Number,
+          default: 0,
+          min: 0,
         },
       },
     ],

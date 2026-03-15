@@ -18,7 +18,7 @@ const populateInventoryTransactionQuery = (query) =>
     })
     .populate({
       path: 'items.batch',
-      select: 'batchCode expiryDate productCode productName unit importPrice taxRate discountRate totalAmount',
+      select: 'batchCode expiryDate productCode productName unit importPrice totalAmount',
       populate: {
         path: 'unit',
       },
@@ -45,8 +45,6 @@ const mapInventoryTransactionForClient = (inventoryTransaction) => {
           unit,
           batchCode: (batch && batch.batchCode) || '',
           expiryDate: (batch && batch.expiryDate) || null,
-          taxRate: (batch && typeof batch.taxRate === 'number' ? batch.taxRate : 0) || 0,
-          discountRate: (batch && typeof batch.discountRate === 'number' ? batch.discountRate : 0) || 0,
           totalAmount:
             typeof item.totalAmount === 'number'
               ? item.totalAmount
@@ -125,8 +123,6 @@ const buildImportTransactionItems = async (items, warehouse) =>
         expiryDate: item.expiryDate,
         quantity: item.quantity,
         importPrice: item.price,
-        taxRate: typeof item.taxRate === 'number' ? item.taxRate : 0,
-        discountRate: typeof item.discountRate === 'number' ? item.discountRate : 0,
         totalAmount: lineTotalAmount,
       });
 

@@ -1,44 +1,135 @@
 const httpStatus = require('http-status');
-const { Sale, InventoryTransaction, ProductBatch } = require('../models');
+const { Sale, InventoryTransaction, ProductBatch, Warehouse } = require('../models');
 const ApiError = require('../utils/ApiError');
 const responseMessages = require('../constants/responseMessages');
+
+// Hàm gom logic làm tròn để tránh lệch tiền giữa BE và FE
+const roundCurrency = (value) => Math.round(value);
+
+// Tính tiền cho một dòng hàng hoá (giá trị gốc, chiết khấu, thuế, thành tiền)
+const computeLineAmounts = (quantity, price) => {
+  const baseAmount = quantity * price;
+  const lineTotal = roundCurrency(baseAmount);
+
+  return {
+    baseAmount,
+    discountAmount: 0,
+    taxAmount: 0,
+    lineTotal,
+  };
+};
 
 /**
  * Create a sale
  * @param {Object} saleBody
+ * @param {Object} user
  * @returns {Promise<Sale>}
  */
-const createSale = async (req) => {
-  const { branch, warehouse, items } = req.body;
+const createSale = async (saleBody, user) => {
+  const { branch, warehouse, items, customerName, note, saleDate, code } = saleBody;
+  const warehouseDoc = await Warehouse.findById(warehouse);
 
-  const itemResults = await Promise.all(
-    items.map(async (item) => {
+  if (!warehouseDoc) {
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.warehouse.notFound);
+  }
+
+  const resolvedBranch = branch || warehouseDoc.branch;
+  if (!resolvedBranch) {
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.branch.notFound);
+  }
+
+  if (branch && warehouseDoc.branch && warehouseDoc.branch.toString() !== branch) {
+    throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.sale.branchWarehouseMismatch);
+  }
+
+  const now = new Date();
+  const saleItems = [];
+  const inventoryItems = [];
+
+  let totalAmount = 0;
+  let discountMoney = 0;
+  let taxMoney = 0;
+  let totalAmountAfterFax = 0;
+
+  const registerLine = ({ product, batchId, quantity, price }) => {
+    const { baseAmount, discountAmount, taxAmount, lineTotal } = computeLineAmounts(quantity, price);
+
+    totalAmount += baseAmount;
+    discountMoney += discountAmount;
+    taxMoney += taxAmount;
+    totalAmountAfterFax += lineTotal;
+
+    saleItems.push({
+      product,
+      batch: batchId,
+      quantity,
+      price,
+      lineTotal,
+    });
+
+    inventoryItems.push({
+      product,
+      batch: batchId,
+      quantity,
+      price,
+      totalAmount: lineTotal,
+    });
+  };
+
+  for (const item of items) {
+    if (item.batch) {
+      const batch = await ProductBatch.findOne({
+        _id: item.batch,
+        product: item.product,
+        warehouse,
+      });
+
+      if (!batch) {
+        throw new ApiError(httpStatus.NOT_FOUND, responseMessages.productBatch.notFound);
+      }
+
+      if (batch.expiryDate < now) {
+        throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.sale.batchExpired);
+      }
+
+      if (batch.quantity < item.quantity) {
+        throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.sale.notEnoughStock);
+      }
+
+      batch.quantity -= item.quantity;
+      await batch.save();
+
+      registerLine({
+        product: item.product,
+        batchId: batch._id,
+        quantity: item.quantity,
+        price: item.price,
+      });
+    } else {
       let remainingQty = item.quantity;
 
       const batches = await ProductBatch.find({
         product: item.product,
         warehouse,
         quantity: { $gt: 0 },
-        expiryDate: { $gte: new Date() },
-      }).sort({ expiryDate: 1 });
-
-      const exportItems = [];
-      const savePromises = [];
+        expiryDate: { $gte: now },
+      }).sort({ expiryDate: 1, createdAt: 1 });
 
       for (const batch of batches) {
         if (remainingQty <= 0) break;
 
         const usedQty = Math.min(batch.quantity, remainingQty);
-        if (usedQty <= 0) continue;
+        if (usedQty <= 0) {
+          continue;
+        }
 
         batch.quantity -= usedQty;
         remainingQty -= usedQty;
+        await batch.save();
 
-        savePromises.push(batch.save());
-
-        exportItems.push({
+        registerLine({
           product: item.product,
-          batch: batch._id,
+          batchId: batch._id,
           quantity: usedQty,
           price: item.price,
         });
@@ -47,36 +138,43 @@ const createSale = async (req) => {
       if (remainingQty > 0) {
         throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.sale.notEnoughStock);
       }
+    }
+  }
 
-      await Promise.all(savePromises);
-
-      return {
-        amount: item.quantity * item.price,
-        exportItems,
-      };
-    })
-  );
-
-  const totalAmount = itemResults.reduce((sum, item) => sum + item.amount, 0);
-  const exportItems = itemResults.flatMap((item) => item.exportItems);
-
-  const sale = await Sale.create({
-    code: `SALE-${Date.now()}`,
-    branch,
+  const salePayload = {
+    code: code || `SALE-${Date.now()}`,
+    branch: resolvedBranch,
     warehouse,
-    soldBy: req.user.id,
+    soldBy: user && user.id,
+    customerName,
+    note,
     totalAmount,
-    items,
-  });
+    discountMoney,
+    taxMoney,
+    totalAmountAfterFax,
+    items: saleItems,
+  };
+
+  if (saleDate) {
+    salePayload.saleDate = saleDate;
+  }
+
+  const sale = await Sale.create(salePayload);
 
   await InventoryTransaction.create({
     type: 'EXPORT',
     reason: 'SALE',
     warehouse,
     sale: sale._id,
-    createdBy: req.user.id,
-    items: exportItems,
+    createdBy: user && user.id,
+    status: 'COMPLETED',
+    totalAmount,
+    discountMoney,
+    taxMoney,
+    totalAmountAfterFax,
+    items: inventoryItems,
   });
+
   return sale;
 };
 
