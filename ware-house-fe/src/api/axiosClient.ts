@@ -47,7 +47,9 @@ AxiosClient.interceptors.response.use(
     if ([err?.response?.status,err.status].includes(401) && !err.config.url.includes('auth')) {
       store.dispatch(removeCurrentUser());
       dispatchToast("error","Hết phiên làm việc. Vui lòng đăng nhập lại.")
-      router.navigate(AppRoutes.root, { replace: true });
+      // setTimeout(() => {
+      //   router.navigate(AppRoutes.root, { replace: true });
+      // }, 0);
     }
     return Promise.reject(err);
   },

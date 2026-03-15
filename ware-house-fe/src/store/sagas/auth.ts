@@ -32,11 +32,11 @@ const fakeAuthResponse: AuthResponseLoginType = {
 };
 function* loginSaga(action: PayloadAction<AuthRequestLoginType>) {
   try {
-    // const inforLogin: AuthResponseLoginType = yield call(authLoginApi, action.payload);
-    // console.log("inforLogin",inforLogin);
+    const inforLogin: AuthResponseLoginType = yield call(authLoginApi, action.payload);
+    console.log("inforLogin",inforLogin);
     
     yield put(logginRequesteSuccess());
-    yield put(setInforUser(fakeAuthResponse));
+    yield put(setInforUser(inforLogin));
     
 
     //   yield put({type: "USER_FETCH_SUCCEEDED", user: user});

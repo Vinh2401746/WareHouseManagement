@@ -16,6 +16,15 @@ export const createInventoriesApi = async (payload: CreateInventoryRequest) => {
   return AxiosClient.post(`inventory/import`, payload);
 };
 
+
+export const comfirmInventoryApi = async (payload: {id:string}) => {
+  console.log("payload", payload)
+  if(!payload.id) throw Error("Không tìm thấy đơn duyệt")
+  return AxiosClient.patch(`inventory/import/${payload.id}/confirm`);
+};
+
+
+
 export const updateProductsApi = async (payload: UpdateProductRequestType):Promise<CommonListResponse | any> => {
   const dataUpdate: Pick<
     UpdateProductRequestType,

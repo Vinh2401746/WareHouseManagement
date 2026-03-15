@@ -19,8 +19,8 @@ import type { GetInventoriesRequest } from "../../../types/inventory";
 
 import {  deleteWarehouseApi } from "../../../api/warehouse";
 import type { DeleteWarehouseRequestType } from "../../../types/warehouse";
-import { getInventoriesApi } from "../../../api/inventory/inventory";
-import { formatDate } from "../../../utils/helper";
+import { comfirmInventoryApi, getInventoriesApi } from "../../../api/inventory/inventory";
+import { formatDate, formatNumber } from "../../../utils/helper";
 const WarehouseImportAndExport = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -32,7 +32,7 @@ const WarehouseImportAndExport = memo(() => {
       return getInventoriesApi(payload);
     },
     gcTime: 15 * 60 * 1000, // 15 phut cache
-    enabled:false
+    // enabled:false
   });
 
   console.log("data", data);
@@ -55,17 +55,38 @@ const WarehouseImportAndExport = memo(() => {
       dispatchToast("error", "Xoá kho thất bại!");
     },
   });
+// comfirmInventoryApi
+
+  const { mutate: mutateConfirm } = useMutation({
+    mutationFn: (payload: {id:string}) =>
+      comfirmInventoryApi(payload),
+    onSuccess: () => {
+      console.log("data");
+      dispatchToast("success", "Duyệt đơn nhập kho thành công!");
+      refetch();
+    },
+    onError: (error) => {
+      console.log("error",error)
+      dispatchToast("error", "Duyệt đơn nhập kho thất bại!");
+    },
+  });
 
   const units = useMemo(() => data?.results ?? [], [data?.results]);
 
   const onAction = useCallback(
-    (type: "delete" | "update" | "reset-pass", record: any) => {
+    (type: "delete" | "update" | "reset-pass" | "approval", record: any) => {
       switch (type) {
         case "delete":
           mutate({ warehouseId: record.id } as DeleteWarehouseRequestType);
           break;
         case "update":
+          // dispatchToast("warning", "Tính năng đang phát triển")
             formRef.current?.show(record);
+          break;
+          case "approval":
+          // dispatchToast("warning", "Tính năng đang phát triển")
+          mutateConfirm({id:record.id || ''})
+            // formRef.current?.show(record);
           break;
         default:
           break;
@@ -84,13 +105,13 @@ const WarehouseImportAndExport = memo(() => {
         align: "center",
         width: 80,
       },
-      {
-        title: "Loại",
-        dataIndex: "type",
-        key: "type",
-        align: "center",
-        render: (record) => record  == "IMPORT" ? "Nhập" : "Xuất",
-      },
+      // {
+      //   title: "Loại",
+      //   dataIndex: "type",
+      //   key: "type",
+      //   align: "center",
+      //   render: (record) => record  == "IMPORT" ? "Nhập" : "Xuất",
+      // },
       {
         title: "Tên Kho",
         dataIndex: "warehouse",
@@ -109,7 +130,35 @@ const WarehouseImportAndExport = memo(() => {
         dataIndex: "createdBy",
         key: "createdBy",
         align: "center",
-        render:(record) => record?.name + " - " + record?.email
+        render:(record) =>  record?.email
+      },
+           {
+        title: "Tổng tiền thanh toán",
+        dataIndex: "totalAmountAfterFax",
+        key: "totalAmountAfterFax",
+        align: "center",
+        render:(record) =>  formatNumber(record) + 'đ'
+      },
+           {
+        title: "Chiết khấu",
+        dataIndex: "discountMoney",
+        key: "discountMoney",
+        align: "center",
+        render:(record) =>  formatNumber(record) + 'đ'
+      },
+           {
+        title: "Tiền thuế",
+        dataIndex: "taxMoney",
+        key: "taxMoney",
+        align: "center",
+        render:(record) =>  formatNumber(record) + 'đ'
+      },
+           {
+        title: "Tổng tiền",
+        dataIndex: "totalAmount",
+        key: "totalAmount",
+        align: "center",
+        render:(record) =>  formatNumber(record) + 'đ'
       },
           {
         title: "Người vận chuyển",  
@@ -142,15 +191,17 @@ const WarehouseImportAndExport = memo(() => {
                 variant={"outlined"}
                 onClick={() => onAction("update", record)}
               >
-                Xem mặt hàng
+                Chi Tiết Đơn
               </Tag>
-              <Tag
-                color={"green"}
-                variant={"outlined"}
-                onClick={() => onAction("update", record)}
-              >
-                Cập nhật
-              </Tag>
+              <Popconfirm title="Bạn chắc chắn muốn duyệt đơn này!" onConfirm={() => record?.status == "PENDING" ? onAction("approval", record) : dispatchToast("info","Đã duyệt đơn này.")}>
+                  <Tag
+                    color={"green"}
+                    variant={"outlined"}
+                  >
+                    { record?.status == "PENDING" ? "Duyệt" : "Đã duyệt"}
+                  </Tag>
+
+              </Popconfirm>
               <Popconfirm
                 title="Xác nhận xoá đơn vị này?"
                 cancelText="Huỷ"
@@ -190,15 +241,15 @@ const WarehouseImportAndExport = memo(() => {
           icon={<DownloadOutlined />}
           onClick={() => formRef.current?.show({})}
         >
-          Nhập kho
+          Tạo đơn nhập kho
         </Button>
-        <Button
+        {/* <Button
           type="primary"
           icon={<UploadOutlined />}
          onClick={() => formRef.current?.show({})}
         >
           Xuất kho
-        </Button>
+        </Button> */}
       </Flex>
       <TableCommon
         size="middle"

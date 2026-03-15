@@ -43,3 +43,6 @@ export const UNITS = [
   { label: 'Khây', value: 'tray' },
 ];
 
+
+export const DISCOUNT_PERCENT = 2;
+export const TAX_PERCENT = 5;
