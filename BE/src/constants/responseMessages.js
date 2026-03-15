@@ -44,6 +44,8 @@ const responseMessages = {
     alreadyConfirmed: 'Phiếu nhập đã được xác nhận trước đó',
     alreadyCanceled: 'Phiếu nhập đã bị hủy, không thể thao tác',
     cannotCancelCompleted: 'Không thể hủy phiếu nhập đã xác nhận',
+    cannotUpdateNonPending: 'Chỉ có thể cập nhật phiếu nhập đang chờ xác nhận',
+    cannotDeleteNonPending: 'Chỉ có thể xóa phiếu nhập đang chờ xác nhận',
     invalidStatusTransition: 'Không thể chuyển trạng thái từ {from} sang {to}',
   },
   sale: {
