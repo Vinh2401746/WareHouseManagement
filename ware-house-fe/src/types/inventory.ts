@@ -1,12 +1,13 @@
 export type CreateInventoryRequest = {
-  type: string;
   reason: string;
   warehouse: string;
   supplier: string;
-  sale: string;
-  createdBy: string;
-  transactionDate: Date;
+  deliveryPerson:string
   items: string;
+  discountMoney:number;
+  taxMoney:number;
+  totalAmount:number;
+  totalAmountAfterFax:number
 };
 
 export type GetInventoriesRequest = {

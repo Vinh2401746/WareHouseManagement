@@ -7,7 +7,7 @@ import type {
 import { keyQueryFilterString } from "../../utils/helper";
 import AxiosClient from "../axiosClient";
 
-export const getInventoriesApi = async (payload: GetInventoriesRequest):Promise<CommonListResponse | any>  => {
+export const getInventoriesApi = async (payload: GetInventoriesRequest): Promise<CommonListResponse | any> => {
   const queryString = keyQueryFilterString(payload);
   return AxiosClient.get(`inventory?${queryString}`);
 };
@@ -17,28 +17,28 @@ export const createInventoriesApi = async (payload: CreateInventoryRequest) => {
 };
 
 
-export const comfirmInventoryApi = async (payload: {id:string}) => {
+export const comfirmInventoryApi = async (payload: { id: string }) => {
   console.log("payload", payload)
-  if(!payload.id) throw Error("Không tìm thấy đơn duyệt")
+  if (!payload.id) throw Error("Không tìm thấy đơn duyệt")
   return AxiosClient.patch(`inventory/import/${payload.id}/confirm`);
 };
 
 
 
-export const updateProductsApi = async (payload: UpdateProductRequestType):Promise<CommonListResponse | any> => {
-  const dataUpdate: Pick<
-    UpdateProductRequestType,
-    "code" | "name" | "category" | "unit" | "minStock"
-  > = {
-    code: payload.code,
-    name: payload.name,
-    category: payload.category,
-    unit: payload.unit,
-    minStock: payload.minStock,
-  };
-  return AxiosClient.put(`product/${payload.productId}`, dataUpdate);
-};
+
 
 export const deleteProductApi = async (payload: { id: string }) => {
-  return AxiosClient.delete(`product/${payload.id}` );
+  return AxiosClient.delete(`product/${payload.id}`);
 };
+
+export const getAnInventoryApi = async (payload: { id: string }): Promise<any> => {
+  return AxiosClient.get(`inventory/${payload.id}`);
+};
+
+export const updateAnInventoryApi = async (payload: {
+  id: string,
+  data: any
+}) => {
+  return AxiosClient.put(`inventory/import/${payload.id}`, payload.data)
+}
+
