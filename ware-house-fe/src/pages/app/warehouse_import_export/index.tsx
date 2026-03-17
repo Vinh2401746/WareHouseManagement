@@ -17,14 +17,32 @@ import { AppRoutes } from "../../../router/routes";
 
 import type { GetInventoriesRequest } from "../../../types/inventory";
 
-import {  deleteWarehouseApi } from "../../../api/warehouse";
+import { deleteWarehouseApi } from "../../../api/warehouse";
 import type { DeleteWarehouseRequestType } from "../../../types/warehouse";
 import { comfirmInventoryApi, getInventoriesApi } from "../../../api/inventory/inventory";
 import { formatDate, formatNumber } from "../../../utils/helper";
+//['PENDING', 'COMPLETED', 'CANCELED']
+const renderStatus = (status: string) => {
+  switch (status) {
+    case "PENDING":
+
+      return 'Đang chờ duyệt';
+    case "COMPLETED":
+
+      return 'Đã duyệt';
+
+    case "CANCELED":
+
+      return 'Đã đóng';
+
+    default:
+      return 'Không xác định';
+  }
+}
 const WarehouseImportAndExport = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-    const formRef = useRef<UnitFormRef>(null);
+  const formRef = useRef<UnitFormRef>(null);
   const { data, isLoading, refetch, error, isError } = useQuery({
     queryKey: [QueryKeys.category.list, { page, limit }],
     queryFn: ({ queryKey }) => {
@@ -55,10 +73,10 @@ const WarehouseImportAndExport = memo(() => {
       dispatchToast("error", "Xoá đơn nhập kho thất bại!");
     },
   });
-// comfirmInventoryApi
+  // comfirmInventoryApi
 
   const { mutate: mutateConfirm } = useMutation({
-    mutationFn: (payload: {id:string}) =>
+    mutationFn: (payload: { id: string }) =>
       comfirmInventoryApi(payload),
     onSuccess: () => {
       console.log("data");
@@ -66,7 +84,7 @@ const WarehouseImportAndExport = memo(() => {
       refetch();
     },
     onError: (error) => {
-      console.log("error",error)
+      console.log("error", error)
       dispatchToast("error", "Duyệt đơn nhập kho thất bại!");
     },
   });
@@ -74,19 +92,33 @@ const WarehouseImportAndExport = memo(() => {
   const units = useMemo(() => data?.results ?? [], [data?.results]);
 
   const onAction = useCallback(
-    (type: "delete" | "update" | "reset-pass" | "approval", record: any) => {
+    (type: "delete" | "update" | "reset-pass" | "approval" | "cancel", record: any) => {
       switch (type) {
         case "delete":
           mutate({ warehouseId: record.id } as DeleteWarehouseRequestType);
           break;
         case "update":
           // dispatchToast("warning", "Tính năng đang phát triển")
-            formRef.current?.show(record);
+          formRef.current?.show(record);
           break;
-          case "approval":
+        case "approval":
           // dispatchToast("warning", "Tính năng đang phát triển")
-          mutateConfirm({id:record.id || ''})
-            // formRef.current?.show(record);
+          if (record.status === "PENDING") {
+            mutateConfirm({ id: record.id || '' })
+          }
+          else if (record.status === "COMPLETED") {
+            dispatchToast("info", "Đã duyệt đơn này")
+          }
+          else {
+            dispatchToast("info", "Đã huỷ đơn này")
+          }
+          break;
+        case "cancel":
+          if(record.status === "PENDING") {
+            //call api ccael
+            return;
+          }
+           dispatchToast("info", "Không thể huỷ đơn này do đã duyệt.")
           break;
         default:
           break;
@@ -117,7 +149,7 @@ const WarehouseImportAndExport = memo(() => {
         dataIndex: "warehouse",
         key: "warehouse",
         align: "center",
-        render:(record) => record?.name + " - " + record?.address
+        render: (record) => record?.name
       },
       {
         title: "Lý do",
@@ -125,60 +157,60 @@ const WarehouseImportAndExport = memo(() => {
         key: "reason",
         align: "center",
       },
-          {
+      {
         title: "Người tạo",
         dataIndex: "createdBy",
         key: "createdBy",
         align: "center",
-        render:(record) =>  record?.email
+        render: (record) => record?.email
       },
-           {
+      {
         title: "Tổng tiền thanh toán",
         dataIndex: "totalAmountAfterFax",
         key: "totalAmountAfterFax",
         align: "center",
-        render:(record) =>  formatNumber(record) + 'đ'
+        render: (record) => formatNumber(record) + 'đ'
       },
-           {
+      {
         title: "Chiết khấu",
         dataIndex: "discountMoney",
         key: "discountMoney",
         align: "center",
-        render:(record) =>  formatNumber(record) + 'đ'
+        render: (record) => formatNumber(record) + 'đ'
       },
-           {
+      {
         title: "Tiền thuế",
         dataIndex: "taxMoney",
         key: "taxMoney",
         align: "center",
-        render:(record) =>  formatNumber(record) + 'đ'
+        render: (record) => formatNumber(record) + 'đ'
       },
-           {
+      {
         title: "Tổng tiền",
         dataIndex: "totalAmount",
         key: "totalAmount",
         align: "center",
-        render:(record) =>  formatNumber(record) + 'đ'
+        render: (record) => formatNumber(record) + 'đ'
       },
-          {
-        title: "Người vận chuyển",  
+      {
+        title: "Người vận chuyển",
         dataIndex: "deliveryPerson",
         key: "deliveryPerson",
         align: "center",
       },
-           {
+      {
         title: "Ngày tạo",
         dataIndex: "transactionDate",
         key: "transactionDate",
         align: "center",
-        render:(record) => formatDate(record)
+        render: (record) => formatDate(record)
       },
       {
         title: "Tuỳ chọn",
         dataIndex: "",
         key: "",
         align: "center",
-        width:200,
+        width: 350,
         render(_, record) {
           return (
             <Flex
@@ -187,24 +219,41 @@ const WarehouseImportAndExport = memo(() => {
               justify="center"
               style={{ cursor: "pointer" }}
             >
-                 <Tag
-                color={"green"}
+              <Tag
+                color={"blue"}
                 variant={"outlined"}
                 onClick={() => onAction("update", record)}
               >
                 Chi Tiết Đơn
               </Tag>
-              <Popconfirm title="Bạn chắc chắn muốn duyệt đơn này!" onConfirm={() => record?.status == "PENDING" ? onAction("approval", record) : dispatchToast("info","Đã duyệt đơn này.")}>
-                  <Tag
-                    color={"green"}
-                    variant={"outlined"}
-                  >
-                    { record?.status == "PENDING" ? "Duyệt" : "Đã duyệt"}
-                  </Tag>
+           
+              {
+                record.status == "PENDING" &&
+                <>
+                  <Popconfirm title="Bạn chắc chắn muốn duyệt đơn này!" onConfirm={() => onAction("approval", record)}>
+                    <Tag
+                      color={"green"}
+                      variant={"outlined"}
+                    >
+                      {renderStatus(record?.status)}
+                    </Tag>
 
-              </Popconfirm>
+                  </Popconfirm>
+                    <Popconfirm
+                      title="Xác nhận huỷ đơn nhập kho này?"
+                      cancelText="Huỷ"
+                      okText="Xác nhận"
+                      onConfirm={() => onAction("cancel", record)}
+                    >
+                      <Tag color={"yellow"} variant={"outlined"}>
+                        Huỷ đơn
+                      </Tag>
+                    </Popconfirm>
+                </>
+              }
+
               <Popconfirm
-                title="Xác nhận xoá đơn vị này?"
+                title="Xác nhận xoá đơn nhập kho này?"
                 cancelText="Huỷ"
                 okText="Xác nhận"
                 onConfirm={() => onAction("delete", record)}
@@ -262,11 +311,11 @@ const WarehouseImportAndExport = memo(() => {
         onRow={(record) => {
           return {
             onDoubleClick: () => {
-                formRef.current?.show({ ...record });
+              formRef.current?.show({ ...record });
             },
           };
         }}
-         scroll={{y:1000}}
+        scroll={{ y: 1000 }}
       />
       <Flex justify="end">
         <Pagination
@@ -279,7 +328,7 @@ const WarehouseImportAndExport = memo(() => {
           onChange={(page) => setPage(page)}
         />
       </Flex>
-      <UnitFormModal onSuccessModal={() =>{ refetch()}} ref={formRef} />
+      <UnitFormModal onSuccessModal={() => { refetch() }} ref={formRef} />
     </div>
   );
 });

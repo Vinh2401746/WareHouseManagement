@@ -93,12 +93,12 @@ type Item = {
   };
   expiryDate: string;
   totalAmount: number;
-  id:string;
+  id: string | null;
   idPath: string;
   isTemplate?: boolean;
 };
 
-const ItemTemplate: Omit<Item, "idPath" > = {
+const ItemTemplate: Omit<Item, "idPath"> = {
   product: null,
   unit: "",
   quantity: 0,
@@ -111,7 +111,7 @@ const ItemTemplate: Omit<Item, "idPath" > = {
   totalAmount: 0,
   isTemplate: true,
   expiryDate: "",
-  id: ''
+  id: null
 };
 
 const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
@@ -132,7 +132,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
       taxMoney: 0,
       totalAmountAfterFax: 0,
     });
-
+    const [loading, setLoading] = useState(false)
     useEffect(() => {
       //   Thành tiền = (SL × Đơn giá) × (1 − CK%) × (1 + Thuế%)
       //  A:tổng tiền = Sum ( thành tiền )
@@ -296,6 +296,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
     useImperativeHandle(ref, () => ({
       show: (data: WarehouseImExFormData | any) => {
         setOpen(true);
+        setLoading(true)
         if (data.id) {
           const fetchData = async () => {
             try {
@@ -330,33 +331,31 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
           }
           fetchData()
         }
+        setItemsData([{ ...ItemTemplate, idPath: UUID() }],)
+        setLoading(false)
+          // console.log("data", data);
 
-        // console.log("data", data);
+          // form.setFieldsValue(
+          //   data.id
+          //     ? {
+          //       ...data,
+          //       warehouse: data?.warehouse?.id || "",
+          //       supplier: data?.supplier?.id || "",
+          //     }
+          //     : initForm,
+          // );
+          // setCalculateMoney({
+          //   discountMoney: data.discountMoney,
+          //   taxMoney: data.taxMoney,
+          //   totalAmount: data.totalAmount,
+          //   totalAmountAfterFax: data.totalAmount,
+          // });
+          // console.log("hihih",
+          //   data.id && data.items?.length
+          //     ? data.items.map((item: any) => ({ ...item, idPath: UUID() }))
+          //     : [{ ...ItemTemplate, idPath: UUID() }],)
 
-        form.setFieldsValue(
-          data.id
-            ? {
-              ...data,
-              warehouse: data?.warehouse?.id || "",
-              supplier: data?.supplier?.id || "",
-            }
-            : initForm,
-        );
-        setCalculateMoney({
-          discountMoney: data.discountMoney,
-          taxMoney: data.taxMoney,
-          totalAmount: data.totalAmount,
-          totalAmountAfterFax: data.totalAmount,
-        });
-        console.log("hihih",
-          data.id && data.items?.length
-            ? data.items.map((item: any) => ({ ...item, idPath: UUID() }))
-            : [{ ...ItemTemplate, idPath: UUID() }],)
-        setItemsData(
-          data.id && data.items?.length
-            ? data.items.map((item: any) => ({ ...item, idPath: UUID() }))
-            : [{ ...ItemTemplate, idPath: UUID() }],
-        );
+        
       },
       hide: () => {
         setOpen(false);
@@ -369,7 +368,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
     const { mutate } = useMutation({
       mutationFn: (payload: any) => {
         return isUpdate
-          ? updateAnInventoryApi({ data:payload.data, id: dataImport?.id || null })
+          ? updateAnInventoryApi({ data: payload.data, id: dataImport?.id || null })
           : createInventoriesApi(payload);
       },
       onSuccess: () => {
@@ -425,34 +424,55 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
         return;
       }
 
-      if(!isUpdate){
-          mutate({
-            ...values,
-            items: itemsData.map((item) => ({
-              productCode: item.product.code,
-    
-              productName: item.product?.name,
-    
-              unit: item.unit?.id || "",
-    
-              // packaging: "fake",
-    
-              quantity: item.quantity,
-    
-              price: item.price,
-    
-              expiryDate: dayjs(item.expiryDate).format("YYYY-MM-DD"),
-    
-              totalAmount:item.totalAmount
-    
-              // category: item.category.id,
-            })),
-            ...calculateMoney,
-          });
+      if(!dataImport?.canUpdate && isUpdate) return dispatchToast("warning", "Đơn đã duyệt nên không thể cập nhật");
+
+      const dataPayload = !isUpdate ? {
+        ...values,
+        items: itemsData.map((item) => ({
+          productCode: item.product.code,
+
+          productName: item.product?.name,
+
+          unit: item.unit?.id || "",
+
+          quantity: item.quantity,
+
+          price: item.price,
+
+          expiryDate: dayjs(item.expiryDate).format("YYYY-MM-DD"),
+
+          totalAmount: item.totalAmount
+
+        })),
+        ...calculateMoney,
+      } : {
+        id: dataImport.id,
+        data: {
+          ...values,
+          items: itemsData.map((item) => ({
+            productCode: item.product.code,
+
+            productName: item.product?.name,
+
+            unit: item.unit?.id || "",
+
+            quantity: item.quantity,
+
+            price: item.price,
+
+            expiryDate: dayjs(item.expiryDate).format("YYYY-MM-DD"),
+
+            totalAmount: item.totalAmount,
+            // neu can duyet chinh xasc thi bo comt dong duoi
+            // id: item.id,
+          })),
+          ...calculateMoney,
+        }
       }
-      else{
-        
-      }
+
+
+      mutate(dataPayload);
+
     };
 
     const columns: ColumnsType = useMemo(
@@ -813,6 +833,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
              </Col>
            </Row> */}
           <TableCommon
+           loading={loading}
             columns={columns}
             rowKey={"idPath"}
             dataSource={itemsData}

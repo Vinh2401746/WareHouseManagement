@@ -39,6 +39,6 @@ export const updateAnInventoryApi = async (payload: {
   id: string,
   data: any
 }) => {
-  return AxiosClient.put(`import/${payload.id}`, payload.data)
+  return AxiosClient.put(`inventory/import/${payload.id}`, payload.data)
 }
 
