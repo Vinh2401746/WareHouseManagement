@@ -35,10 +35,50 @@ const deleteProduct = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+/**
+ * GET /products/import-template
+ * Download a pre-filled Excel template for product import.
+ */
+const getImportTemplate = catchAsync(async (req, res) => {
+  const buffer = await productService.getProductImportTemplate();
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename="product_import_template.xlsx"');
+  res.send(buffer);
+});
+
+/**
+ * POST /products/import
+ * Import products from an uploaded Excel file.
+ */
+const importProducts = catchAsync(async (req, res) => {
+  if (!req.file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.product.excel.invalidFile);
+  }
+  const result = await productService.importProductsFromExcel(req.file.buffer);
+  res.status(httpStatus.OK).send(result);
+});
+
+/**
+ * GET /products/export
+ * Export product list as an Excel file download.
+ */
+const exportProducts = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['code', 'name']);
+  const buffer = await productService.exportProductsToExcel(filter);
+
+  const filename = `products_${Date.now()}.xlsx`;
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.send(buffer);
+});
+
 module.exports = {
   createProduct,
   getProducts,
   getProduct,
   updateProduct,
   deleteProduct,
+  getImportTemplate,
+  importProducts,
+  exportProducts,
 };

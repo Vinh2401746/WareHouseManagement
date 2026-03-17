@@ -32,6 +32,11 @@ const responseMessages = {
   },
   product: {
     notFound: 'Không tìm thấy sản phẩm',
+    excel: {
+      invalidFile: 'File không hợp lệ. Vui lòng tải lên file Excel (.xlsx, .xls)',
+      noData: 'File Excel không có dữ liệu (chỉ có header hoặc rỗng)',
+      importSuccess: 'Nhập sản phẩm thành công',
+    },
   },
   supplier: {
     notFound: 'Không tìm thấy nhà cung cấp',

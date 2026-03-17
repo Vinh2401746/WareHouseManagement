@@ -67,10 +67,24 @@ const deleteProduct = {
   }),
 };
 
+const importProducts = {
+  // File validation is handled by multer middleware; no body/query schema needed
+};
+
+const exportProducts = {
+  query: Joi.object().keys({
+    code: Joi.string(),
+    name: Joi.string(),
+  }),
+};
+
 module.exports = {
   createProduct,
   getProducts,
   getProduct,
   updateProduct,
   deleteProduct,
+  importProducts,
+  exportProducts,
 };
+
