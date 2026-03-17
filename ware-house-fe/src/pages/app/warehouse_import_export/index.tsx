@@ -35,7 +35,7 @@ const WarehouseImportAndExport = memo(() => {
     // enabled:false
   });
 
-  console.log("data", data);
+
 
   useEffect(() => {
     if (isError) {
@@ -48,11 +48,11 @@ const WarehouseImportAndExport = memo(() => {
       deleteWarehouseApi(payload),
     onSuccess: () => {
       console.log("data");
-      dispatchToast("success", "Xoá kho thành công!");
+      dispatchToast("success", "Xoá đơn nhập kho thành công!");
       refetch();
     },
     onError: () => {
-      dispatchToast("error", "Xoá kho thất bại!");
+      dispatchToast("error", "Xoá đơn nhập kho thất bại!");
     },
   });
 // comfirmInventoryApi
@@ -178,6 +178,7 @@ const WarehouseImportAndExport = memo(() => {
         dataIndex: "",
         key: "",
         align: "center",
+        width:200,
         render(_, record) {
           return (
             <Flex
@@ -229,7 +230,7 @@ const WarehouseImportAndExport = memo(() => {
             title: (
               <>
                 <UserOutlined />
-                <span>Kho</span>
+                <span>Nhập kho</span>
               </>
             ),
           },
@@ -265,7 +266,7 @@ const WarehouseImportAndExport = memo(() => {
             },
           };
         }}
-        // scroll={{ y: 500 }}
+         scroll={{y:1000}}
       />
       <Flex justify="end">
         <Pagination

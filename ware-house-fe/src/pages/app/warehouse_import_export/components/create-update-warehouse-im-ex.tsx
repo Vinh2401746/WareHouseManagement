@@ -18,6 +18,7 @@ import {
   Col,
   Tag,
   Flex,
+  Switch,
 } from "antd";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import dispatchToast from "../../../../constants/toast";
@@ -32,7 +33,7 @@ import {
   PlusOutlined,
 } from "@ant-design/icons";
 import { getProductsApi } from "../../../../api/products";
-import { createInventoriesApi } from "../../../../api/inventory/inventory";
+import { createInventoriesApi, getAnInventoryApi, updateAnInventoryApi } from "../../../../api/inventory/inventory";
 import { TableCommon } from "../../../../components/table/table";
 import type { ColumnsType } from "antd/es/table";
 import { v4 as UUID } from "uuid";
@@ -52,7 +53,10 @@ export type WarehouseImExFormData = {
   taxMoney: number;
   totalAmount: number;
   totalAmountAfterFax: number;
+  // tax:number;
 };
+
+
 
 export type UnitFormRef = {
   show: (data: Partial<WarehouseImExFormData>) => void;
@@ -70,6 +74,7 @@ const initForm: WarehouseImExFormData = {
   taxMoney: 0,
   totalAmount: 0,
   totalAmountAfterFax: 0,
+  // tax:0
 };
 
 type WarehouseFormModalProps = {
@@ -86,13 +91,14 @@ type Item = {
     code: string;
     id: string;
   };
-  idPath: string;
   expiryDate: string;
-  packaging: string;
+  totalAmount: number;
+  id:string;
+  idPath: string;
   isTemplate?: boolean;
 };
 
-const ItemTemplate: Omit<Item, "idPath"> = {
+const ItemTemplate: Omit<Item, "idPath" > = {
   product: null,
   unit: "",
   quantity: 0,
@@ -102,12 +108,15 @@ const ItemTemplate: Omit<Item, "idPath"> = {
     name: "",
     code: "",
   },
+  totalAmount: 0,
   isTemplate: true,
   expiryDate: "",
-  packaging: "",
+  id: ''
 };
+
 const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
   ({ onSuccessModal }, ref) => {
+    const [dataImport, setDataImport] = useState({})
     const [open, setOpen] = useState(false);
     const [itemsData, setItemsData] = useState<Item[]>([
       {
@@ -116,7 +125,6 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
       },
     ]);
     const [errorRows, setErrorRows] = useState<string[]>([]);
-    const [warehouseImEx, setWarehouseImEx] = useState<any>(initForm);
     const [form] = Form.useForm<WarehouseImExFormData>();
     const [calculateMoney, setCalculateMoney] = useState({
       totalAmount: 0,
@@ -144,7 +152,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
               (prevValue, currentItem) =>
                 prevValue +
                 Number(currentItem?.quantity || 0) *
-                  Number(currentItem?.price || 0),
+                Number(currentItem?.price || 0),
               0,
             ),
         );
@@ -248,7 +256,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
     );
 
     const { data: supplierData } = useQuery({
-      queryKey: [QueryKeys.warehouse.list],
+      queryKey: [QueryKeys.supplier.list],
       queryFn: () => {
         return getSuppliersApi({ page: 1, limit: 1000000000 });
       },
@@ -259,7 +267,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
       () =>
         supplierData?.results?.map((item: any) => ({
           value: item.id,
-          label: `${item?.name}-${item?.branch.name || ""}`,
+          label: `${item?.name}-${item?.phone || ""}`,
         })),
       [supplierData?.results],
     );
@@ -282,22 +290,57 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
       [productData?.results],
     );
 
-    const isUpdate = useMemo(() => warehouseImEx.id, [warehouseImEx.id]);
+
+    const isUpdate = useMemo(() => dataImport?.id || null, [dataImport]);
+
     useImperativeHandle(ref, () => ({
       show: (data: WarehouseImExFormData | any) => {
-        console.log("data", data);
         setOpen(true);
+        if (data.id) {
+          const fetchData = async () => {
+            try {
+              const response = await getAnInventoryApi({ id: data.id })
+              if (response.id) {
+                setDataImport(response.id ? response : null)
+                form.setFieldsValue(
+                  data.id
+                    ? {
+                      ...data,
+                      warehouse: data?.warehouse?.id || "",
+                      supplier: data?.supplier?.id || "",
+                    }
+                    : initForm,
+                );
+                setCalculateMoney({
+                  discountMoney: response?.discountMoney || null,
+                  taxMoney: response?.taxMoney || null,
+                  totalAmount: response?.totalAmount || null,
+                  totalAmountAfterFax: response?.totalAmount || null,
+                });
+                setItemsData(
+                  response.items?.length
+                    ? response.items.map((item: any) => ({ ...item, idPath: UUID() }))
+                    : [{ ...ItemTemplate, idPath: UUID() }],
+                );
+              }
+              console.log("res", response)
+            } catch (error) {
+              dispatchToast("error", "KHông lấy được thông tin đơn hàng!")
+            }
+          }
+          fetchData()
+        }
+
+        // console.log("data", data);
+
         form.setFieldsValue(
           data.id
             ? {
-                ...data,
-                warehouse: data?.warehouse?.id || "",
-                supplier: data?.supplier?.id || "",
-              }
+              ...data,
+              warehouse: data?.warehouse?.id || "",
+              supplier: data?.supplier?.id || "",
+            }
             : initForm,
-        );
-        setWarehouseImEx(
-          (data.id ? { ...data } : initForm) as WarehouseImExFormData,
         );
         setCalculateMoney({
           discountMoney: data.discountMoney,
@@ -305,6 +348,10 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
           totalAmount: data.totalAmount,
           totalAmountAfterFax: data.totalAmount,
         });
+        console.log("hihih",
+          data.id && data.items?.length
+            ? data.items.map((item: any) => ({ ...item, idPath: UUID() }))
+            : [{ ...ItemTemplate, idPath: UUID() }],)
         setItemsData(
           data.id && data.items?.length
             ? data.items.map((item: any) => ({ ...item, idPath: UUID() }))
@@ -314,14 +361,15 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
       hide: () => {
         setOpen(false);
         form.resetFields();
-        setWarehouseImEx(initForm as WarehouseImExFormData);
+        setDataImport({});
+        setErrorRows([])
       },
     }));
 
     const { mutate } = useMutation({
-      mutationFn: (payload: WarehouseImExFormData) => {
+      mutationFn: (payload: any) => {
         return isUpdate
-          ? updateWarehousesApi({ ...payload, warehouseId: warehouse.id })
+          ? updateAnInventoryApi({ data:payload.data, id: dataImport?.id || null })
           : createInventoriesApi(payload);
       },
       onSuccess: () => {
@@ -338,14 +386,14 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
         dispatchToast(
           "warning",
           error?.response?.data?.message ||
-            `${isUpdate ? "Cập nhật" : "Tạo"} kho thất bại`,
+          `${isUpdate ? "Cập nhật" : "Tạo"} kho thất bại`,
         );
       },
     });
 
     const validateItems = () => {
       const invalidIds: string[] = [];
-
+      console.log("itemsData", itemsData)
       itemsData.forEach((item) => {
         if (
           !item.product ||
@@ -376,27 +424,35 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
         dispatchToast("warning", "Vui lòng kiểm tra lại các dòng sản phẩm");
         return;
       }
-      mutate({
-        ...values,
-        items: itemsData.map((item) => ({
-          productCode: item.product.code,
 
-          productName: item.product?.name,
-
-          unit: item.unit?.id || "",
-
-          packaging: "fake",
-
-          quantity: item.quantity,
-
-          price: item.price,
-
-          expiryDate: item.expiryDate,
-
-          category: item.category.id,
-        })),
-        ...calculateMoney,
-      });
+      if(!isUpdate){
+          mutate({
+            ...values,
+            items: itemsData.map((item) => ({
+              productCode: item.product.code,
+    
+              productName: item.product?.name,
+    
+              unit: item.unit?.id || "",
+    
+              // packaging: "fake",
+    
+              quantity: item.quantity,
+    
+              price: item.price,
+    
+              expiryDate: dayjs(item.expiryDate).format("YYYY-MM-DD"),
+    
+              totalAmount:item.totalAmount
+    
+              // category: item.category.id,
+            })),
+            ...calculateMoney,
+          });
+      }
+      else{
+        
+      }
     };
 
     const columns: ColumnsType = useMemo(
@@ -446,12 +502,12 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
                 );
               }}
               style={{
-                width: 200,
+                width: "100%",
               }}
             />
           ),
-          align: "center",
-          width: 200,
+          // align: "center",
+          width: 100,
         },
         {
           title: "Số lượng",
@@ -469,6 +525,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
                     );
                     if (itemToUpdate) {
                       itemToUpdate.quantity = newValue;
+                      itemToUpdate.totalAmount = Number(itemToUpdate?.price || 0) * Number(newValue || 0)
                     }
                   }),
                 );
@@ -488,7 +545,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
               placeholder="Số lượng"
               inputMode="numeric"
 
-              // value={value}
+            // value={value}
             />
           ),
           align: "center",
@@ -519,6 +576,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
                     );
                     if (itemToUpdate) {
                       itemToUpdate.price = newValue;
+                      itemToUpdate.totalAmount = Number(itemToUpdate?.quantity || 0) * Number(newValue || 0)
                     }
                   }),
                 );
@@ -567,7 +625,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
             <DatePicker
               onFocus={disableErrorRows}
               format={"YYYY-MM-DD"}
-              defaultValue={itemsData?.[index]?.expiryDate}
+              defaultValue={itemsData?.[index]?.expiryDate ? dayjs(itemsData?.[index]?.expiryDate || dayjs(), 'YYYY-MM-DD') : null}
               onChange={(date) => {
                 const newValue = dayjs(date).format("YYYY-MM-DD");
                 setItemsData(
@@ -587,14 +645,10 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
           width: 100,
         },
         {
-          title: "Danh mục",
-          dataIndex: "category",
-          key: "category",
-          render: (value) => `${value?.name || "" + value?.code || ""}`,
-          // render: () => <Select
-          //                       options={categories || []}
-          //                       placeholder="Vui lòng chọn danh mục"
-          //                     />,
+          title: "Tổng tiền",
+          dataIndex: "totalAmount",
+          key: "totalAmount",
+          render: (item) => formatNumber(item || '') + " đ",
           align: "center",
           width: 80,
         },
@@ -645,25 +699,29 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
             </Row>
           ),
           align: "center",
-          width: 120,
+          width: 100,
         },
       ],
       [disableErrorRows, itemsData, products],
     );
 
 
-    const onCloseModal = () =>{
+    const onCloseModal = () => {
       setOpen(false)
+      setDataImport({})
       setCalculateMoney({
-          totalAmount: 0,
-          discountMoney: 0,
-          taxMoney: 0,
-          totalAmountAfterFax: 0,
-        });
-        setItemsData([]);
-        form.resetFields();
-        setErrorRows([]);
+        totalAmount: 0,
+        discountMoney: 0,
+        taxMoney: 0,
+        totalAmountAfterFax: 0,
+      });
+      setItemsData([]);
+      form.resetFields();
+      setErrorRows([]);
     }
+
+    // const useTaxForThisImport = Form.useWatch('tax', form)
+
     return (
       <Modal
         open={open}
@@ -673,8 +731,9 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
         // onOk={() => onFinish({})}
         // destroyOnHidden
         title={`${!isUpdate ? "Tạo" : "Cập nhật"}`}
+
         // cancelText="Đóng"
-        
+
         footer={false}
         width={"80%"}
       >
@@ -735,9 +794,27 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
               </Form.Item>
             </Col>
           </Row>
+          {/* <Row gutter={8}>
+             <Col span={12}        style={{display:'flex'}}>
+              <Form.Item
+                label="Thuế"
+                name="tax"
+         
+              >
+                <Switch />
+              </Form.Item>
+             {!!useTaxForThisImport && (
+               <Col span={12}>
+                 <Form.Item label=" " name="taxPercent">
+                   <Input placeholder="Vui lòng nhập % thuế" />
+                 </Form.Item>
+               </Col>
+             )}
+             </Col>
+           </Row> */}
           <TableCommon
             columns={columns}
-            rowKey={"id"}
+            rowKey={"idPath"}
             dataSource={itemsData}
             rowClassName={
               (record) => {
@@ -745,6 +822,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
               }
               // errorRows.includes(record.idPath) ? "error-row" : ""
             }
+
           />
           {renderTotalMoney()}
           <Flex justify="end" gap={12}>
@@ -752,7 +830,7 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
               Đóng
             </Button>
             <Button htmlType="submit" type="primary">
-             {!isUpdate ? "Tạo" : "Cập nhật"}
+              {!isUpdate ? "Tạo" : "Cập nhật"}
             </Button>
           </Flex>
         </Form>
