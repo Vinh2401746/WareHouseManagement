@@ -13,11 +13,14 @@ components:
         role:
           type: string
           enum: [user, admin]
+        branch:
+          type: string
       example:
         id: 5ebac534954b54139806c112
         email: admin@gmail.com
         name: fake name
         role: user
+        branch: 65a1b2c3d4e5f6a7b8c9d012
 
     Branch:
       type: object

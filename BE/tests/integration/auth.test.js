@@ -15,10 +15,15 @@ const { roleRights } = require('../../src/config/roles');
 const { tokenTypes } = require('../../src/config/tokens');
 const { userOne, admin, insertUsers } = require('../fixtures/user.fixture');
 const { userOneAccessToken, adminAccessToken } = require('../fixtures/token.fixture');
+const { branchOne, branchTwo, insertBranchs } = require('../fixtures/branch.fixture');
 
 setupTestDB();
 
 describe('Auth routes', () => {
+  beforeEach(async () => {
+    await insertBranchs([branchOne, branchTwo]);
+  });
+
   describe('POST /v1/auth/register', () => {
     let newUser;
     beforeEach(() => {
@@ -26,6 +31,7 @@ describe('Auth routes', () => {
         name: faker.name.findName(),
         email: faker.internet.email().toLowerCase(),
         password: 'admin123',
+        branch: branchOne._id.toHexString(),
       };
     });
 
@@ -38,13 +44,20 @@ describe('Auth routes', () => {
         name: newUser.name,
         email: newUser.email,
         role: 'user',
+        branch: newUser.branch,
         isEmailVerified: false,
       });
 
       const dbUser = await User.findById(res.body.user.id);
       expect(dbUser).toBeDefined();
       expect(dbUser.password).not.toBe(newUser.password);
-      expect(dbUser).toMatchObject({ name: newUser.name, email: newUser.email, role: 'user', isEmailVerified: false });
+      expect(dbUser).toMatchObject({
+        name: newUser.name,
+        email: newUser.email,
+        role: 'user',
+        branch: branchOne._id,
+        isEmailVerified: false,
+      });
 
       expect(res.body.tokens).toEqual({
         access: { token: expect.anything(), expires: expect.anything() },
@@ -97,6 +110,7 @@ describe('Auth routes', () => {
         name: userOne.name,
         email: userOne.email,
         role: userOne.role,
+        branch: userOne.branch.toHexString(),
         isEmailVerified: userOne.isEmailVerified,
       });
 

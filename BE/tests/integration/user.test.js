@@ -6,6 +6,7 @@ const setupTestDB = require('../utils/setupTestDB');
 const { User } = require('../../src/models');
 const { userOne, userTwo, admin, insertUsers } = require('../fixtures/user.fixture');
 const { userOneAccessToken, adminAccessToken } = require('../fixtures/token.fixture');
+const { branchOne, branchTwo, insertBranchs } = require('../fixtures/branch.fixture');
 const { roleRights } = require('../../src/config/roles');
 const { PERMISSION_GROUPS } = require('../../src/constants/permission.constant');
 
@@ -23,6 +24,10 @@ const buildExpectedPermissions = (role) => {
 };
 
 describe('User routes', () => {
+  beforeEach(async () => {
+    await insertBranchs([branchOne, branchTwo]);
+  });
+
   describe('POST /v1/users', () => {
     let newUser;
 
@@ -32,6 +37,7 @@ describe('User routes', () => {
         email: faker.internet.email().toLowerCase(),
         password: 'admin123',
         role: 'user',
+        branch: branchOne._id.toHexString(),
       };
     });
 
@@ -50,13 +56,20 @@ describe('User routes', () => {
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
+        branch: newUser.branch,
         isEmailVerified: false,
       });
 
       const dbUser = await User.findById(res.body.id);
       expect(dbUser).toBeDefined();
       expect(dbUser.password).not.toBe(newUser.password);
-      expect(dbUser).toMatchObject({ name: newUser.name, email: newUser.email, role: newUser.role, isEmailVerified: false });
+      expect(dbUser).toMatchObject({
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        branch: branchOne._id,
+        isEmailVerified: false,
+      });
     });
 
     test('should be able to create an admin as well', async () => {
@@ -176,6 +189,7 @@ describe('User routes', () => {
         name: userOne.name,
         email: userOne.email,
         role: userOne.role,
+        branch: userOne.branch.toHexString(),
         isEmailVerified: userOne.isEmailVerified,
       });
     });
@@ -401,6 +415,7 @@ describe('User routes', () => {
         email: userOne.email,
         name: userOne.name,
         role: userOne.role,
+        branch: userOne.branch.toHexString(),
         isEmailVerified: userOne.isEmailVerified,
       });
     });
@@ -534,13 +549,14 @@ describe('User routes', () => {
         name: updateBody.name,
         email: updateBody.email,
         role: 'user',
+        branch: userOne.branch.toHexString(),
         isEmailVerified: false,
       });
 
       const dbUser = await User.findById(userOne._id);
       expect(dbUser).toBeDefined();
       expect(dbUser.password).not.toBe(updateBody.password);
-      expect(dbUser).toMatchObject({ name: updateBody.name, email: updateBody.email, role: 'user' });
+      expect(dbUser).toMatchObject({ name: updateBody.name, email: updateBody.email, role: 'user', branch: userOne.branch });
     });
 
     test('should return 401 error if access token is missing', async () => {

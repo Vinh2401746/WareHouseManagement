@@ -40,6 +40,7 @@ module.exports = router;
  *               - name
  *               - email
  *               - password
+ *               - branch
  *             properties:
  *               name:
  *                 type: string
@@ -52,10 +53,14 @@ module.exports = router;
  *                 format: password
  *                 minLength: 8
  *                 description: Ít nhất 1 chữ cái và 1 chữ số
+ *               branch:
+ *                 type: string
+ *                 description: ID chi nhánh
  *             example:
  *               name: fake name
  *               email: admin@gmail.com
  *               password: admin123
+ *               branch: 65a1b2c3d4e5f6a7b8c9d012
  *     responses:
  *       "201":
  *         description: Tạo thành công

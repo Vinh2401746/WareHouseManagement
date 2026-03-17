@@ -25,7 +25,7 @@ const responseMessages = {
     notFoundByEmail: 'Không tìm thấy người dùng với email này',
   },
   branch: {
-    notFound: 'Không tìm thấy chi nhánh',
+    notFound: 'Không tìm thấy cửa hàng',
   },
   warehouse: {
     notFound: 'Không tìm thấy kho',

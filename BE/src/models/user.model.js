@@ -40,6 +40,11 @@ const userSchema = mongoose.Schema(
       enum: roles,
       default: 'user',
     },
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+    },
     isEmailVerified: {
       type: Boolean,
       default: false,

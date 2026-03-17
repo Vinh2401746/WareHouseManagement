@@ -55,6 +55,7 @@ module.exports = router;
  *               - name
  *               - email
  *               - password
+ *               - branch
  *               - role
  *             properties:
  *               name:
@@ -68,6 +69,9 @@ module.exports = router;
  *                 format: password
  *                 minLength: 8
  *                 description: Ít nhất 1 chữ cái và 1 chữ số
+ *               branch:
+ *                 type: string
+ *                 description: ID chi nhánh
  *               role:
  *                  type: string
  *                  enum: [user, admin]
@@ -75,6 +79,7 @@ module.exports = router;
  *               name: fake name
  *               email: admin@gmail.com
  *               password: admin123
+ *               branch: 65a1b2c3d4e5f6a7b8c9d012
  *               role: user
  *     responses:
  *       "201":

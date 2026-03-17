@@ -1,9 +1,20 @@
 const httpStatus = require('http-status');
-const { User } = require('../models');
+const { User, Branch } = require('../models');
 const { roleRights } = require('../config/roles');
 const { PERMISSION_GROUPS } = require('../constants/permission.constant');
 const ApiError = require('../utils/ApiError');
 const responseMessages = require('../constants/responseMessages');
+
+/**
+ * Đảm bảo chi nhánh tồn tại trước khi gán cho user
+ * @param {string|ObjectId} branchId
+ */
+const ensureBranchExists = async (branchId) => {
+  const exists = await Branch.exists({ _id: branchId });
+  if (!exists) {
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.branch.notFound);
+  }
+};
 
 /**
  * Create a user
@@ -11,6 +22,7 @@ const responseMessages = require('../constants/responseMessages');
  * @returns {Promise<User>}
  */
 const createUser = async (userBody) => {
+  await ensureBranchExists(userBody.branch);
   if (await User.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.user.emailTaken);
   }
@@ -62,6 +74,9 @@ const updateUserById = async (userId, updateBody) => {
   }
   if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId))) {
     throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.user.emailTaken);
+  }
+  if (updateBody.branch) {
+    await ensureBranchExists(updateBody.branch);
   }
   Object.assign(user, updateBody);
   await user.save();
