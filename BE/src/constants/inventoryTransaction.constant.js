@@ -1,9 +1,15 @@
-export const INVENTORY_TRANSACTION_TYPES = {
+const INVENTORY_TRANSACTION_TYPES = {
   IMPORT: 'IMPORT',
   EXPORT: 'EXPORT',
 };
-export const INVENTORY_TRANSACTION_REASONS = {
+
+const INVENTORY_TRANSACTION_REASONS = {
   PURCHASE: 'Mua hàng',
   SALE: 'Bán hàng',
   ADJUSTMENT: 'Điều chỉnh tồn kho',
+};
+
+module.exports = {
+  INVENTORY_TRANSACTION_TYPES,
+  INVENTORY_TRANSACTION_REASONS,
 };

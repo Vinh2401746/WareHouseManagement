@@ -6,8 +6,21 @@ const setupTestDB = require('../utils/setupTestDB');
 const { User } = require('../../src/models');
 const { userOne, userTwo, admin, insertUsers } = require('../fixtures/user.fixture');
 const { userOneAccessToken, adminAccessToken } = require('../fixtures/token.fixture');
+const { roleRights } = require('../../src/config/roles');
+const { PERMISSION_GROUPS } = require('../../src/constants/permission.constant');
 
 setupTestDB();
+
+const buildExpectedPermissions = (role) => {
+  const rights = roleRights.get(role);
+  return Object.entries(PERMISSION_GROUPS).reduce((acc, [groupKey, groupPerms]) => {
+    const granted = groupPerms.filter((perm) => rights.includes(perm));
+    if (granted.length) {
+      acc[groupKey] = granted;
+    }
+    return acc;
+  }, {});
+};
 
 describe('User routes', () => {
   describe('POST /v1/users', () => {
@@ -347,6 +360,28 @@ describe('User routes', () => {
       });
       expect(res.body.results).toHaveLength(1);
       expect(res.body.results[0].id).toBe(admin._id.toHexString());
+    });
+  });
+
+  describe('GET /v1/users/me/permissions', () => {
+    test('should return 200 với danh sách quyền của người dùng hiện tại', async () => {
+      await insertUsers([userOne]);
+
+      const res = await request(app)
+        .get('/v1/users/me/permissions')
+        .set('Authorization', `Bearer ${userOneAccessToken}`)
+        .send()
+        .expect(httpStatus.OK);
+
+      expect(res.body).toEqual({
+        userId: userOne._id.toHexString(),
+        role: userOne.role,
+        permissions: buildExpectedPermissions(userOne.role),
+      });
+    });
+
+    test('should return 401 nếu không truyền access token', async () => {
+      await request(app).get('/v1/users/me/permissions').send().expect(httpStatus.UNAUTHORIZED);
     });
   });
 

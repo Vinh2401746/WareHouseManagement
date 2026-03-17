@@ -54,6 +54,15 @@ const changeUserPassword = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).send(updated);
 });
 
+const getMyPermissions = catchAsync(async (req, res) => {
+  const permissions = userService.getUserPermissions(req.user.role);
+  res.status(httpStatus.OK).send({
+    userId: req.user.id,
+    role: req.user.role,
+    permissions,
+  });
+});
+
 module.exports = {
   createUser,
   getUsers,
@@ -61,4 +70,5 @@ module.exports = {
   updateUser,
   deleteUser,
   changeUserPassword,
+  getMyPermissions,
 };

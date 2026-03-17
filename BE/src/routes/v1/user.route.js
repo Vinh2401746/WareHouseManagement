@@ -11,6 +11,8 @@ router
   .post(auth('manageUsers'), validate(userValidation.createUser), userController.createUser)
   .get(auth('getUsers'), validate(userValidation.getUsers), userController.getUsers);
 
+router.get('/me/permissions', auth(), userController.getMyPermissions);
+
 router
   .route('/:userId')
   .get(auth('getUsers'), validate(userValidation.getUser), userController.getUser)
@@ -152,6 +154,44 @@ module.exports = router;
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
  *         $ref: '#/components/responses/Forbidden'
+ */
+
+/**
+ * @swagger
+ * /users/me/permissions:
+ *   get:
+ *     summary: Lấy danh sách quyền hiện tại
+ *     description: Người dùng đã đăng nhập có thể xem các quyền của chính mình.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 userId:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *                 permissions:
+ *                   type: object
+ *                   additionalProperties:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                   example:
+ *                     user:
+ *                       - getUsers
+ *                       - manageUsers
+ *                     branches:
+ *                       - getBranches
+ *                       - manageBranches
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
  */
 
 /**

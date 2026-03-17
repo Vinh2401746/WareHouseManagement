@@ -1,5 +1,7 @@
 const httpStatus = require('http-status');
 const { User } = require('../models');
+const { roleRights } = require('../config/roles');
+const { PERMISSION_GROUPS } = require('../constants/permission.constant');
 const ApiError = require('../utils/ApiError');
 const responseMessages = require('../constants/responseMessages');
 
@@ -80,6 +82,29 @@ const deleteUserById = async (userId) => {
   return user;
 };
 
+const formatPermissionsByGroup = (rights) => {
+  return Object.entries(PERMISSION_GROUPS).reduce((acc, [groupKey, groupPerms]) => {
+    const granted = groupPerms.filter((perm) => rights.includes(perm));
+    if (granted.length) {
+      acc[groupKey] = granted;
+    }
+    return acc;
+  }, {});
+};
+
+/**
+ * Lấy danh sách quyền của người dùng từ vai trò theo từng nhóm
+ * @param {string} role
+ * @returns {Object}
+ */
+const getUserPermissions = (role) => {
+  const rights = roleRights.get(role);
+  if (!rights) {
+    throw new ApiError(httpStatus.FORBIDDEN, responseMessages.common.forbidden);
+  }
+  return formatPermissionsByGroup(rights);
+};
+
 module.exports = {
   createUser,
   queryUsers,
@@ -87,4 +112,5 @@ module.exports = {
   getUserByEmail,
   updateUserById,
   deleteUserById,
+  getUserPermissions,
 };
