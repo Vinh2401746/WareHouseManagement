@@ -19,7 +19,7 @@ import type { GetInventoriesRequest } from "../../../types/inventory";
 
 import { deleteWarehouseApi } from "../../../api/warehouse";
 import type { DeleteWarehouseRequestType } from "../../../types/warehouse";
-import { comfirmInventoryApi, getInventoriesApi } from "../../../api/inventory/inventory";
+import { cancelAnInventoryApi, comfirmInventoryApi, getInventoriesApi } from "../../../api/inventory/inventory";
 import { formatDate, formatNumber } from "../../../utils/helper";
 //['PENDING', 'COMPLETED', 'CANCELED']
 const renderStatus = (status: string) => {
@@ -89,6 +89,20 @@ const WarehouseImportAndExport = memo(() => {
     },
   });
 
+//cancelAnInventoryApi
+
+ const { mutate: mutateCancel } = useMutation({
+    mutationFn: (payload: { id: string, cancelReason:string }) =>
+      cancelAnInventoryApi(payload),
+    onSuccess: () => {
+      dispatchToast("success", "Huỷ đơn nhập kho thành công!");
+      refetch();
+    },
+    onError: (error) => {
+      dispatchToast("error", "Huỷ đơn nhập kho thất bại!");
+    },
+  });
+
   const units = useMemo(() => data?.results ?? [], [data?.results]);
 
   const onAction = useCallback(
@@ -116,6 +130,7 @@ const WarehouseImportAndExport = memo(() => {
         case "cancel":
           if(record.status === "PENDING") {
             //call api ccael
+            // mutateCancel({id:record})
             return;
           }
            dispatchToast("info", "Không thể huỷ đơn này do đã duyệt.")
