@@ -21,6 +21,8 @@ import { deleteWarehouseApi } from "../../../api/warehouse";
 import type { DeleteWarehouseRequestType } from "../../../types/warehouse";
 import { cancelAnInventoryApi, comfirmInventoryApi, getInventoriesApi } from "../../../api/inventory/inventory";
 import { formatDate, formatNumber } from "../../../utils/helper";
+import type { CancelFormRef } from "./components/cancel-import";
+import CancelImport from "./components/cancel-import";
 //['PENDING', 'COMPLETED', 'CANCELED']
 const renderStatus = (status: string) => {
   switch (status) {
@@ -43,6 +45,7 @@ const WarehouseImportAndExport = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<UnitFormRef>(null);
+  const cancelRef= useRef<CancelFormRef>(null)
   const { data, isLoading, refetch, error, isError } = useQuery({
     queryKey: [QueryKeys.category.list, { page, limit }],
     queryFn: ({ queryKey }) => {
@@ -131,6 +134,7 @@ const WarehouseImportAndExport = memo(() => {
           if(record.status === "PENDING") {
             //call api ccael
             // mutateCancel({id:record})
+            cancelRef.current?.show(record.id)
             return;
           }
            dispatchToast("info", "Không thể huỷ đơn này do đã duyệt.")
@@ -184,28 +188,28 @@ const WarehouseImportAndExport = memo(() => {
         dataIndex: "totalAmountAfterFax",
         key: "totalAmountAfterFax",
         align: "center",
-        render: (record) => formatNumber(record) + 'đ'
+        render: (record) => formatNumber(record) + ' đ'
       },
       {
         title: "Chiết khấu",
         dataIndex: "discountMoney",
         key: "discountMoney",
         align: "center",
-        render: (record) => formatNumber(record) + 'đ'
+        render: (record) => formatNumber(record) + ' đ'
       },
       {
         title: "Tiền thuế",
         dataIndex: "taxMoney",
         key: "taxMoney",
         align: "center",
-        render: (record) => formatNumber(record) + 'đ'
+        render: (record) => formatNumber(record) + ' đ'
       },
       {
         title: "Tổng tiền",
         dataIndex: "totalAmount",
         key: "totalAmount",
         align: "center",
-        render: (record) => formatNumber(record) + 'đ'
+        render: (record) => formatNumber(record) + ' đ'
       },
       {
         title: "Người vận chuyển",
@@ -344,6 +348,7 @@ const WarehouseImportAndExport = memo(() => {
         />
       </Flex>
       <UnitFormModal onSuccessModal={() => { refetch() }} ref={formRef} />
+      <CancelImport ref={cancelRef} onSuccessModal={() => { refetch() }} />
     </div>
   );
 });

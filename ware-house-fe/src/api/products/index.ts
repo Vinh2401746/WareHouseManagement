@@ -33,3 +33,20 @@ export const updateProductsApi = async (payload: UpdateProductRequestType):Promi
 export const deleteProductApi = async (payload: { id: string }) => {
   return AxiosClient.delete(`product/${payload.id}` );
 };
+
+
+export const getTemplateProduct = () =>{
+   return AxiosClient.get(`product/import-template`, { responseType: 'blob' });
+}
+
+export const importTemplateProduct = (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  return AxiosClient.post(`product/import`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
+
+export const exportCurrentExProduct = () =>{
+   return AxiosClient.get(`product/export`, { responseType: 'blob' });
+}

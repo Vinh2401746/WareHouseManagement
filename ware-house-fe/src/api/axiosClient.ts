@@ -31,14 +31,9 @@ AxiosClient.interceptors.request.use(
 
 AxiosClient.interceptors.response.use(
   async (res: AxiosResponse<any, any>) => {
-
-    // const transformed = {
-    //   result: res.data?.result,
-    //   data: res.data?.data,
-    //   transactionId: res.data.transactionId,
-    // } as Response;
-    // // replace the data payload with your transformed object
-    // res.data = transformed;
+    if (res.config.responseType === 'blob') {
+      return Promise.resolve(res);
+    }
     return Promise.resolve(res.data);
   },
   async (err: AxiosResponse | any) => {

@@ -105,7 +105,7 @@ export const AppHeader = () => {
         background: "#001529",
         paddingRight:12,
         paddingLeft:12,
-        height:80
+        height:60
         // padding:50
         // position: "relative",
         

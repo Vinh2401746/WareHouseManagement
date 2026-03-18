@@ -27,9 +27,11 @@ export const authSlice = createSlice({
     },
     collapMenuRequest:(state) =>{
       state.collapsed = !state.collapsed
+    },
+    getPermissionRequest:(state) =>{
     }
   },
 });
 
-export const { loginRequest, logginRequesteSuccess, loginRequestedFailt,logoutRequest,collapMenuRequest } =
+export const { loginRequest, logginRequesteSuccess, loginRequestedFailt,logoutRequest,collapMenuRequest,getPermissionRequest } =
   authSlice.actions;

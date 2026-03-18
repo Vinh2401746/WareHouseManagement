@@ -45,3 +45,8 @@ export const deleteUser = async (payload: any): Promise<any> => {
 export const requestResetPassword = async (payload: {email:string}): Promise<any> => {
   return AxiosClient.post(`auth/forgot-password`,payload);
 };
+
+
+export const getPermission = () =>{
+   return AxiosClient.get(`users/me/permissions`);
+}
