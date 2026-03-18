@@ -63,7 +63,7 @@ router
 
 router
   .route('/import/:inventoryTransactionId/cancel')
-  .patch(
+  .put(
     auth('manageInventoryTransactions'),
     validate(inventoryTransactionValidation.cancelImport),
     inventoryTransactionController.cancelImport
