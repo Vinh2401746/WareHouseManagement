@@ -20,6 +20,8 @@ import { AppRoutes } from "../../../router/routes";
 
 import type { GetCategoriesRequestType } from "../../../types/category";
 import { deleteBranchApi, getBranchsApi } from "../../../api/branch";
+import { usePermission } from "../../../hooks/usePermission";
+import NoPermissonPage from "../../404-developing/no-permission";
  const BranchPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -32,7 +34,7 @@ import { deleteBranchApi, getBranchsApi } from "../../../api/branch";
   },
     gcTime: 15 * 60 * 1000 // 15 phut cache
   });
-
+    const {isManager,canView} = usePermission("branches")
     useEffect(()=>{
     if(isError){
       dispatchToast("error", error.message)
@@ -78,7 +80,7 @@ import { deleteBranchApi, getBranchsApi } from "../../../api/branch";
       width: 80,
     },
       {
-      title: "Tên Chi nhánh",
+      title: "Tên cửa hàng",
       dataIndex: "name",
       key: "name",
       align: "center",
@@ -130,6 +132,8 @@ import { deleteBranchApi, getBranchsApi } from "../../../api/branch";
       },
     }
   ],[onAction]);
+
+if(!canView) return <NoPermissonPage />
 
   return (
     <div style={{ rowGap: 24,  display: "flex",flexDirection:'column'}}>

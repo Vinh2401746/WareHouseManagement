@@ -55,12 +55,12 @@ const ProductFormModal = forwardRef<ProductFormRef, ProductFormModalProps>(
 
     const multiData = useQueries({
       queries: [
-        {
-          queryKey: [QueryKeys.category.list],
-          queryFn: () => getCategorysApi({ page: 1, limit: 1000000000 }),
-          staleTime: 5 * 60 * 1000,
-          gcTime:  5 * 60 * 1000,
-        },
+        // {
+        //   queryKey: [QueryKeys.category.list],
+        //   queryFn: () => getCategorysApi({ page: 1, limit: 1000000000 }),
+        //   staleTime: 5 * 60 * 1000,
+        //   gcTime:  5 * 60 * 1000,
+        // },
         {
           queryKey: [QueryKeys.unit.list],
           queryFn: () => getUnitsApi({ page: 1, limit: 1000000000 }),
@@ -69,19 +69,19 @@ const ProductFormModal = forwardRef<ProductFormRef, ProductFormModalProps>(
         },
       ],
     });
-    console.log(multiData);
-    const category = useMemo(
-      () =>
-        multiData[0]?.data?.results?.map((item: any) => ({
-          value: item.id,
-          label: item.name,
-        })) || [],
-      [multiData],
-    );
+
+    // const category = useMemo(
+    //   () =>
+    //     multiData[0]?.data?.results?.map((item: any) => ({
+    //       value: item.id,
+    //       label: item.name,
+    //     })) || [],
+    //   [multiData],
+    // );
 
     const units = useMemo(
       () =>
-        multiData[1]?.data?.results?.map((item: any) => ({
+        multiData[0]?.data?.results?.map((item: any) => ({
           value: item.id,
           label: item.name,
         })) || [],
@@ -199,7 +199,7 @@ const ProductFormModal = forwardRef<ProductFormRef, ProductFormModalProps>(
             <Input />
           </Form.Item>
         )} */}
-          <Form.Item
+          {/* <Form.Item
             label="Danh mục"
             name="category"
             rules={[
@@ -210,7 +210,7 @@ const ProductFormModal = forwardRef<ProductFormRef, ProductFormModalProps>(
               showSearch={{ optionFilterProp: "label" }}
               options={category || []}
             />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item
             label="Đơn vị"
             name="unit"

@@ -22,10 +22,13 @@ import { AppRoutes } from "../../../router/routes";
 import type { GetCategoriesRequestType } from "../../../types/category";
 import { getUnitsApi, deleteUnit } from "../../../api/unit";
 import type { DeleteUnitType } from "../../../types/unit";
+import { usePermission } from "../../../hooks/usePermission";
+import NoPermissonPage from "../../404-developing/no-permission";
 const UnitPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<UnitFormRef>(null);
+      const {isManager,canView} = usePermission("units")
   const { data, isLoading, refetch, error, isError } = useQuery({
     queryKey: [QueryKeys.category.list, { page, limit }],
     queryFn: ({ queryKey }) => {
@@ -128,7 +131,7 @@ const UnitPage = memo(() => {
       },
     }
   ],[onAction]);
-
+  if(!canView) return <NoPermissonPage />
   return (
     <div style={{ rowGap: 24,  display: "flex",flexDirection:'column'}}>
       <Breadcrumb

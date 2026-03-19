@@ -14,11 +14,13 @@ import { deleteProductApi, exportCurrentExProduct, getProductsApi, getTemplatePr
 import type { GetProductsRequestType } from "../../../types/products";
 import { UNITS } from "../../../constants/common";
 import { formatNumber } from "../../../utils/helper";
+import { usePermission } from "../../../hooks/usePermission";
+import NoPermissonPage from "../../404-developing/no-permission";
 const ProductsPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<ProductFormRef>(null);
-
+  const {isManager,canView} = usePermission("products")
   const { data, refetch, isFetching, isError, error } = useQuery({
     queryKey: [QueryKeys.products.list, { page, limit }],
     queryFn: ({ queryKey }) => {
@@ -221,6 +223,8 @@ const ProductsPage = memo(() => {
         break;
     }
   };
+
+  if(!canView) return<NoPermissonPage />
 
   return (
     <div style={{ rowGap: 24, display: "flex", flexDirection: "column" }}>

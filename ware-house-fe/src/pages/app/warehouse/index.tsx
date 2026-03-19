@@ -23,6 +23,8 @@ import type { GetCategoriesRequestType } from "../../../types/category";
 
 import { getWarehousesApi,deleteWarehouseApi } from "../../../api/warehouse";
 import type { DeleteWarehouseRequestType } from "../../../types/warehouse";
+import { usePermission } from "../../../hooks/usePermission";
+import NoPermissonPage from "../../404-developing/no-permission";
  const WarehousePage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -35,6 +37,7 @@ import type { DeleteWarehouseRequestType } from "../../../types/warehouse";
   },
     gcTime: 15 * 60 * 1000 // 15 phut cache
   });
+    const {isManager,canView} = usePermission("warehouses")
 
   useEffect(()=>{
     if(isError){
@@ -137,6 +140,8 @@ import type { DeleteWarehouseRequestType } from "../../../types/warehouse";
     }
   ],[onAction]);
 
+
+    if(!canView) return <NoPermissonPage />
   return (
     <div style={{ rowGap: 24,  display: "flex",flexDirection:'column'}}>
       <Breadcrumb

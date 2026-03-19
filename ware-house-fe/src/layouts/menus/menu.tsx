@@ -30,11 +30,11 @@ const items: ItemType<MenuItemType>[] = [
     icon: <VideoCameraOutlined />,
     label: "Sản phẩm",
   },
-  {
-    key: AppRoutes.category,
-    icon: <UploadOutlined />,
-    label: "Danh mục sản phẩm",
-  },
+  // {
+  //   key: AppRoutes.category,
+  //   icon: <UploadOutlined />,
+  //   label: "Danh mục sản phẩm",
+  // },
    {
     key: AppRoutes.supplier,
     icon: <UploadOutlined />,

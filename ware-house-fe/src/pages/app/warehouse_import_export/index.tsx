@@ -23,6 +23,8 @@ import { cancelAnInventoryApi, comfirmInventoryApi, getInventoriesApi } from "..
 import { formatDate, formatNumber } from "../../../utils/helper";
 import type { CancelFormRef } from "./components/cancel-import";
 import CancelImport from "./components/cancel-import";
+import NoPermissonPage from "../../404-developing/no-permission";
+import { usePermission } from "../../../hooks/usePermission";
 //['PENDING', 'COMPLETED', 'CANCELED']
 const renderStatus = (status: string) => {
   switch (status) {
@@ -55,7 +57,7 @@ const WarehouseImportAndExport = memo(() => {
     gcTime: 15 * 60 * 1000, // 15 phut cache
     // enabled:false
   });
-
+      const {isManager,canView} = usePermission("inventoryTransactions")
 
 
   useEffect(() => {
@@ -288,7 +290,7 @@ const WarehouseImportAndExport = memo(() => {
     ],
     [onAction],
   );
-
+  if(!canView) return <NoPermissonPage />
   return (
     <div style={{ rowGap: 24, display: "flex", flexDirection: "column" }}>
       <Breadcrumb

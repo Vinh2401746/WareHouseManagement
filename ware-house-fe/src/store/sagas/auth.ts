@@ -6,10 +6,12 @@ import {
   loginRequestedFailt,
   loginRequest,
   logoutRequest,
-  getPermissionRequest
+  getPermissionRequest,
+  getPermissionSuccess,
+  getPermissionFailt
 } from "../toolkit/auth";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { AuthRequestLoginType, AuthResponseLoginType } from "../../types/auth";
+import type { AuthRequestLoginType, AuthResponseLoginType, permissionType } from "../../types/auth";
 import dispatchToast from "../../constants/toast";
 import { getPermission } from "../../api/users/users";
 // Worker saga will be fired on USER_FETCH_REQUESTED actions
@@ -66,15 +68,14 @@ function* logoutSaga() {
 
 function* getPermissionSaga() {
   try {
-   const permissonResponse :{
-    permisson:any,
-    role:string,
-   } = yield call(getPermission)
-    console.log("permissonResponse",permissonResponse)
-    //   yield put({type: "USER_FETCH_SUCCEEDED", user: user});
+   const permissonResponse :permissionType = yield call(getPermission)
+   console.log("permissonResponse",permissonResponse)
+   if(permissonResponse.userId){
+      yield put(getPermissionSuccess(permissonResponse));
+      return;
+   }
   } catch (e) {
-
-    //   yield put({type: "USER_FETCH_FAILED", message: e.message});
+      yield put(getPermissionFailt());
   }
 }
 

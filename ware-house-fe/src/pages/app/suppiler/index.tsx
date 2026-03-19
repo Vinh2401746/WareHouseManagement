@@ -12,11 +12,13 @@ import { TableCommon } from "../../../components/table/table";
 import { AppRoutes } from "../../../router/routes";
 import type { GetSuppliersRequestType } from "../../../types/supplier";
 import { getSuppliersApi,deleteSuplierApi } from "../../../api/supplier";
+import { usePermission } from "../../../hooks/usePermission";
+import NoPermissonPage from "../../404-developing/no-permission";
 const SuppilerPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<SupplierFormRef>(null);
-
+      const {isManager,canView} = usePermission("suppliers")
   const { data, refetch, isFetching, error,isError } = useQuery({
     queryKey: [QueryKeys.supplier.list, { page, limit }],
     queryFn: ({ queryKey }) => {
@@ -139,7 +141,7 @@ const SuppilerPage = memo(() => {
     ],
     [onAction],
   );
-
+  if(!canView) return <NoPermissonPage />
   return (
     <div style={{ rowGap: 24, display: "flex", flexDirection: "column" }}>
       <Breadcrumb

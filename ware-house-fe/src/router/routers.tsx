@@ -4,6 +4,7 @@ import { lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { AppRoutes } from "./routes";
 import { GuestRoute, PrivateRoute } from "../components/protect-route";
+import NoPermissonPage from "../pages/404-developing/no-permission";
 
 
 const LoginPage = Loadable(lazy(() => import('../pages/auth/login-page')));
@@ -101,6 +102,11 @@ export const router = createBrowserRouter(
           path: AppRoutes.branch.list,
           id: AppRoutes.branch.list,
           element : <BranchPage />
+        },
+           {
+          path: AppRoutes.no_permisson,
+          id: AppRoutes.no_permisson,
+          element : <NoPermissonPage />
         }
       ],
       errorElement: <NotFoundPage />,
