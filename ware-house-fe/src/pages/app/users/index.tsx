@@ -17,10 +17,13 @@ import dispatchToast from "../../../constants/toast";
 import { UserOutlined } from "@ant-design/icons";
 import './index.css'
 import { TableCommon } from "../../../components/table/table";
+import { usePermission } from "../../../hooks/usePermission";
+import NoPermissonPage from "../../404-developing/no-permission";
 const UserPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<UserFormRef>(null);
+  const {isManager,canView} = usePermission('user')
   const { data, isFetching, isError, error } = useQuery({
     queryKey: [QueryKeys.users.users, page, limit],
     queryFn: () => getUsers({ page, limit }),
@@ -139,6 +142,7 @@ const UserPage = memo(() => {
     }
   ],[onAction]);
 
+  if(!canView) return <NoPermissonPage />
   return (
     <div style={{ rowGap: 12,  display: "flex",flexDirection:'column'}}>
       <Breadcrumb

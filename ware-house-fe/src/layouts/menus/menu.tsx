@@ -30,11 +30,11 @@ const items: ItemType<MenuItemType>[] = [
     icon: <VideoCameraOutlined />,
     label: "Sản phẩm",
   },
-  {
-    key: AppRoutes.category,
-    icon: <UploadOutlined />,
-    label: "Danh mục sản phẩm",
-  },
+  // {
+  //   key: AppRoutes.category,
+  //   icon: <UploadOutlined />,
+  //   label: "Danh mục sản phẩm",
+  // },
    {
     key: AppRoutes.supplier,
     icon: <UploadOutlined />,
@@ -56,14 +56,14 @@ const items: ItemType<MenuItemType>[] = [
     label: "Kho",
   },
    {
-    key: AppRoutes.store,
+    key: AppRoutes.branch.list,
     icon: <UploadOutlined />,
     label: "Cửa hàng",
   },
    {
     key: AppRoutes.warehouse_import_export,
     icon: <UploadOutlined />,
-    label: "Nhập/xuất kho",
+    label: "Nhập kho",
   },
    {
     key: AppRoutes.sales_invoice,

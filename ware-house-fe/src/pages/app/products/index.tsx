@@ -10,15 +10,17 @@ import { UserOutlined } from "@ant-design/icons";
 import "./index.css";
 import { TableCommon } from "../../../components/table/table";
 import { AppRoutes } from "../../../router/routes";
-import { deleteProductApi, getProductsApi } from "../../../api/products";
+import { deleteProductApi, exportCurrentExProduct, getProductsApi, getTemplateProduct, importTemplateProduct } from "../../../api/products";
 import type { GetProductsRequestType } from "../../../types/products";
 import { UNITS } from "../../../constants/common";
 import { formatNumber } from "../../../utils/helper";
+import { usePermission } from "../../../hooks/usePermission";
+import NoPermissonPage from "../../404-developing/no-permission";
 const ProductsPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<ProductFormRef>(null);
-
+  const {isManager,canView} = usePermission("products")
   const { data, refetch, isFetching, isError, error } = useQuery({
     queryKey: [QueryKeys.products.list, { page, limit }],
     queryFn: ({ queryKey }) => {
@@ -106,13 +108,13 @@ const ProductsPage = memo(() => {
         align: "center",
         render:(value) => <span style={{fontWeight:'bold'}}>{formatNumber(value)}</span>
       },
-      {
-        title: "Danh mục",
-        dataIndex: "category",
-        key: "category",
-        align: "center",
-        render: (value: any) => `${value?.name || ""}`,
-      },
+      // {
+      //   title: "Danh mục",
+      //   dataIndex: "category",
+      //   key: "category",
+      //   align: "center",
+      //   render: (value: any) => `${value?.name || ""}`,
+      // },
       {
         title: "Tuỳ chọn",
         dataIndex: "",
@@ -151,6 +153,79 @@ const ProductsPage = memo(() => {
     [onAction],
   );
 
+
+  const { mutate: downloadTemplate } = useMutation({
+    mutationFn: getTemplateProduct,
+    onSuccess: (res) => {
+      const url = URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "template_product.xlsx";
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    onError: () => {
+      dispatchToast("error", "Tải file mẫu thất bại!");
+    },
+  });
+
+  const { mutate: importProduct } = useMutation({
+    mutationFn: importTemplateProduct,
+    onSuccess: (res:any) => {
+      console.log("res",res)
+      if(res?.errors.length == 0) {
+        dispatchToast("success", "Nhập sản phẩm thành công!");
+        refetch();
+        return;
+      }
+        dispatchToast("error", res?.errors?.[0].errors[0] || "Mẫu đẩy lên không đúng quy định!");
+    },
+    onError: () => {
+      dispatchToast("error", "Nhập file thất bại!");
+    },
+  });
+
+  const { mutate: exportProducts } = useMutation({
+    mutationFn: exportCurrentExProduct,
+    onSuccess: (res) => {
+      const url = URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "products.xlsx";
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    onError: () => {
+      dispatchToast("error", "Xuất sản phẩm thất bại!");
+    },
+  });
+
+  const utitilesAction = (action: "template" | "import" | "export") => {
+    switch (action) {
+      case "template":
+        downloadTemplate();
+        break;
+      case "import": {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".xlsx,.xls";
+        input.onchange = (e) => {
+          const file = (e.target as HTMLInputElement).files?.[0];
+          if (file) importProduct(file);
+        };
+        input.click();
+        break;
+      }
+      case "export":
+        exportProducts();
+        break;
+      default:
+        break;
+    }
+  };
+
+  if(!canView) return<NoPermissonPage />
+
   return (
     <div style={{ rowGap: 24, display: "flex", flexDirection: "column" }}>
       <Breadcrumb
@@ -166,7 +241,16 @@ const ProductsPage = memo(() => {
           },
         ]}
       />
-      <Flex justify="end">
+      <Flex justify="end" gap={8}>
+         <Button type="primary" onClick={() => utitilesAction("template")}>
+         Tải file mẫu
+        </Button>
+         <Button type="primary" onClick={() => utitilesAction("import")}>
+          Tải danh sách sản phẩm
+        </Button>
+         <Button type="primary" onClick={() => utitilesAction("export")}>
+          Xuất sản phẩm hiện có
+        </Button>
         <Button type="primary" onClick={() => formRef.current?.show()}>
           Thêm sản phẩm
         </Button>

@@ -19,6 +19,7 @@ import {
   Tag,
   Flex,
   Switch,
+  Spin,
 } from "antd";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import dispatchToast from "../../../../constants/toast";
@@ -741,7 +742,9 @@ const WarehouseFormModal = forwardRef<UnitFormRef, WarehouseFormModalProps>(
     }
 
     // const useTaxForThisImport = Form.useWatch('tax', form)
-
+if(loading){
+  return <Spin />
+}
     return (
       <Modal
         open={open}

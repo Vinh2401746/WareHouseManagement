@@ -25,5 +25,6 @@ export const AppRoutes = {
   },
   branch: {
     list: '/branch'
-  }
+  },
+  no_permisson:'/no_permisson'
 };

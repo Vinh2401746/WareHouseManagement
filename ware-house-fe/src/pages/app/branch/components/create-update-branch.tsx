@@ -1,7 +1,6 @@
 import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { Modal, Form, Input } from "antd";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { QueryKeys } from "../../../../constants/query-keys";
 import dispatchToast from "../../../../constants/toast";
 import { VIETNAM_PHONE_NUMBER } from "../../../../utils/regex";
 import { createBranchApi, updateBranchApi } from "../../../../api/branch";
@@ -18,22 +17,24 @@ export type BranchFormRef = {
   hide: () => void;
 };
 
+export type BranchFormProp = {
+  onSuccess:()=>void
+}
 const initForm: BranchFormData = {
   address: "",
   phone: "",
   name: "",
   id: "",
 };
-const BranchFormModal = forwardRef<BranchFormRef>((_, ref) => {
+const BranchFormModal = forwardRef<BranchFormRef,BranchFormProp>(({onSuccess}, ref) => {
   const [open, setOpen] = useState(false);
-  const [category, setCategory] = useState<BranchFormData>(initForm);
+  const [branchs, setCategory] = useState<BranchFormData>(initForm);
   const [form] = Form.useForm<BranchFormData>();
 
-  const isUpdate = useMemo(() => category.id, [category.id]);
-  const queryClient = useQueryClient();
+  const isUpdate = useMemo(() => branchs.id, [branchs.id]);
+
   useImperativeHandle(ref, () => ({
     show: (data) => {
-      console.log("data", data);
       
       setOpen(true)
       form.setFieldsValue(data ? data : initForm);
@@ -49,7 +50,7 @@ const BranchFormModal = forwardRef<BranchFormRef>((_, ref) => {
   const { mutate } = useMutation({
     mutationFn: (payload: BranchFormData) =>{
      return isUpdate
-        ? updateBranchApi({ ...payload, branchId: category.id })
+        ? updateBranchApi({ ...payload, branchId: branchs.id })
         : createBranchApi(payload)},
     onSuccess: () => {
       dispatchToast(
@@ -57,9 +58,7 @@ const BranchFormModal = forwardRef<BranchFormRef>((_, ref) => {
         `${isUpdate ? "Cập nhật" : "Tạo"} chi nhánh thành công`,
       );
       setOpen(false);
-      queryClient.invalidateQueries({
-        queryKey: [QueryKeys.category.list],
-      });
+      onSuccess()
     },
     onError: (error: any) => {
       console.log("error", error);

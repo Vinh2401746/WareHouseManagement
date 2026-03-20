@@ -1,4 +1,4 @@
-import type { roles } from "../../types/auth";
+import type { permissionType, roles } from "../../types/auth";
 import type { UpdateUserType } from "../../types/user";
 import AxiosClient from "../axiosClient";
 
@@ -45,3 +45,8 @@ export const deleteUser = async (payload: any): Promise<any> => {
 export const requestResetPassword = async (payload: {email:string}): Promise<any> => {
   return AxiosClient.post(`auth/forgot-password`,payload);
 };
+
+
+export const getPermission = ():Promise<permissionType> =>{
+   return AxiosClient.get(`users/me/permissions`);
+}

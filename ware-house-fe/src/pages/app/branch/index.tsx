@@ -11,7 +11,7 @@ import {
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { BranchFormRef } from "./components/create-update-branch";
-import CategoryFormModal from "./components/create-update-branch";
+import BranchFormModal from "./components/create-update-branch";
 import dispatchToast from "../../../constants/toast";
 import { UserOutlined } from "@ant-design/icons";
 import './index.css'
@@ -20,19 +20,21 @@ import { AppRoutes } from "../../../router/routes";
 
 import type { GetCategoriesRequestType } from "../../../types/category";
 import { deleteBranchApi, getBranchsApi } from "../../../api/branch";
+import { usePermission } from "../../../hooks/usePermission";
+import NoPermissonPage from "../../404-developing/no-permission";
  const BranchPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<BranchFormRef>(null);
   const { data, isLoading, refetch, isError, error } = useQuery({
-    queryKey: [QueryKeys.category.list, {page, limit}],
+    queryKey: [QueryKeys.branch.list, {page, limit}],
     queryFn: ({ queryKey }) => {
     const [, payload] = queryKey as [string, GetCategoriesRequestType];
     return getBranchsApi(payload);
   },
     gcTime: 15 * 60 * 1000 // 15 phut cache
   });
-
+    const {isManager,canView} = usePermission("branches")
     useEffect(()=>{
     if(isError){
       dispatchToast("error", error.message)
@@ -50,7 +52,7 @@ import { deleteBranchApi, getBranchsApi } from "../../../api/branch";
     },
   });
 
-  const categories = useMemo(() => data?.results ?? [], [data?.results]);
+  const branchs = useMemo(() => data?.results ?? [], [data?.results]);
 
   const onAction = useCallback(
     (type: "delete" | "update" | "reset-pass", record: any) => {
@@ -78,7 +80,7 @@ import { deleteBranchApi, getBranchsApi } from "../../../api/branch";
       width: 80,
     },
       {
-      title: "Tên Chi nhánh",
+      title: "Tên cửa hàng",
       dataIndex: "name",
       key: "name",
       align: "center",
@@ -131,12 +133,14 @@ import { deleteBranchApi, getBranchsApi } from "../../../api/branch";
     }
   ],[onAction]);
 
+if(!canView) return <NoPermissonPage />
+
   return (
     <div style={{ rowGap: 24,  display: "flex",flexDirection:'column'}}>
       <Breadcrumb
         items={[
           {
-            href: AppRoutes.category,
+            href: AppRoutes.branch.list,
             title: (
               <>
                 <UserOutlined />
@@ -153,7 +157,7 @@ import { deleteBranchApi, getBranchsApi } from "../../../api/branch";
       </Flex>
       <TableCommon
         size="middle"
-        dataSource={categories}
+        dataSource={branchs}
         columns={columns}
         pagination={false}
         loading={isLoading || isPending}
@@ -178,7 +182,7 @@ import { deleteBranchApi, getBranchsApi } from "../../../api/branch";
           onChange={(page) => setPage(page)}
         />
       </Flex>
-      <CategoryFormModal ref={formRef} />
+      <BranchFormModal ref={formRef} onSuccess={()=>refetch()} />
     </div>
   );
 });
