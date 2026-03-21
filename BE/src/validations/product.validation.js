@@ -57,6 +57,7 @@ const updateProduct = {
       unit: Joi.string(),
       minStock: Joi.number().integer().min(0),
       package: Joi.string(),
+      removeImage: Joi.boolean(),
     })
     .min(1),
 };
@@ -66,7 +67,6 @@ const deleteProduct = {
     productId: Joi.string().custom(objectId),
   }),
 };
-
 const importProducts = {
   // File validation is handled by multer middleware; no body/query schema needed
 };
@@ -87,4 +87,3 @@ module.exports = {
   importProducts,
   exportProducts,
 };
-

@@ -6,6 +6,7 @@ const compression = require('compression');
 const cors = require('cors');
 const passport = require('passport');
 const httpStatus = require('http-status');
+const fs = require('fs');
 const config = require('./config/config');
 const morgan = require('./config/morgan');
 const { jwtStrategy } = require('./config/passport');
@@ -16,6 +17,9 @@ const ApiError = require('./utils/ApiError');
 const responseMessages = require('./constants/responseMessages');
 
 const app = express();
+
+// eslint-disable-next-line security/detect-non-literal-fs-filename
+fs.mkdirSync(config.file.uploadDir, { recursive: true });
 
 if (config.env !== 'test') {
   app.use(morgan.successHandler);
@@ -41,6 +45,8 @@ app.use(compression());
 // enable cors
 app.use(cors());
 app.options('*', cors());
+
+app.use(config.file.publicPrefix, express.static(config.file.uploadDir, { maxAge: '30d' }));
 
 // jwt authentication
 app.use(passport.initialize());

@@ -30,6 +30,11 @@ const productSchema = mongoose.Schema(
       trim: true,
       comment: 'Quy cách đóng gói',
     },
+    imagePath: {
+      type: String,
+      trim: true,
+      private: true,
+    },
   },
   {
     timestamps: true,

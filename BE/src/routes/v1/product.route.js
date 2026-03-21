@@ -2,6 +2,8 @@ const express = require('express');
 const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
 const upload = require('../../middlewares/upload');
+const uploadProductImage = require('../../middlewares/uploadImage');
+const normalizeProductPayload = require('../../middlewares/normalizeProductPayload');
 const productValidation = require('../../validations/product.validation');
 const productController = require('../../controllers/product.controller');
 
@@ -9,37 +11,35 @@ const router = express.Router();
 
 // ─── Excel Import / Export (phải đặt TRƯỚC /:productId) ──────────────────────
 
-router.get(
-  '/import-template',
-  auth('getProducts'),
-  productController.getImportTemplate
-);
+router.get('/import-template', auth('getProducts'), productController.getImportTemplate);
 
-router.post(
-  '/import',
-  auth('manageProducts'),
-  upload.single('file'),
-  productController.importProducts
-);
+router.post('/import', auth('manageProducts'), upload.single('file'), productController.importProducts);
 
-router.get(
-  '/export',
-  auth('getProducts'),
-  validate(productValidation.exportProducts),
-  productController.exportProducts
-);
+router.get('/export', auth('getProducts'), validate(productValidation.exportProducts), productController.exportProducts);
 
 // ─── CRUD ─────────────────────────────────────────────────────────────────────
 
 router
   .route('/')
-  .post(auth('manageProducts'), validate(productValidation.createProduct), productController.createProduct)
+  .post(
+    auth('manageProducts'),
+    uploadProductImage,
+    normalizeProductPayload,
+    validate(productValidation.createProduct),
+    productController.createProduct
+  )
   .get(auth('getProducts'), validate(productValidation.getProducts), productController.getProducts);
 
 router
   .route('/:productId')
   .get(auth('getProducts'), validate(productValidation.getProduct), productController.getProduct)
-  .put(auth('manageProducts'), validate(productValidation.updateProduct), productController.updateProduct)
+  .put(
+    auth('manageProducts'),
+    uploadProductImage,
+    normalizeProductPayload,
+    validate(productValidation.updateProduct),
+    productController.updateProduct
+  )
   .delete(auth('manageProducts'), validate(productValidation.deleteProduct), productController.deleteProduct);
 
 module.exports = router;
@@ -208,14 +208,16 @@ module.exports = router;
  * /product:
  *   post:
  *     summary: Tạo sản phẩm
- *     description: Tạo mới sản phẩm.
+ *     description: |
+ *       Tạo mới sản phẩm. Gửi `multipart/form-data` nếu cần upload ảnh (field `image`).
+ *       Nếu không kèm ảnh, có thể tiếp tục gửi JSON thuần như trước.
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
@@ -236,12 +238,16 @@ module.exports = router;
  *               package:
  *                 type: string
  *                 description: Quy cách đóng gói
- *             example:
- *               code: PRD-001
- *               name: Nồi cơm điện
- *               unit: cái
- *               minStock: 10
- *               package: Hộp
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Ảnh đại diện (JPG, PNG, WEBP · tối đa 2MB)
+ *           example:
+ *             code: PRD-001
+ *             name: Nồi cơm điện
+ *             unit: cái
+ *             minStock: 10
+ *             package: Hộp
  *     responses:
  *       "201":
  *         description: Tạo thành công
@@ -364,7 +370,9 @@ module.exports = router;
  *
  *   put:
  *     summary: Cập nhật sản phẩm
- *     description: Cập nhật thông tin sản phẩm theo ID.
+ *     description: |
+ *       Cập nhật thông tin sản phẩm theo ID. Gửi `multipart/form-data` nếu muốn thay ảnh (`image`).
+ *       Có thể gửi `removeImage=true` (checkbox) để xoá ảnh hiện tại.
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -378,7 +386,7 @@ module.exports = router;
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -392,9 +400,17 @@ module.exports = router;
  *                 type: number
  *               package:
  *                 type: string
- *             example:
- *               name: Nồi cơm điện (bản mới)
- *               minStock: 15
+ *               removeImage:
+ *                 type: boolean
+ *                 description: true để xoá ảnh hiện tại (bỏ qua nếu upload ảnh mới)
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Ảnh đại diện mới (JPG, PNG, WEBP · tối đa 2MB)
+ *           example:
+ *             name: Nồi cơm điện (bản mới)
+ *             minStock: 15
+ *             removeImage: false
  *     responses:
  *       "200":
  *         description: OK

@@ -37,6 +37,8 @@ const responseMessages = {
       noData: 'File Excel không có dữ liệu (chỉ có header hoặc rỗng)',
       importSuccess: 'Nhập sản phẩm thành công',
     },
+    imageInvalidType: 'Chỉ chấp nhận ảnh định dạng JPG, PNG hoặc WEBP',
+    imageTooLarge: 'Ảnh vượt quá kích thước cho phép (tối đa 2MB)',
   },
   supplier: {
     notFound: 'Không tìm thấy nhà cung cấp',

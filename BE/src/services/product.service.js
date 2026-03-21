@@ -1,8 +1,67 @@
 const httpStatus = require('http-status');
 const ExcelJS = require('exceljs');
+const fs = require('fs');
+const path = require('path');
 const { Product, Unit } = require('../models');
 const ApiError = require('../utils/ApiError');
 const responseMessages = require('../constants/responseMessages');
+const config = require('../config/config');
+const logger = require('../config/logger');
+
+const normalizeRelativeImagePath = (imagePath) => {
+  if (!imagePath) {
+    return null;
+  }
+  const normalized = path.posix.normalize(imagePath.replace(/\\/g, '/'));
+  const withoutTraversal = normalized.replace(/^((\.\.)\/+)+/g, '').replace(/^\/+/, '');
+  return withoutTraversal || null;
+};
+
+const buildImageUrl = (imagePath) => {
+  const safeRelativePath = normalizeRelativeImagePath(imagePath);
+  if (!safeRelativePath) {
+    return null;
+  }
+  const normalizedPrefix = (config.file.publicPrefix || '').replace(/\/+$/g, '');
+  if (!normalizedPrefix) {
+    return `/${safeRelativePath}`;
+  }
+  return `${normalizedPrefix}/${safeRelativePath}`;
+};
+
+const resolveAbsoluteImagePath = (imagePath) => {
+  const safeRelativePath = normalizeRelativeImagePath(imagePath);
+  if (!safeRelativePath) {
+    return null;
+  }
+  return path.join(config.file.uploadDir, safeRelativePath);
+};
+
+const removeImageFile = async (imagePath) => {
+  const absolutePath = resolveAbsoluteImagePath(imagePath);
+  if (!absolutePath) {
+    return;
+  }
+  try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    await fs.promises.unlink(absolutePath);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      logger.warn(`Không thể xoá file ảnh sản phẩm: ${error.message}`);
+    }
+  }
+};
+
+const formatProductResponse = (productDoc) => {
+  if (!productDoc) {
+    return null;
+  }
+  const product = productDoc.toJSON();
+  product.imageUrl = buildImageUrl(productDoc.imagePath);
+  return product;
+};
+
+const getProductDocumentById = (id) => Product.findById(id).populate('unit');
 
 /**
  * Create a product
@@ -11,7 +70,7 @@ const responseMessages = require('../constants/responseMessages');
  */
 const createProduct = async (productBody) => {
   const product = await Product.create(productBody);
-  return product;
+  return getProductById(product.id);
 };
 
 /**
@@ -26,6 +85,7 @@ const createProduct = async (productBody) => {
 const queryProducts = async (filter, options) => {
   options.populate = 'unit';
   const products = await Product.paginate(filter, options);
+  products.results = products.results.map((result) => formatProductResponse(result));
   return products;
 };
 
@@ -35,7 +95,8 @@ const queryProducts = async (filter, options) => {
  * @returns {Promise<Product>}
  */
 const getProductById = async (id) => {
-  return Product.findById(id).populate('unit');
+  const product = await getProductDocumentById(id);
+  return formatProductResponse(product);
 };
 
 /**
@@ -45,13 +106,35 @@ const getProductById = async (id) => {
  * @returns {Promise<Product>}
  */
 const updateProductById = async (productId, updateBody) => {
-  const product = await getProductById(productId);
+  const product = await getProductDocumentById(productId);
   if (!product) {
     throw new ApiError(httpStatus.NOT_FOUND, responseMessages.product.notFound);
   }
-  Object.assign(product, updateBody);
+
+  const data = { ...updateBody };
+  const previousImagePath = product.imagePath;
+  let shouldRemovePreviousImage = false;
+
+  if (Object.prototype.hasOwnProperty.call(data, 'imagePath') && data.imagePath) {
+    product.imagePath = data.imagePath;
+    shouldRemovePreviousImage = Boolean(previousImagePath) && previousImagePath !== data.imagePath;
+    delete data.imagePath;
+  }
+
+  if (data.removeImage === true && !updateBody.imagePath) {
+    product.imagePath = undefined;
+    shouldRemovePreviousImage = Boolean(previousImagePath);
+  }
+  delete data.removeImage;
+
+  Object.assign(product, data);
   await product.save();
-  return product;
+
+  if (shouldRemovePreviousImage) {
+    await removeImageFile(previousImagePath);
+  }
+
+  return getProductById(product.id);
 };
 
 /**
@@ -60,11 +143,15 @@ const updateProductById = async (productId, updateBody) => {
  * @returns {Promise<Product>}
  */
 const deleteProductById = async (productId) => {
-  const product = await getProductById(productId);
+  const product = await getProductDocumentById(productId);
   if (!product) {
     throw new ApiError(httpStatus.NOT_FOUND, responseMessages.product.notFound);
   }
+  const previousImagePath = product.imagePath;
   await product.remove();
+  if (previousImagePath) {
+    await removeImageFile(previousImagePath);
+  }
   return product;
 };
 
@@ -205,7 +292,7 @@ const importProductsFromExcel = async (buffer) => {
   let updated = 0;
   const errors = [];
 
-  for (let rowNumber = 2; rowNumber <= totalRows; rowNumber++) {
+  for (let rowNumber = 2; rowNumber <= totalRows; rowNumber += 1) {
     const row = worksheet.getRow(rowNumber);
 
     const getCellValue = (header) => {

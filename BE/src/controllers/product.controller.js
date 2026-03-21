@@ -5,9 +5,39 @@ const catchAsync = require('../utils/catchAsync');
 const { productService } = require('../services');
 const responseMessages = require('../constants/responseMessages');
 
+const cleanupUploadedFile = async (req) => {
+  if (typeof req.cleanupUploadedFile === 'function') {
+    await req.cleanupUploadedFile();
+  }
+};
+
+const buildProductPayload = (req, { allowRemoveImage = false } = {}) => {
+  const payload = { ...req.body };
+
+  delete payload.imagePath;
+  delete payload.imageUrl;
+
+  if (!allowRemoveImage && Object.prototype.hasOwnProperty.call(payload, 'removeImage')) {
+    delete payload.removeImage;
+  }
+
+  if (req.file && req.file.relativePath) {
+    payload.imagePath = req.file.relativePath.replace(/\\/g, '/');
+  }
+
+  return payload;
+};
+
 const createProduct = catchAsync(async (req, res) => {
-  const product = await productService.createProduct(req.body);
-  res.status(httpStatus.CREATED).send(product);
+  const payload = buildProductPayload(req);
+
+  try {
+    const product = await productService.createProduct(payload);
+    res.status(httpStatus.CREATED).send(product);
+  } catch (error) {
+    await cleanupUploadedFile(req);
+    throw error;
+  }
 });
 
 const getProducts = catchAsync(async (req, res) => {
@@ -26,8 +56,15 @@ const getProduct = catchAsync(async (req, res) => {
 });
 
 const updateProduct = catchAsync(async (req, res) => {
-  const product = await productService.updateProductById(req.params.productId, req.body);
-  res.send(product);
+  const payload = buildProductPayload(req, { allowRemoveImage: true });
+
+  try {
+    const product = await productService.updateProductById(req.params.productId, payload);
+    res.send(product);
+  } catch (error) {
+    await cleanupUploadedFile(req);
+    throw error;
+  }
 });
 
 const deleteProduct = catchAsync(async (req, res) => {

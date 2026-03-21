@@ -1,6 +1,6 @@
 const multer = require('multer');
-const ApiError = require('../utils/ApiError');
 const httpStatus = require('http-status');
+const ApiError = require('../utils/ApiError');
 
 const EXCEL_MIME_TYPES = [
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx

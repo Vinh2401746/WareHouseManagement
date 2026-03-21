@@ -33,6 +33,8 @@ if (error) {
   throw new Error(`Config validation error: ${error.message}`);
 }
 
+const uploadDir = path.join(__dirname, '../../uploads');
+
 module.exports = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
@@ -63,4 +65,9 @@ module.exports = {
     from: envVars.EMAIL_FROM,
   },
   frontEndUrl: envVars.FRONTEND_URL || 'http://link-to-app',
+  file: {
+    uploadDir,
+    productDir: 'products',
+    publicPrefix: '/static',
+  },
 };

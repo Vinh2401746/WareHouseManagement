@@ -71,6 +71,10 @@ components:
           type: number
         package:
           type: string
+        imageUrl:
+          type: string
+          nullable: true
+          description: URL ảnh đại diện (null nếu chưa có)
       example:
         id: 65a1b2c3d4e5f6a7b8c9d015
         code: PRD-001
@@ -78,6 +82,7 @@ components:
         unit: cái
         minStock: 10
         package: Hộp
+        imageUrl: /static/products/1710689651000-abc.jpg
 
     Supplier:
       type: object
