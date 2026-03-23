@@ -144,7 +144,7 @@ if(!canView) return <NoPermissonPage />
             title: (
               <>
                 <UserOutlined />
-                <span>Chi nhánh</span>
+                <span>Cửa hàng</span>
               </>
             ),
           },
@@ -152,7 +152,7 @@ if(!canView) return <NoPermissonPage />
       />
       <Flex justify="end">
         <Button type="primary" onClick={() => formRef.current?.show()}  disabled={!isManager}>
-          Thêm chi nhánh
+          Thêm cửa hàng
         </Button>
       </Flex>
       <TableCommon
