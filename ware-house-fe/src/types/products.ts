@@ -15,6 +15,7 @@ export type CreateProductRequestType = {
   category: string;
   unit: string;
   minStock: number;
+  image?:object
 };
 
 export type UpdateProductRequestType = {

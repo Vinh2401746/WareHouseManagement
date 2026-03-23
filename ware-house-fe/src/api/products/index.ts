@@ -13,7 +13,15 @@ export const getProductsApi = async (payload: GetProductsRequestType):Promise<Co
 };
 
 export const createProductApi = async (payload: CreateProductRequestType) => {
-  return AxiosClient.post(`product`, payload);
+  const formData = new FormData();
+  formData.append("code", payload.code);
+  formData.append("name", payload.name);
+  formData.append("unit", payload.unit);
+  formData.append("minStock", String(payload.minStock));
+  if (payload.image) formData.append("image", (payload.image) as File);
+  return AxiosClient.post(`product`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 };
 
 export const updateProductsApi = async (payload: UpdateProductRequestType):Promise<CommonListResponse | any> => {
