@@ -67,18 +67,12 @@ const confirmImport = catchAsync(async (req, res) => {
 });
 
 const cancelImport = catchAsync(async (req, res) => {
-  const result = await inventoryTransactionService.cancelImport(
-    req.params.inventoryTransactionId,
-    req.body.cancelReason
-  );
+  const result = await inventoryTransactionService.cancelImport(req.params.inventoryTransactionId, req.body.cancelReason);
   res.send(result);
 });
 
 const changeImportStatus = catchAsync(async (req, res) => {
-  const result = await inventoryTransactionService.changeImportStatus(
-    req.params.inventoryTransactionId,
-    req.body.status
-  );
+  const result = await inventoryTransactionService.changeImportStatus(req.params.inventoryTransactionId, req.body.status);
   res.send(result);
 });
 

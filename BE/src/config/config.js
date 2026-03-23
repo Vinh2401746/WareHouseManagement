@@ -35,11 +35,21 @@ if (error) {
 
 const uploadDir = path.join(__dirname, '../../uploads');
 
+const buildTestDatabaseUrl = (url, isTestEnv) => {
+  if (!isTestEnv) {
+    return url;
+  }
+  const [base] = url.split('?');
+  return `${base}-test`;
+};
+
+const mongooseUrl = buildTestDatabaseUrl(envVars.MONGODB_URL, envVars.NODE_ENV === 'test');
+
 module.exports = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   mongoose: {
-    url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
+    url: mongooseUrl,
     options: {
       useCreateIndex: true,
       useNewUrlParser: true,

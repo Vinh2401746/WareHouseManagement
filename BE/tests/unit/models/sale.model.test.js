@@ -26,6 +26,8 @@ describe('Sale model', () => {
             quantity: 10,
             price: 100000,
             lineTotal: 1045000,
+            costPrice: 80000,
+            costTotal: 800000,
           },
         ],
       };

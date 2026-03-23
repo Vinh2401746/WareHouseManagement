@@ -3,6 +3,7 @@ module.exports.userController = require('./user.controller');
 module.exports.branchController = require('./branch.controller');
 module.exports.warehouseController = require('./warehouse.controller');
 module.exports.productController = require('./product.controller');
+module.exports.productInventoryController = require('./productInventory.controller');
 module.exports.supplierController = require('./supplier.controller');
 module.exports.productBatchController = require('./productBatch.controller');
 module.exports.inventoryTransactionController = require('./inventoryTransaction.controller');

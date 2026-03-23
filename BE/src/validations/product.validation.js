@@ -1,6 +1,8 @@
 const Joi = require('joi');
 const { objectId } = require('./custom.validation');
 
+const objectIdArray = Joi.array().items(Joi.string().custom(objectId));
+
 const createProduct = {
   body: Joi.object().keys({
     code: Joi.string().required().messages({
@@ -78,6 +80,40 @@ const exportProducts = {
   }),
 };
 
+const getInventoryOverview = {
+  query: Joi.object().keys({
+    keyword: Joi.string(),
+    productId: Joi.string().custom(objectId),
+    productIds: Joi.alternatives().try(objectIdArray, Joi.string().custom(objectId)),
+    warehouse: Joi.alternatives().try(objectIdArray, Joi.string().custom(objectId)),
+    warehouseId: Joi.string().custom(objectId),
+    warehouseIds: Joi.alternatives().try(objectIdArray, Joi.string().custom(objectId)),
+    alertOnly: Joi.boolean(),
+    startDate: Joi.date().iso(),
+    endDate: Joi.date().iso(),
+    dateFrom: Joi.date().iso(),
+    dateTo: Joi.date().iso(),
+    sortBy: Joi.string(),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
+  }),
+};
+
+const getInventoryDetail = {
+  params: Joi.object().keys({
+    productId: Joi.string().custom(objectId).required(),
+  }),
+  query: Joi.object().keys({
+    warehouse: Joi.alternatives().try(objectIdArray, Joi.string().custom(objectId)),
+    warehouseId: Joi.string().custom(objectId),
+    warehouseIds: Joi.alternatives().try(objectIdArray, Joi.string().custom(objectId)),
+    startDate: Joi.date().iso(),
+    endDate: Joi.date().iso(),
+    dateFrom: Joi.date().iso(),
+    dateTo: Joi.date().iso(),
+  }),
+};
+
 module.exports = {
   createProduct,
   getProducts,
@@ -86,4 +122,6 @@ module.exports = {
   deleteProduct,
   importProducts,
   exportProducts,
+  getInventoryOverview,
+  getInventoryDetail,
 };

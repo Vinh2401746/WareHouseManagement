@@ -6,6 +6,7 @@ const uploadProductImage = require('../../middlewares/uploadImage');
 const normalizeProductPayload = require('../../middlewares/normalizeProductPayload');
 const productValidation = require('../../validations/product.validation');
 const productController = require('../../controllers/product.controller');
+const productInventoryController = require('../../controllers/productInventory.controller');
 
 const router = express.Router();
 
@@ -16,6 +17,22 @@ router.get('/import-template', auth('getProducts'), productController.getImportT
 router.post('/import', auth('manageProducts'), upload.single('file'), productController.importProducts);
 
 router.get('/export', auth('getProducts'), validate(productValidation.exportProducts), productController.exportProducts);
+
+// ─── Inventory overview APIs ────────────────────────────────────────────────
+
+router.get(
+  '/inventory-overview',
+  auth('getProductInventory'),
+  validate(productValidation.getInventoryOverview),
+  productInventoryController.getInventoryOverview
+);
+
+router.get(
+  '/:productId/inventory-detail',
+  auth('getProductInventory'),
+  validate(productValidation.getInventoryDetail),
+  productInventoryController.getInventoryDetail
+);
 
 // ─── CRUD ─────────────────────────────────────────────────────────────────────
 
@@ -201,6 +218,413 @@ module.exports = router;
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
  *         $ref: '#/components/responses/Forbidden'
+ */
+
+/**
+ * @swagger
+ * /product/inventory-overview:
+ *   get:
+ *     summary: Tổng quan tồn kho sản phẩm
+ *     description: |
+ *       Trả về bảng tổng hợp tồn kho, doanh số và cảnh báo cho từng sản phẩm.
+ *       Nếu không truyền khoảng thời gian, hệ thống tự động lấy 30 ngày gần nhất.
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: keyword
+ *         schema:
+ *           type: string
+ *         description: Tìm theo mã hoặc tên sản phẩm (không phân biệt hoa thường)
+ *       - in: query
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         description: Lọc theo 1 sản phẩm (ObjectId)
+ *       - in: query
+ *         name: productIds
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         description: Lọc theo nhiều sản phẩm (mảng ObjectId hoặc truyền nhiều lần)
+ *       - in: query
+ *         name: warehouse
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         description: Giới hạn dữ liệu theo kho (có thể truyền 1 hoặc nhiều giá trị)
+ *       - in: query
+ *         name: warehouseId
+ *         schema:
+ *           type: string
+ *         description: Tương tự `warehouse`, dạng đơn lẻ cho kho chính
+ *       - in: query
+ *         name: warehouseIds
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         description: Alias của `warehouse` khi gọi từ UI cũ
+ *       - in: query
+ *         name: alertOnly
+ *         schema:
+ *           type: boolean
+ *         description: true để chỉ trả về sản phẩm đang thấp hơn tồn tối thiểu
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Ngày bắt đầu tính doanh số (ISO 8601)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Ngày kết thúc tính doanh số (ISO 8601)
+ *       - in: query
+ *         name: dateFrom
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Alias của `startDate`
+ *       - in: query
+ *         name: dateTo
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Alias của `endDate`
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *         description: field:asc|desc (mặc định theo tên tăng dần)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *         description: Số bản ghi mỗi trang (tối đa 100)
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Trang hiện tại
+ *     responses:
+ *       "200":
+ *         description: Bảng tổng quan tồn kho
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 results:
+ *                   type: array
+ *                   description: Danh sách sản phẩm sau khi áp dụng bộ lọc
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       product:
+ *                         $ref: '#/components/schemas/Product'
+ *                       stockByWarehouse:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             warehouse:
+ *                               type: string
+ *                               description: ID kho
+ *                             quantity:
+ *                               type: number
+ *                             value:
+ *                               type: number
+ *                       totalStock:
+ *                         type: number
+ *                       totalStockValue:
+ *                         type: number
+ *                         description: Giá trị vốn hiện tại (làm tròn)
+ *                       revenue:
+ *                         type: number
+ *                       costOfGoods:
+ *                         type: number
+ *                       manualAdjustmentsCost:
+ *                         type: number
+ *                       profit:
+ *                         type: number
+ *                         description: Doanh thu - giá vốn - chi phí xuất thủ công
+ *                       soldQuantity:
+ *                         type: number
+ *                       manualExportQuantity:
+ *                         type: number
+ *                       lastImportAt:
+ *                         type: string
+ *                         format: date-time
+ *                       lastExportAt:
+ *                         type: string
+ *                         format: date-time
+ *                       isBelowMin:
+ *                         type: boolean
+ *                       alerts:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       missingCostLines:
+ *                         type: integer
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 totalResults:
+ *                   type: integer
+ *                 summary:
+ *                   type: object
+ *                   description: Tổng hợp nhanh sau khi lọc
+ *                   properties:
+ *                     totalStock:
+ *                       type: number
+ *                     totalStockValue:
+ *                       type: number
+ *                     totalRevenue:
+ *                       type: number
+ *                     totalCost:
+ *                       type: number
+ *                     totalProfit:
+ *                       type: number
+ *                     lowStockCount:
+ *                       type: number
+ *                       description: Số sản phẩm dưới tồn tối thiểu
+ *                 warnings:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 dateRange:
+ *                   type: object
+ *                   properties:
+ *                     startDate:
+ *                       type: string
+ *                       format: date-time
+ *                     endDate:
+ *                       type: string
+ *                       format: date-time
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ */
+
+/**
+ * @swagger
+ * /product/{productId}/inventory-detail:
+ *   get:
+ *     summary: Chi tiết tồn kho cho 1 sản phẩm
+ *     description: |
+ *       Trả về snapshot tồn kho, lợi nhuận và lịch sử nhập/xuất gần nhất của sản phẩm.
+ *       Khoảng thời gian mặc định là 30 ngày cuối cùng nếu không truyền tham số ngày.
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID sản phẩm cần tra cứu
+ *       - in: query
+ *         name: warehouse
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         description: Lọc lịch sử theo kho (truyền 1 hoặc nhiều ID)
+ *       - in: query
+ *         name: warehouseId
+ *         schema:
+ *           type: string
+ *         description: Kho đơn lẻ (alias của `warehouse`)
+ *       - in: query
+ *         name: warehouseIds
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         description: Alias khác phục vụ UI cũ
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Tính lịch sử từ ngày này (ISO 8601)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *       - in: query
+ *         name: dateFrom
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Alias của `startDate`
+ *       - in: query
+ *         name: dateTo
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Alias của `endDate`
+ *     responses:
+ *       "200":
+ *         description: Chi tiết tồn kho và lịch sử giao dịch gần nhất
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 product:
+ *                   $ref: '#/components/schemas/Product'
+ *                 stockSnapshot:
+ *                   type: object
+ *                   properties:
+ *                     totalStock:
+ *                       type: number
+ *                     totalStockValue:
+ *                       type: number
+ *                     lastImportAt:
+ *                       type: string
+ *                       format: date-time
+ *                     stockByWarehouse:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           warehouse:
+ *                             type: string
+ *                           quantity:
+ *                             type: number
+ *                           value:
+ *                             type: number
+ *                 profitSummary:
+ *                   type: object
+ *                   properties:
+ *                     revenue:
+ *                       type: number
+ *                     costOfGoods:
+ *                       type: number
+ *                     manualAdjustmentsCost:
+ *                       type: number
+ *                     profit:
+ *                       type: number
+ *                 sales:
+ *                   type: object
+ *                   properties:
+ *                     soldQuantity:
+ *                       type: number
+ *                     manualExportQuantity:
+ *                       type: number
+ *                     lastExportAt:
+ *                       type: string
+ *                       format: date-time
+ *                 alerts:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 histories:
+ *                   type: object
+ *                   properties:
+ *                     imports:
+ *                       type: array
+ *                       description: Tối đa 10 phiếu nhập gần nhất
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           transactionId:
+ *                             type: string
+ *                           transactionDate:
+ *                             type: string
+ *                             format: date-time
+ *                           quantity:
+ *                             type: number
+ *                           price:
+ *                             type: number
+ *                           totalAmount:
+ *                             type: number
+ *                           supplier:
+ *                             type: string
+ *                             description: ID nhà cung cấp (nếu có)
+ *                           warehouse:
+ *                             type: string
+ *                           batch:
+ *                             type: string
+ *                     manualExports:
+ *                       type: array
+ *                       description: Tối đa 10 phiếu xuất thủ công gần nhất
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           transactionId:
+ *                             type: string
+ *                           transactionDate:
+ *                             type: string
+ *                             format: date-time
+ *                           quantity:
+ *                             type: number
+ *                           costPrice:
+ *                             type: number
+ *                           costTotal:
+ *                             type: number
+ *                           warehouse:
+ *                             type: string
+ *                           reason:
+ *                             type: string
+ *                     sales:
+ *                       type: array
+ *                       description: Tối đa 10 đơn bán gần nhất
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           saleId:
+ *                             type: string
+ *                           code:
+ *                             type: string
+ *                           saleDate:
+ *                             type: string
+ *                             format: date-time
+ *                           customerName:
+ *                             type: string
+ *                           warehouse:
+ *                             type: string
+ *                           quantity:
+ *                             type: number
+ *                           price:
+ *                             type: number
+ *                           lineTotal:
+ *                             type: number
+ *                           costPrice:
+ *                             type: number
+ *                           costTotal:
+ *                             type: number
+ *                 dateRange:
+ *                   type: object
+ *                   properties:
+ *                     startDate:
+ *                       type: string
+ *                       format: date-time
+ *                     endDate:
+ *                       type: string
+ *                       format: date-time
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ *       "404":
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**

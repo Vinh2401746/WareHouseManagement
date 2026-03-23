@@ -394,9 +394,7 @@ const changeImportStatus = async (transactionId, newStatus) => {
   if (!allowed.includes(newStatus)) {
     throw new ApiError(
       httpStatus.BAD_REQUEST,
-      responseMessages.inventory.invalidStatusTransition
-        .replace('{from}', transaction.status)
-        .replace('{to}', newStatus)
+      responseMessages.inventory.invalidStatusTransition.replace('{from}', transaction.status).replace('{to}', newStatus)
     );
   }
 

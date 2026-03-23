@@ -97,6 +97,18 @@ const inventoryTransactionSchema = mongoose.Schema(
           default: 0,
           min: 0,
         },
+        costPrice: {
+          type: Number,
+          min: 0,
+          default: 0,
+          comment: 'Giá vốn snapshot cho dòng EXPORT',
+        },
+        costTotal: {
+          type: Number,
+          min: 0,
+          default: 0,
+          comment: 'Tổng giá vốn dòng EXPORT',
+        },
       },
     ],
   },

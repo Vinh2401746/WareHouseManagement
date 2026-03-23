@@ -93,6 +93,18 @@ const saleSchema = mongoose.Schema(
           default: 0,
           min: 0,
         },
+        costPrice: {
+          type: Number,
+          min: 0,
+          default: 0,
+          comment: 'Giá vốn snapshot tại thời điểm bán',
+        },
+        costTotal: {
+          type: Number,
+          min: 0,
+          default: 0,
+          comment: 'Tổng giá vốn cho dòng hàng',
+        },
       },
     ],
   },

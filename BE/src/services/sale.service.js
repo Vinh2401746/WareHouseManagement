@@ -51,8 +51,10 @@ const createSale = async (saleBody, user) => {
   let taxMoney = 0;
   let totalAmountAfterFax = 0;
 
-  const registerLine = ({ product, batchId, quantity, price }) => {
+  const registerLine = ({ product, batchId, quantity, price, costPrice }) => {
     const { baseAmount, discountAmount, taxAmount, lineTotal } = computeLineAmounts(quantity, price);
+    const resolvedCostPrice = typeof costPrice === 'number' && !Number.isNaN(costPrice) ? costPrice : 0;
+    const costTotal = roundCurrency(resolvedCostPrice * quantity);
 
     totalAmount += baseAmount;
     discountMoney += discountAmount;
@@ -65,6 +67,8 @@ const createSale = async (saleBody, user) => {
       quantity,
       price,
       lineTotal,
+      costPrice: resolvedCostPrice,
+      costTotal,
     });
 
     inventoryItems.push({
@@ -73,6 +77,8 @@ const createSale = async (saleBody, user) => {
       quantity,
       price,
       totalAmount: lineTotal,
+      costPrice: resolvedCostPrice,
+      costTotal,
     });
   };
 
@@ -104,6 +110,7 @@ const createSale = async (saleBody, user) => {
         batchId: batch._id,
         quantity: item.quantity,
         price: item.price,
+        costPrice: batch.importPrice,
       });
     } else {
       let remainingQty = item.quantity;
@@ -132,6 +139,7 @@ const createSale = async (saleBody, user) => {
           batchId: batch._id,
           quantity: usedQty,
           price: item.price,
+          costPrice: batch.importPrice,
         });
       }
 

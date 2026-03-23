@@ -5,6 +5,7 @@ module.exports.userService = require('./user.service');
 module.exports.branchService = require('./branch.service');
 module.exports.warehouseService = require('./warehouse.service');
 module.exports.productService = require('./product.service');
+module.exports.productInventoryService = require('./productInventory.service');
 module.exports.supplierService = require('./supplier.service');
 // module.exports.productBatchService = require('./productBatch.service');
 module.exports.inventoryTransactionService = require('./inventoryTransaction.service');

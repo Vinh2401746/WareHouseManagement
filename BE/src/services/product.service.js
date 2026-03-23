@@ -64,6 +64,16 @@ const formatProductResponse = (productDoc) => {
 const getProductDocumentById = (id) => Product.findById(id).populate('unit');
 
 /**
+ * Get product by id
+ * @param {ObjectId} id
+ * @returns {Promise<Product>}
+ */
+const getProductById = async (id) => {
+  const product = await getProductDocumentById(id);
+  return formatProductResponse(product);
+};
+
+/**
  * Create a product
  * @param {Object} productBody
  * @returns {Promise<Product>}
@@ -87,16 +97,6 @@ const queryProducts = async (filter, options) => {
   const products = await Product.paginate(filter, options);
   products.results = products.results.map((result) => formatProductResponse(result));
   return products;
-};
-
-/**
- * Get product by id
- * @param {ObjectId} id
- * @returns {Promise<Product>}
- */
-const getProductById = async (id) => {
-  const product = await getProductDocumentById(id);
-  return formatProductResponse(product);
 };
 
 /**
