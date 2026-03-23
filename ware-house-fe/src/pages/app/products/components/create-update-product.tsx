@@ -12,6 +12,7 @@ import type {
   UpdateProductRequestType,
 } from "../../../../types/products";
 import { InboxOutlined } from "@ant-design/icons";
+import { ROOT_IMAGE_IMAGE } from "../../../../constants/common";
 
 export type ProductFormData = {
   code: string;
@@ -95,7 +96,6 @@ const ProductFormModal = forwardRef<ProductFormRef, ProductFormModalProps>(
 
     useImperativeHandle(ref, () => ({
       show: (data: any) => {
-        console.log("data",data);
         setOpen(true);
         form.setFieldsValue(
           data
@@ -103,6 +103,9 @@ const ProductFormModal = forwardRef<ProductFormRef, ProductFormModalProps>(
               ...data,
               unit: data?.unit?.id || "",
               category: data?.category?.id || "",
+              image: data?.imageUrl
+                ? [{ uid: '-1', name: 'image', status: 'done', url: data.imageUrl ? ROOT_IMAGE_IMAGE + data.imageUrl : '' }]
+                : null,
             }
             : initForm,
         );
@@ -145,10 +148,11 @@ const ProductFormModal = forwardRef<ProductFormRef, ProductFormModalProps>(
     });
 
     const onFinish = (values: ProductFormData) => {
+      console.log("òninish", (values?.image as any)?.[0]?.originFileObj)
       mutate({
         ...values,
         minStock: Number(values.minStock),
-        image: values?.image?.fileList[0]?.originFileObj
+        image: (values?.image as any)?.[0]?.originFileObj
       });
     };
 
@@ -178,15 +182,17 @@ const ProductFormModal = forwardRef<ProductFormRef, ProductFormModalProps>(
           <Form.Item
             label="Ảnh sản phẩm"
             name="image"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
             // rules={[{ required: true, message: "Vui lòng chọn sản phẩm" }]}
           >
             <Upload.Dragger
               name="files"
-              action="/upload.do"
+              listType="picture"
               maxCount={1}
               accept=".png,.jpg,.jpeg"
               beforeUpload={(file) => {
-                const isValidType = ["image/png", "image/jpeg","image/png"].includes(file.type);
+                const isValidType = ["image/png", "image/jpeg"].includes(file.type);
                 if (!isValidType) {
                   dispatchToast("error", "Chỉ chấp nhận file PNG, JPG, JPEG!");
                   return Upload.LIST_IGNORE;

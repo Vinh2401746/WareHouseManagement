@@ -12,7 +12,7 @@ import { TableCommon } from "../../../components/table/table";
 import { AppRoutes } from "../../../router/routes";
 import { deleteProductApi, exportCurrentExProduct, getProductsApi, getTemplateProduct, importTemplateProduct } from "../../../api/products";
 import type { GetProductsRequestType } from "../../../types/products";
-import { UNITS } from "../../../constants/common";
+import { ROOT_IMAGE_IMAGE, UNITS } from "../../../constants/common";
 import { formatNumber } from "../../../utils/helper";
 import { usePermission } from "../../../hooks/usePermission";
 import NoPermissonPage from "../../404-developing/no-permission";
@@ -91,7 +91,7 @@ const ProductsPage = memo(() => {
           width={50}
           height={50}
           alt="basic"
-          src={`https://api.sanghh.space${image}`}
+          src={`${ROOT_IMAGE_IMAGE}${image}`}
         /> : ''
       },
       {
