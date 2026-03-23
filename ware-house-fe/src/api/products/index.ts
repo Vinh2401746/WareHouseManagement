@@ -7,36 +7,42 @@ import type {
 import { keyQueryFilterString } from "../../utils/helper";
 import AxiosClient from "../axiosClient";
 
-export const getProductsApi = async (payload: GetProductsRequestType):Promise<CommonListResponse | any>  => {
+export const getProductsApi = async (payload: GetProductsRequestType): Promise<CommonListResponse | any> => {
   const queryString = keyQueryFilterString(payload);
   return AxiosClient.get(`product?${queryString}`);
 };
 
 export const createProductApi = async (payload: CreateProductRequestType) => {
-  return AxiosClient.post(`product`, payload);
+  const formData = new FormData();
+  formData.append("code", payload.code);
+  formData.append("name", payload.name);
+  formData.append("unit", payload.unit);
+  formData.append("minStock", String(payload.minStock));
+  if (payload.image) formData.append("image", (payload.image) as File);
+  return AxiosClient.post(`product`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 };
 
-export const updateProductsApi = async (payload: UpdateProductRequestType):Promise<CommonListResponse | any> => {
-  const dataUpdate: Pick<
-    UpdateProductRequestType,
-    "code" | "name" | "category" | "unit" | "minStock"
-  > = {
-    code: payload.code,
-    name: payload.name,
-    category: payload.category,
-    unit: payload.unit,
-    minStock: payload.minStock,
-  };
-  return AxiosClient.put(`product/${payload.productId}`, dataUpdate);
+export const updateProductsApi = async (payload: UpdateProductRequestType): Promise<CommonListResponse | any> => {
+  const formData = new FormData();
+  formData.append("code", payload.code);
+  formData.append("name", payload.name);
+  formData.append("unit", payload.unit);
+  formData.append("minStock", String(payload.minStock));
+  if (payload.image) formData.append("image", (payload.image) as File);
+  return AxiosClient.put(`product/${payload.productId}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 };
 
 export const deleteProductApi = async (payload: { id: string }) => {
-  return AxiosClient.delete(`product/${payload.id}` );
+  return AxiosClient.delete(`product/${payload.id}`);
 };
 
 
-export const getTemplateProduct = () =>{
-   return AxiosClient.get(`product/import-template`, { responseType: 'blob' });
+export const getTemplateProduct = () => {
+  return AxiosClient.get(`product/import-template`, { responseType: 'blob' });
 }
 
 export const importTemplateProduct = (file: File) => {
@@ -47,6 +53,6 @@ export const importTemplateProduct = (file: File) => {
   });
 };
 
-export const exportCurrentExProduct = () =>{
-   return AxiosClient.get(`product/export`, { responseType: 'blob' });
+export const exportCurrentExProduct = () => {
+  return AxiosClient.get(`product/export`, { responseType: 'blob' });
 }

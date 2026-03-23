@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QueryKeys } from "../../../constants/query-keys";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Button, Flex, Pagination, Popconfirm, Tag } from "antd";
+import { Breadcrumb, Button, Flex, Image, Pagination, Popconfirm, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { ProductFormRef } from "./components/create-update-product";
 import ProductFormModal from "./components/create-update-product";
@@ -12,7 +12,7 @@ import { TableCommon } from "../../../components/table/table";
 import { AppRoutes } from "../../../router/routes";
 import { deleteProductApi, exportCurrentExProduct, getProductsApi, getTemplateProduct, importTemplateProduct } from "../../../api/products";
 import type { GetProductsRequestType } from "../../../types/products";
-import { UNITS } from "../../../constants/common";
+import { ROOT_IMAGE_IMAGE, UNITS } from "../../../constants/common";
 import { formatNumber } from "../../../utils/helper";
 import { usePermission } from "../../../hooks/usePermission";
 import NoPermissonPage from "../../404-developing/no-permission";
@@ -20,7 +20,7 @@ const ProductsPage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<ProductFormRef>(null);
-  const {isManager,canView} = usePermission("products")
+  const { isManager, canView } = usePermission("products")
   const { data, refetch, isFetching, isError, error } = useQuery({
     queryKey: [QueryKeys.products.list, { page, limit }],
     queryFn: ({ queryKey }) => {
@@ -29,19 +29,19 @@ const ProductsPage = memo(() => {
     },
   });
 
-    useEffect(()=>{
-    if(isError){
+  useEffect(() => {
+    if (isError) {
       dispatchToast("error", error.message)
     }
-  },[error, isError])
+  }, [error, isError])
 
   const { mutate, isPending } = useMutation({
     mutationFn: (payload: { id: string }) =>
       deleteProductApi({ id: payload.id }),
     onSuccess: () => {
       dispatchToast("success", "Xoá sản phẩm thành công!");
-      if((data?.totalResults  % ( (page - 1)  * limit) == 1) && page > 1){
-       return setPage( page - 1 )
+      if ((data?.totalResults % ((page - 1) * limit) == 1) && page > 1) {
+        return setPage(page - 1)
       }
       refetch();
     },
@@ -83,6 +83,18 @@ const ProductsPage = memo(() => {
         width: 80,
       },
       {
+        title: "Ảnh sản phẩm",
+        dataIndex: "imageUrl",
+        key: "imageUrl",
+        align: "center",
+        render: (image) => image ? <Image
+          width={50}
+          height={50}
+          alt="basic"
+          src={`${ROOT_IMAGE_IMAGE}${image}`}
+        /> : ''
+      },
+      {
         title: "Mã hàng hoá",
         dataIndex: "code",
         key: "code",
@@ -99,14 +111,14 @@ const ProductsPage = memo(() => {
         dataIndex: "unit",
         key: "unit",
         align: "center",
-        render: (value:any) => value?.name || ''
+        render: (value: any) => value?.name || ''
       },
       {
         title: "Tồn kho tối thiểu",
         dataIndex: "minStock",
         key: "minStock",
         align: "center",
-        render:(value) => <span style={{fontWeight:'bold'}}>{formatNumber(value)}</span>
+        render: (value) => <span style={{ fontWeight: 'bold' }}>{formatNumber(value)}</span>
       },
       // {
       //   title: "Danh mục",
@@ -132,6 +144,7 @@ const ProductsPage = memo(() => {
                 color={"green"}
                 variant={"outlined"}
                 onClick={() => onAction("update", record)}
+                disabled={!isManager}
               >
                 Cập nhật
               </Tag>
@@ -141,7 +154,7 @@ const ProductsPage = memo(() => {
                 okText="Xác nhận"
                 onConfirm={() => onAction("delete", record)}
               >
-                <Tag color={"red"} variant={"outlined"}>
+                <Tag color={"red"} variant={"outlined"}  disabled={!isManager}>
                   Xoá
                 </Tag>
               </Popconfirm>
@@ -171,14 +184,14 @@ const ProductsPage = memo(() => {
 
   const { mutate: importProduct } = useMutation({
     mutationFn: importTemplateProduct,
-    onSuccess: (res:any) => {
-      console.log("res",res)
-      if(res?.errors.length == 0) {
+    onSuccess: (res: any) => {
+      console.log("res", res)
+      if (res?.errors.length == 0) {
         dispatchToast("success", "Nhập sản phẩm thành công!");
         refetch();
         return;
       }
-        dispatchToast("error", res?.errors?.[0].errors[0] || "Mẫu đẩy lên không đúng quy định!");
+      dispatchToast("error", res?.errors?.[0].errors[0] || "Mẫu đẩy lên không đúng quy định!");
     },
     onError: () => {
       dispatchToast("error", "Nhập file thất bại!");
@@ -224,7 +237,7 @@ const ProductsPage = memo(() => {
     }
   };
 
-  if(!canView) return<NoPermissonPage />
+  if (!canView) return <NoPermissonPage />
 
   return (
     <div style={{ rowGap: 24, display: "flex", flexDirection: "column" }}>
@@ -242,16 +255,16 @@ const ProductsPage = memo(() => {
         ]}
       />
       <Flex justify="end" gap={8}>
-         <Button type="primary" onClick={() => utitilesAction("template")}>
-         Tải file mẫu
+        <Button type="primary" onClick={() => utitilesAction("template")}  disabled={!isManager}>
+          Tải file mẫu
         </Button>
-         <Button type="primary" onClick={() => utitilesAction("import")}>
+        <Button type="primary" onClick={() => utitilesAction("import")}  disabled={!isManager}>
           Tải danh sách sản phẩm
         </Button>
-         <Button type="primary" onClick={() => utitilesAction("export")}>
+        <Button type="primary" onClick={() => utitilesAction("export")}  disabled={!isManager}>
           Xuất sản phẩm hiện có
         </Button>
-        <Button type="primary" onClick={() => formRef.current?.show()}>
+        <Button type="primary" onClick={() => formRef.current?.show()}  disabled={!isManager}>
           Thêm sản phẩm
         </Button>
       </Flex>
@@ -269,7 +282,7 @@ const ProductsPage = memo(() => {
             },
           };
         }}
-        // scroll={{ y: 500 }}
+      // scroll={{ y: 500 }}
       />
       <Flex justify="end">
         <Pagination

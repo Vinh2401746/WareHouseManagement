@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
-import { Modal, Form, Input, Select } from "antd";
+import { Modal, Form, Input, Select, Upload } from "antd";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { QueryKeys } from "../../../../constants/query-keys";
 import { getCategorysApi } from "../../../../api/category";
@@ -11,6 +11,8 @@ import type {
   CreateProductRequestType,
   UpdateProductRequestType,
 } from "../../../../types/products";
+import { InboxOutlined } from "@ant-design/icons";
+import { ROOT_IMAGE_IMAGE } from "../../../../constants/common";
 
 export type ProductFormData = {
   code: string;
@@ -19,6 +21,7 @@ export type ProductFormData = {
   unit: string;
   minStock: number | null;
   id: string;
+  image: any
 };
 
 export type ProductFormRef = {
@@ -29,10 +32,11 @@ export type ProductFormRef = {
 const initForm: ProductFormData = {
   code: "",
   name: "",
-  category:'',
+  category: '',
   unit: '',
   minStock: null,
   id: "",
+  image: null
 };
 
 type ProductFormModalProps = {
@@ -65,7 +69,7 @@ const ProductFormModal = forwardRef<ProductFormRef, ProductFormModalProps>(
           queryKey: [QueryKeys.unit.list],
           queryFn: () => getUnitsApi({ page: 1, limit: 1000000000 }),
           staleTime: 5 * 60 * 1000,
-           gcTime:  5 * 60 * 1000,
+          gcTime: 5 * 60 * 1000,
         },
       ],
     });
@@ -91,16 +95,18 @@ const ProductFormModal = forwardRef<ProductFormRef, ProductFormModalProps>(
     const isUpdate = useMemo(() => product.id, [product.id]);
 
     useImperativeHandle(ref, () => ({
-      show: (data:any) => {
-        console.log("data");
+      show: (data: any) => {
         setOpen(true);
         form.setFieldsValue(
           data
             ? {
-                ...data,
-                unit: data?.unit?.id || "",
-                category: data?.category?.id || "",
-              }
+              ...data,
+              unit: data?.unit?.id || "",
+              category: data?.category?.id || "",
+              image: data?.imageUrl
+                ? [{ uid: '-1', name: 'image', status: 'done', url: data.imageUrl ? ROOT_IMAGE_IMAGE + data.imageUrl : '' }]
+                : null,
+            }
             : initForm,
         );
         setproduct((data ? data : initForm) as ProductFormData);
@@ -115,12 +121,12 @@ const ProductFormModal = forwardRef<ProductFormRef, ProductFormModalProps>(
       mutationFn: (payload: ProductFormData) => {
         return isUpdate
           ? updateProductsApi({
-              ...payload,
-              productId: product.id,
-            } as UpdateProductRequestType)
+            ...payload,
+            productId: product.id,
+          } as UpdateProductRequestType)
           : createProductApi({
-              ...payload,
-            } as CreateProductRequestType);
+            ...payload,
+          } as CreateProductRequestType);
       },
       onSuccess: () => {
         dispatchToast(
@@ -136,16 +142,17 @@ const ProductFormModal = forwardRef<ProductFormRef, ProductFormModalProps>(
         dispatchToast(
           "warning",
           error?.response?.data?.message ||
-            `${isUpdate ? "Cập nhật" : "Tạo"} sản phẩm thất bại`,
+          `${isUpdate ? "Cập nhật" : "Tạo"} sản phẩm thất bại`,
         );
       },
     });
 
     const onFinish = (values: ProductFormData) => {
-      console.log("Submit:", values);
+      console.log("òninish", (values?.image as any)?.[0]?.originFileObj)
       mutate({
         ...values,
         minStock: Number(values.minStock),
+        image: (values?.image as any)?.[0]?.originFileObj
       });
     };
 
@@ -171,6 +178,38 @@ const ProductFormModal = forwardRef<ProductFormRef, ProductFormModalProps>(
             rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm" }]}
           >
             <Input />
+          </Form.Item>
+          <Form.Item
+            label="Ảnh sản phẩm"
+            name="image"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
+            // rules={[{ required: true, message: "Vui lòng chọn sản phẩm" }]}
+          >
+            <Upload.Dragger
+              name="files"
+              listType="picture"
+              maxCount={1}
+              accept=".png,.jpg,.jpeg"
+              beforeUpload={(file) => {
+                const isValidType = ["image/png", "image/jpeg"].includes(file.type);
+                if (!isValidType) {
+                  dispatchToast("error", "Chỉ chấp nhận file PNG, JPG, JPEG!");
+                  return Upload.LIST_IGNORE;
+                }
+                const isUnder500MB = file.size / 1024 / 1024 < 500;
+                if (!isUnder500MB) {
+                  dispatchToast("error", "Ảnh không được vượt quá 500MB!");
+                  return Upload.LIST_IGNORE;
+                }
+                return false;
+              }}
+            >
+              <p className="ant-upload-drag-icon">
+                <InboxOutlined />
+              </p>
+              <p className="ant-upload-text">Chọn hoặc kéo file vào đây!</p>
+            </Upload.Dragger>
           </Form.Item>
 
           <Form.Item

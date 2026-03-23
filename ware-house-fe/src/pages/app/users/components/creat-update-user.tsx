@@ -1,11 +1,12 @@
 import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { Modal, Form, Input, Select } from "antd";
 import { ROLES } from "../../../../constants/common";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createUser, updateUser } from "../../../../api/users/users";
 import type { roles } from "../../../../types/auth";
 import dispatchToast from "../../../../constants/toast";
 import { QueryKeys } from "../../../../constants/query-keys";
+import { getBranchsApi } from "../../../../api/branch";
 
 export type UserFormData = {
   name: string;
@@ -13,6 +14,7 @@ export type UserFormData = {
   role: roles;
   id: string;
   password: string;
+  branch:string
 };
 
 export type UserFormRef = {
@@ -25,6 +27,7 @@ const initForm: UserFormData = {
   email: "",
   id: "",
   password: "",
+  branch: "",
   role: null,
 };
 const UserFormModal = forwardRef<UserFormRef>((_, ref) => {
@@ -80,6 +83,16 @@ const UserFormModal = forwardRef<UserFormRef>((_, ref) => {
     },
   });
 
+   const { data } = useQuery({
+    queryKey: [QueryKeys.branch.list, {page:0, limit:100000}],
+    queryFn: ({ queryKey }) => {
+    return getBranchsApi({page:0 , limit:100000});
+  },
+    gcTime: 15 * 60 * 1000 // 15 phut cache
+  });
+
+  console.log("data",data)
+
   const onFinish = (values: UserFormData) => {
     // console.log("Submit:", values);
     mutate(values);
@@ -88,7 +101,7 @@ const UserFormModal = forwardRef<UserFormRef>((_, ref) => {
   return (
     <Modal
       open={open}
-      title="User Form"
+      title="Người dùng"
       onCancel={() => setOpen(false)}
       onOk={() => form.submit()}
       // destroyOnHidden
@@ -140,6 +153,18 @@ const UserFormModal = forwardRef<UserFormRef>((_, ref) => {
           ]}
         >
           <Select options={ROLES} />
+        </Form.Item>
+         <Form.Item
+          label="Cửa hàng"
+          name="branch"
+          rules={[
+            { required: true, message: "Vui lòng chọn cửa hàng người dùng" },
+          ]}
+        >
+          <Select options={data?.results?.map(item=>({
+            label:item.name,
+            value:item.id
+          })) || []} />
         </Form.Item>
       </Form>
     </Modal>

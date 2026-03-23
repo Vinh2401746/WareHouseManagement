@@ -244,6 +244,7 @@ const WarehouseImportAndExport = memo(() => {
                 color={"blue"}
                 variant={"outlined"}
                 onClick={() => onAction("update", record)}
+                   disabled={!isManager}
               >
                 Chi Tiết Đơn
               </Tag>
@@ -255,6 +256,7 @@ const WarehouseImportAndExport = memo(() => {
                     <Tag
                       color={"green"}
                       variant={"outlined"}
+                         disabled={!isManager}
                     >
                       {renderStatus(record?.status)}
                     </Tag>
@@ -265,6 +267,7 @@ const WarehouseImportAndExport = memo(() => {
                       cancelText="Huỷ"
                       okText="Xác nhận"
                       onConfirm={() => onAction("cancel", record)}
+                         disabled={!isManager}
                     >
                       <Tag color={"yellow"} variant={"outlined"}>
                         Huỷ đơn
@@ -311,6 +314,7 @@ const WarehouseImportAndExport = memo(() => {
           type="primary"
           icon={<DownloadOutlined />}
           onClick={() => formRef.current?.show({})}
+             disabled={!isManager}
         >
           Tạo đơn nhập kho
         </Button>

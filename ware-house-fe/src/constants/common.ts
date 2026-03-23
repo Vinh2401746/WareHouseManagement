@@ -46,3 +46,4 @@ export const UNITS = [
 
 export const DISCOUNT_PERCENT = 2;
 export const TAX_PERCENT = 5;
+export const ROOT_IMAGE_IMAGE = "https://api.sanghh.space"

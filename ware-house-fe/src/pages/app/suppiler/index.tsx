@@ -121,6 +121,7 @@ const SuppilerPage = memo(() => {
                 color={"green"}
                 variant={"outlined"}
                 onClick={() => onAction("update", record)}
+                disabled={!isManager}
               >
                 Cập nhật
               </Tag>
@@ -130,7 +131,7 @@ const SuppilerPage = memo(() => {
                 okText="Xác nhận"
                 onConfirm={() => onAction("delete", record)}
               >
-                <Tag color={"red"} variant={"outlined"}>
+                <Tag color={"red"} variant={"outlined"}    disabled={!isManager}>
                   Xoá
                 </Tag>
               </Popconfirm>
@@ -158,7 +159,7 @@ const SuppilerPage = memo(() => {
         ]}
       />
       <Flex justify="end">
-        <Button type="primary" onClick={() => formRef.current?.show()}>
+        <Button type="primary" onClick={() => formRef.current?.show()}    disabled={!isManager}>
           Thêm nhà cung cấp
         </Button>
       </Flex>
