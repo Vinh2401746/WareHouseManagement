@@ -113,6 +113,7 @@ const UserPage = memo(() => {
               color={"green"}
               variant={"outlined"}
               onClick={() => onAction("update", record)}
+              disabled={!isManager}
             >
               Cập nhật
             </Tag>
@@ -122,7 +123,7 @@ const UserPage = memo(() => {
               okText="Xác nhận"
               onConfirm={() => onAction("reset-pass", record)}
             >
-              <Tag color={"yellow"} variant={"outlined"}>
+              <Tag color={"yellow"} variant={"outlined"} disabled={!isManager}>
                 Đặt lại mật khẩu
               </Tag>
             </Popconfirm>
@@ -132,7 +133,7 @@ const UserPage = memo(() => {
               okText="Xác nhận"
               onConfirm={() => onAction("delete", record)}
             >
-              <Tag color={"red"} variant={"outlined"}>
+              <Tag color={"red"} variant={"outlined"} disabled={!isManager}>
                 Xoá
               </Tag>
             </Popconfirm>
@@ -159,7 +160,7 @@ const UserPage = memo(() => {
         ]}
       />
       <Flex justify="end">
-        <Button type="primary" onClick={() => formRef.current?.show()}>
+        <Button type="primary" onClick={() => formRef.current?.show()} disabled={!isManager}>
           Thêm Người Dùng
         </Button>
       </Flex>

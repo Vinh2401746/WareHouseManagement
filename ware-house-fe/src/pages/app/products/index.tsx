@@ -144,6 +144,7 @@ const ProductsPage = memo(() => {
                 color={"green"}
                 variant={"outlined"}
                 onClick={() => onAction("update", record)}
+                disabled={!isManager}
               >
                 Cập nhật
               </Tag>
@@ -153,7 +154,7 @@ const ProductsPage = memo(() => {
                 okText="Xác nhận"
                 onConfirm={() => onAction("delete", record)}
               >
-                <Tag color={"red"} variant={"outlined"}>
+                <Tag color={"red"} variant={"outlined"}  disabled={!isManager}>
                   Xoá
                 </Tag>
               </Popconfirm>
@@ -254,16 +255,16 @@ const ProductsPage = memo(() => {
         ]}
       />
       <Flex justify="end" gap={8}>
-        <Button type="primary" onClick={() => utitilesAction("template")}>
+        <Button type="primary" onClick={() => utitilesAction("template")}  disabled={!isManager}>
           Tải file mẫu
         </Button>
-        <Button type="primary" onClick={() => utitilesAction("import")}>
+        <Button type="primary" onClick={() => utitilesAction("import")}  disabled={!isManager}>
           Tải danh sách sản phẩm
         </Button>
-        <Button type="primary" onClick={() => utitilesAction("export")}>
+        <Button type="primary" onClick={() => utitilesAction("export")}  disabled={!isManager}>
           Xuất sản phẩm hiện có
         </Button>
-        <Button type="primary" onClick={() => formRef.current?.show()}>
+        <Button type="primary" onClick={() => formRef.current?.show()}  disabled={!isManager}>
           Thêm sản phẩm
         </Button>
       </Flex>

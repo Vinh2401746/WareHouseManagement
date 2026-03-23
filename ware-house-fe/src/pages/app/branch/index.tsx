@@ -113,7 +113,7 @@ import NoPermissonPage from "../../404-developing/no-permission";
             <Tag
               color={"green"}
               variant={"outlined"}
-              onClick={() => onAction("update", record)}
+              onClick={() => onAction("update", record)}    disabled={!isManager}
             >
               Cập nhật
             </Tag>
@@ -123,7 +123,7 @@ import NoPermissonPage from "../../404-developing/no-permission";
               okText="Xác nhận"
               onConfirm={() => onAction("delete", record)}
             >
-              <Tag color={"red"} variant={"outlined"}>
+              <Tag color={"red"} variant={"outlined"}    disabled={!isManager}>
                 Xoá
               </Tag>
             </Popconfirm>
@@ -151,7 +151,7 @@ if(!canView) return <NoPermissonPage />
         ]}
       />
       <Flex justify="end">
-        <Button type="primary" onClick={() => formRef.current?.show()}>
+        <Button type="primary" onClick={() => formRef.current?.show()}  disabled={!isManager}>
           Thêm chi nhánh
         </Button>
       </Flex>

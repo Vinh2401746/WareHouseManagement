@@ -6,8 +6,8 @@ export const usePermission = (module: keyof permissionType['permissions']) => {
 
     const currentPermisson = useAppSelector(state => state.auth.permission?.permissions)
 
-    const isManager = currentPermisson?.[module].join('').includes("manage")
-    const canView = currentPermisson?.[module].join('').includes("get")
+    const isManager = currentPermisson?.[module]?.join('')?.includes("manage") || false
+    const canView = currentPermisson?.[module]?.join('')?.includes("get") || false
 
     return {
         isManager,
