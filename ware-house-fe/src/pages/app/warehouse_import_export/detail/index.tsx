@@ -2,6 +2,7 @@ import {
     useCallback,
     useEffect,
     useMemo,
+    useRef,
     useState,
 } from "react";
 import {
@@ -15,6 +16,7 @@ import {
     Tag,
     Flex,
     Spin,
+    Breadcrumb,
 } from "antd";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import dispatchToast from "../../../../constants/toast";
@@ -26,6 +28,7 @@ import { getSuppliersApi } from "../../../../api/supplier";
 import {
     MinusOutlined,
     PlusOutlined,
+    UserOutlined,
 } from "@ant-design/icons";
 import { getProductsApi } from "../../../../api/products";
 import { createInventoriesApi, getAnInventoryApi, updateAnInventoryApi } from "../../../../api/inventory/inventory";
@@ -38,6 +41,9 @@ import dayjs from "dayjs";
 import { DISCOUNT_PERCENT, TAX_PERCENT } from "../../../../constants/common";
 import { formatNumber } from "../../../../utils/helper";
 import { useLocation, useNavigate } from "react-router-dom";
+import type { ProductFormRef } from "../../products/components/create-update-product";
+import ProductFormModal from "../../products/components/create-update-product";
+import { AppRoutes } from "../../../../router/routes";
 export type WarehouseImExFormData = {
     warehouse: string;
     supplier: string;
@@ -112,10 +118,10 @@ const ItemTemplate: Omit<Item, "idPath"> = {
 
 const WarehouseImportExportDetailPage =
     () => {
-         const navigate = useNavigate()
+        const navigate = useNavigate()
         const params = useLocation()
-        
-        const paramDetail = useMemo(()=>params.state,[params])
+
+        const paramDetail = useMemo(() => params.state, [params])
         const [dataImport, setDataImport] = useState({})
         const [itemsData, setItemsData] = useState<Item[]>([
             {
@@ -132,6 +138,7 @@ const WarehouseImportExportDetailPage =
             totalAmountAfterFax: 0,
         });
         const [loading, setLoading] = useState(false)
+        const formRef = useRef<ProductFormRef>(null);
         useEffect(() => {
             //   Thành tiền = (SL × Đơn giá) × (1 − CK%) × (1 + Thuế%)
             //  A:tổng tiền = Sum ( thành tiền )
@@ -271,7 +278,7 @@ const WarehouseImportExportDetailPage =
             [supplierData?.results],
         );
 
-        const { data: productData } = useQuery({
+        const { data: productData, refetch } = useQuery({
             queryKey: [QueryKeys.products.list],
             queryFn: () => {
                 return getProductsApi({ page: 1, limit: 1000000000 });
@@ -331,9 +338,9 @@ const WarehouseImportExportDetailPage =
             }
             setLoading(false)
             setItemsData([{ ...ItemTemplate, idPath: UUID() }],)
-            return () =>{
-                  setItemsData([{ ...ItemTemplate, idPath: UUID() }],)
-                  setErrorRows([])
+            return () => {
+                setItemsData([{ ...ItemTemplate, idPath: UUID() }],)
+                setErrorRows([])
             }
         }, [])
 
@@ -536,7 +543,7 @@ const WarehouseImportExportDetailPage =
                             popupRender={(menu) => {
                                 return (
                                     <>
-                                        <Button type="link">Thêm sản phẩm</Button>
+                                        <Button type="link" onClick={() => formRef.current?.show()}>Thêm sản phẩm</Button>
                                         {menu}
                                     </>
                                 );
@@ -765,20 +772,20 @@ const WarehouseImportExportDetailPage =
             return <Spin />
         }
         return (
-            <div
-            // open={open}
-            // // title="Nhập kho"
-            // onCancel={onCloseModal}
-            // // onOk={() => form.submit()}
-            // // onOk={() => onFinish({})}
-            // // destroyOnHidden
-            // title={`${!isUpdate ? "Tạo" : "Cập nhật"}`}
-
-            // cancelText="Đóng"
-
-            // footer={false}
-            // width={"80%"}
-            >
+            <div>
+                <Breadcrumb
+                    items={[
+                        {
+                            href: AppRoutes.warehouse_import_export,
+                            title: (
+                                <>
+                                    <UserOutlined />
+                                    <span>Quay lại</span>
+                                </>
+                            ),
+                        },
+                    ]}
+                />
                 <Form
                     form={form}
                     layout="vertical"
@@ -877,6 +884,13 @@ const WarehouseImportExportDetailPage =
                         </Button>
                     </Flex>
                 </Form>
+                <ProductFormModal
+                    onSuccess={() => {
+                        refetch();
+                        formRef.current?.hide();
+                    }}
+                    ref={formRef}
+                />
             </div>
         );
     }
