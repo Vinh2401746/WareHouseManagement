@@ -5,6 +5,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { AppRoutes } from "./routes";
 import { GuestRoute, PrivateRoute } from "../components/protect-route";
 import NoPermissonPage from "../pages/404-developing/no-permission";
+import WarehouseImportExportDetailPage from "../pages/app/warehouse_import_export/detail";
 
 
 const LoginPage = Loadable(lazy(() => import('../pages/auth/login-page')));
@@ -87,6 +88,11 @@ export const router = createBrowserRouter(
           path: AppRoutes.warehouse_import_export,
           id: AppRoutes.warehouse_import_export,
           element: <WarehouseImportAndExport />,
+        },
+           {
+          path: AppRoutes.warehouse_import_export_detail,
+          id: AppRoutes.warehouse_import_export_detail,
+          element: <WarehouseImportExportDetailPage />,
         },
         {
           path: AppRoutes.sales_invoice,

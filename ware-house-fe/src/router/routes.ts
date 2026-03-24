@@ -19,6 +19,7 @@ export const AppRoutes = {
   },
   store: '/store',
   warehouse_import_export: '/warehouse_import_export',
+  warehouse_import_export_detail: '/warehouse_import_export_detail',
   sales_invoice: '/sales_invoice',
   unit:{
     list:'/unit'

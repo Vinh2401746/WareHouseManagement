@@ -3,12 +3,9 @@ import { QueryKeys } from "../../../constants/query-keys";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Button, Flex, Pagination, Popconfirm, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import type { UnitFormRef } from "./components/create-update-warehouse-im-ex";
-import UnitFormModal from "./components/create-update-warehouse-im-ex";
 import dispatchToast from "../../../constants/toast";
 import {
   DownloadOutlined,
-  UploadOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 
@@ -25,6 +22,7 @@ import type { CancelFormRef } from "./components/cancel-import";
 import CancelImport from "./components/cancel-import";
 import NoPermissonPage from "../../404-developing/no-permission";
 import { usePermission } from "../../../hooks/usePermission";
+import { useNavigate } from "react-router-dom";
 //['PENDING', 'COMPLETED', 'CANCELED']
 const renderStatus = (status: string) => {
   switch (status) {
@@ -46,8 +44,9 @@ const renderStatus = (status: string) => {
 const WarehouseImportAndExport = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const formRef = useRef<UnitFormRef>(null);
   const cancelRef= useRef<CancelFormRef>(null)
+
+  const navigate = useNavigate()
   const { data, isLoading, refetch, error, isError } = useQuery({
     queryKey: [QueryKeys.category.list, { page, limit }],
     queryFn: ({ queryKey }) => {
@@ -94,19 +93,6 @@ const WarehouseImportAndExport = memo(() => {
     },
   });
 
-//cancelAnInventoryApi
-
- const { mutate: mutateCancel } = useMutation({
-    mutationFn: (payload: { id: string, cancelReason:string }) =>
-      cancelAnInventoryApi(payload),
-    onSuccess: () => {
-      dispatchToast("success", "Huỷ đơn nhập kho thành công!");
-      refetch();
-    },
-    onError: (error) => {
-      dispatchToast("error", "Huỷ đơn nhập kho thất bại!");
-    },
-  });
 
   const units = useMemo(() => data?.results ?? [], [data?.results]);
 
@@ -118,7 +104,10 @@ const WarehouseImportAndExport = memo(() => {
           break;
         case "update":
           // dispatchToast("warning", "Tính năng đang phát triển")
-          formRef.current?.show(record);
+          // formRef.current?.show(record);
+          navigate(AppRoutes.warehouse_import_export_detail,{
+            state:record
+          })
           break;
         case "approval":
           // dispatchToast("warning", "Tính năng đang phát triển")
@@ -313,7 +302,10 @@ const WarehouseImportAndExport = memo(() => {
         <Button
           type="primary"
           icon={<DownloadOutlined />}
-          onClick={() => formRef.current?.show({})}
+          onClick={() => {
+            // formRef.current?.show({})
+              navigate(AppRoutes.warehouse_import_export_detail)
+        }}
              disabled={!isManager}
         >
           Tạo đơn nhập kho
@@ -336,7 +328,10 @@ const WarehouseImportAndExport = memo(() => {
         onRow={(record) => {
           return {
             onDoubleClick: () => {
-              formRef.current?.show({ ...record });
+              // formRef.current?.show({ ...record });
+                navigate(AppRoutes.warehouse_import_export_detail,{
+            state:record
+          })
             },
           };
         }}
@@ -353,7 +348,6 @@ const WarehouseImportAndExport = memo(() => {
           onChange={(page) => setPage(page)}
         />
       </Flex>
-      <UnitFormModal onSuccessModal={() => { refetch() }} ref={formRef} />
       <CancelImport ref={cancelRef} onSuccessModal={() => { refetch() }} />
     </div>
   );
