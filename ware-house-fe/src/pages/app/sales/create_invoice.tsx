@@ -31,7 +31,7 @@ export const CreateInvoicePage = memo(() => {
     const handleAddProduct = useCallback((product: ProductItem) => {
         setInvoiceItems((prev) => {
             const exists = prev.find((i) => i.id === product._id);
-            console.log("exists",exists)
+            console.log("exists",{exists, product})
             if (exists) {
                 return prev.map((i) =>
                     i.id === product._id ? { ...i, quantity: i.quantity + 1 } : i
@@ -49,7 +49,7 @@ export const CreateInvoicePage = memo(() => {
                 },
             ];
         });
-    }, [invoiceItems]);
+    }, []);
 
     const handleIncrease = useCallback((id: string) => {
         setInvoiceItems((prev) =>
