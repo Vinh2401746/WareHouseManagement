@@ -26,6 +26,7 @@ export type CreateInvoiceRef = {
 export const CreateInvoicePage = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const invoiceListRef = useRef<ProductInvoiceListRef>(null);
 
 
@@ -38,6 +39,13 @@ export const CreateInvoicePage = () => {
 
   const handleAddProduct = useCallback((product: ProductItem) => {
     invoiceListRef.current?.addProduct(product);
+    setSelectedIds((prev) =>
+      prev.includes(product.id) ? prev : [...prev, product.id]
+    );
+  }, []);
+
+  const handleRemoveFromList = useCallback((id: string) => {
+    setSelectedIds((prev) => prev.filter((sid) => sid !== id));
   }, []);
 
   const renderProduct = useCallback(() => {
@@ -45,8 +53,13 @@ export const CreateInvoicePage = () => {
     return (
       <>
         {products.map((item: ProductItem) => (
-          <Col key={item?.id || ""} xxl={6} xl={8} lg={8} md={8} sm={12} xs={12} >
-            <Row gutter={8}>
+          <Col key={item?.id || ""} xxl={6} xl={8} lg={8} md={8} sm={12} xs={12}    onClick={() => handleAddProduct(item)}>
+            <Row gutter={8} style={{
+              border: selectedIds.includes(item.id) ? '1.5px solid #1677ff' : '1.5px solid transparent',
+              borderRadius: 8,
+              padding: 6,
+              transition: 'border-color 0.2s',
+            }}>
               <Col>
                 <Image
                   width={50}
@@ -58,7 +71,7 @@ export const CreateInvoicePage = () => {
               <Col>
                 <Flex vertical gap={6}>
                   <span>{item?.name || ""}</span>
-                  <Tag
+                  {/* <Tag
                     color="green"
                     variant="outlined"
                     style={{
@@ -68,10 +81,9 @@ export const CreateInvoicePage = () => {
                       display: "flex",
                       cursor: "pointer",
                     }}
-                    onClick={() => handleAddProduct(item)}
                   >
                     +
-                  </Tag>
+                  </Tag> */}
                 </Flex>
               </Col>
             </Row>
@@ -79,13 +91,13 @@ export const CreateInvoicePage = () => {
         ))}
       </>
     );
-  }, [products, isFetching, handleAddProduct]);
+  }, [products, isFetching, handleAddProduct, selectedIds]);
 
 
   return (
     <div className="invoice-layout">
-      <Splitter style={{ minHeight: window.screen.height - 300 }}>
-        <Splitter.Panel defaultSize="80%" min="50%" max="80%">
+      <Splitter style={{ minHeight: window.screen.height - 400 }}>
+        <Splitter.Panel defaultSize="80%" min="50%" max="80%" style={{padding:4}}>
           <Row gutter={[12, 12]}>{renderProduct()}</Row>
           <Flex justify="end">
             <Pagination
@@ -103,7 +115,7 @@ export const CreateInvoicePage = () => {
           </Flex>
         </Splitter.Panel>
         <Splitter.Panel>
-          <ProductInvoiceList ref={invoiceListRef} />
+          <ProductInvoiceList ref={invoiceListRef} removeFromList={handleRemoveFromList} />
         </Splitter.Panel>
       </Splitter>
     </div>
