@@ -16,7 +16,7 @@ import type { GetInventoriesRequest } from "../../../types/inventory";
 
 import { deleteWarehouseApi } from "../../../api/warehouse";
 import type { DeleteWarehouseRequestType } from "../../../types/warehouse";
-import { cancelAnInventoryApi, comfirmInventoryApi, getInventoriesApi } from "../../../api/inventory/inventory";
+import { comfirmInventoryApi, getInventoriesApi } from "../../../api/inventory/inventory";
 import { formatDate, formatNumber } from "../../../utils/helper";
 import type { CancelFormRef } from "./components/cancel-import";
 import CancelImport from "./components/cancel-import";
@@ -35,7 +35,7 @@ const renderStatus = (status: string) => {
 
     case "CANCELED":
 
-      return 'Đã đóng';
+      return 'Đã huỷ';
 
     default:
       return 'Không xác định';
@@ -134,7 +134,7 @@ const WarehouseImportAndExport = memo(() => {
           break;
       }
     },
-    [mutate],
+    [mutate, mutateConfirm, navigate],
   );
 
   const columns: ColumnsType = useMemo(
@@ -215,6 +215,13 @@ const WarehouseImportAndExport = memo(() => {
         align: "center",
         render: (record) => formatDate(record)
       },
+         {
+        title: "Trạng thái",
+        dataIndex: "status",
+        key: "status",
+        align: "center",
+        render: (record) => renderStatus(record)
+      },
       {
         title: "Tuỳ chọn",
         dataIndex: "",
@@ -280,7 +287,7 @@ const WarehouseImportAndExport = memo(() => {
         },
       },
     ],
-    [onAction],
+    [isManager, onAction],
   );
   if(!canView) return <NoPermissonPage />
   return (
