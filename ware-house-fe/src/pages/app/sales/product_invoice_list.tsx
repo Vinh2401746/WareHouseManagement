@@ -36,8 +36,12 @@ export type ProductInvoiceListRef = {
   clearItems: () => void;
 };
 
-export const ProductInvoiceList = forwardRef<ProductInvoiceListRef>(
-  (_, ref) => {
+type Props = {
+  removeFromList?: (id: string) => void;
+};
+
+export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
+  ({ removeFromList }, ref) => {
     const [items, setItems] = useState<InvoiceItem[]>([]);
     // const [calculateMoney, setCalculateMoney] = useState({
     //   totalAmount: 0,
@@ -144,7 +148,10 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef>(
       setItems((prev) => {
         const item = prev.find((i) => i.id === id);
         if (!item) return prev;
-        if (item.quantity <= 1) return prev.filter((i) => i.id !== id);
+        if (item.quantity <= 1) {
+          removeFromList?.(id);
+          return prev.filter((i) => i.id !== id);
+        }
         return prev.map((i) =>
           i.id === id ? { ...i, quantity: i.quantity - 1 } : i,
         );
@@ -159,6 +166,7 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef>(
     };
 
     const handleRemove = (id: string) => {
+      removeFromList?.(id);
       setItems((prev) => prev.filter((i) => i.id !== id));
     };    const renderTotalMoney = useCallback(() => {
       return (
