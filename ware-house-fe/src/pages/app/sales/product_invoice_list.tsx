@@ -6,7 +6,8 @@ import {
   useMemo,
   useState,
 } from "react";
-import { Col, Flex, Image, Row, Tag } from "antd";
+import { Button, Col, Flex, Image, Input, Row, Tag } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
 import {
   DISCOUNT_PERCENT,
   ROOT_IMAGE_IMAGE,
@@ -85,7 +86,7 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef>(
             (prevValue, currentItem) =>
               prevValue +
               Number(currentItem?.quantity || 0) *
-                Number(currentItem?.price || 1500),
+                Number(currentItem?.price || 0),
             0,
           ),
         );
@@ -149,7 +150,17 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef>(
         );
       });
     };
-    const renderTotalMoney = useCallback(() => {
+
+    const handlePriceBlur = (id: string, value: string) => {
+      const price = Number(value.replace(/[^0-9]/g, ""));
+      setItems((prev) =>
+        prev.map((i) => (i.id === id ? { ...i, price } : i))
+      );
+    };
+
+    const handleRemove = (id: string) => {
+      setItems((prev) => prev.filter((i) => i.id !== id));
+    };    const renderTotalMoney = useCallback(() => {
       return (
         <div
           style={{
@@ -229,7 +240,7 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef>(
         )}
         {items.map((item) => (
           <Col key={item.id}>
-            <Row gutter={8}>
+            <Row gutter={8} align="middle">
               <Col>
                 <Image
                   width={50}
@@ -238,19 +249,14 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef>(
                   src={`${ROOT_IMAGE_IMAGE}${item.imageUrl}`}
                 />
               </Col>
-              <Col>
+              <Col flex={1}>
                 <Flex vertical gap={6}>
                   <span>{item.name}</span>
                   <Flex gap={4} align="center">
                     <Tag
                       color="red"
                       variant="outlined"
-                      style={{
-                        width: 28,
-                        justifyContent: "center",
-                        display: "flex",
-                        cursor: "pointer",
-                      }}
+                      style={{ width: 28, justifyContent: "center", display: "flex", cursor: "pointer" }}
                       onClick={() => handleDecrease(item.id)}
                     >
                       −
@@ -261,16 +267,23 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef>(
                     <Tag
                       color="green"
                       variant="outlined"
-                      style={{
-                        width: 28,
-                        justifyContent: "center",
-                        display: "flex",
-                        cursor: "pointer",
-                      }}
+                      style={{ width: 28, justifyContent: "center", display: "flex", cursor: "pointer" }}
                       onClick={() => handleIncrease(item.id)}
                     >
                       +
                     </Tag>
+                    <Input
+                      defaultValue={item.price}
+                      style={{ width: 110 }}
+                      suffix="đ"
+                      onBlur={(e) => handlePriceBlur(item.id, e.target.value)}
+                    />
+                    <Button
+                      type="text"
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => handleRemove(item.id)}
+                    />
                   </Flex>
                 </Flex>
               </Col>

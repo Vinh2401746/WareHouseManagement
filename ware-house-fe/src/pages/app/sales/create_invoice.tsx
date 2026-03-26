@@ -45,7 +45,7 @@ export const CreateInvoicePage = () => {
     return (
       <>
         {products.map((item: ProductItem) => (
-          <Col key={item?._id || ""} md={6} sm={12} xs={12}>
+          <Col key={item?.id || ""} xxl={6} xl={8} lg={8} md={8} sm={12} xs={12} >
             <Row gutter={8}>
               <Col>
                 <Image
@@ -86,7 +86,7 @@ export const CreateInvoicePage = () => {
     <div className="invoice-layout">
       <Splitter style={{ minHeight: window.screen.height - 300 }}>
         <Splitter.Panel defaultSize="80%" min="50%" max="80%">
-          <Row gutter={[24, 24]}>{renderProduct()}</Row>
+          <Row gutter={[12, 12]}>{renderProduct()}</Row>
           <Flex justify="end">
             <Pagination
               current={page}
