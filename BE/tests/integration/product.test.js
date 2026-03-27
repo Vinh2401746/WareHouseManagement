@@ -11,7 +11,7 @@ const { productOne, productTwo, productThree, insertProducts } = require('../fix
 setupTestDB();
 
 describe('Product routes', () => {
-  describe('POST /v1/products', () => {
+  describe('POST /v1/product', () => {
     let newProduct;
 
     beforeEach(() => {
@@ -29,7 +29,7 @@ describe('Product routes', () => {
       await insertProducts([productOne]);
 
       const res = await request(app)
-        .post('/v1/products')
+        .post('/v1/product')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(newProduct)
         .expect(httpStatus.CREATED);
@@ -42,16 +42,16 @@ describe('Product routes', () => {
     });
 
     test('should return 401 error if access token is missing', async () => {
-      await request(app).post('/v1/products').send(newProduct).expect(httpStatus.UNAUTHORIZED);
+      await request(app).post('/v1/product').send(newProduct).expect(httpStatus.UNAUTHORIZED);
     });
   });
 
-  describe('GET /v1/products', () => {
+  describe('GET /v1/product', () => {
     test('should return 200 and apply the default query options', async () => {
       await insertProducts([productOne, productTwo]);
 
       const res = await request(app)
-        .get('/v1/products')
+        .get('/v1/product')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
@@ -72,14 +72,14 @@ describe('Product routes', () => {
     test('should return 401 if access token is missing', async () => {
       await insertProducts([productOne, productTwo]);
 
-      await request(app).get('/v1/products').send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).get('/v1/product').send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 403 if a non-admin is trying to access all products', async () => {
       await insertProducts([productOne, productTwo]);
 
       await request(app)
-        .get('/v1/products')
+        .get('/v1/product')
         .set('Authorization', `Bearer ${userTwoAccessToken}`)
         .send()
         .expect(httpStatus.FORBIDDEN);
@@ -89,7 +89,7 @@ describe('Product routes', () => {
       await insertProducts([productOne, productTwo, productThree]);
 
       const res = await request(app)
-        .get('/v1/products')
+        .get('/v1/product')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ limit: 2 })
         .send()
@@ -111,7 +111,7 @@ describe('Product routes', () => {
       await insertProducts([productOne, productTwo, productThree]);
 
       const res = await request(app)
-        .get('/v1/products')
+        .get('/v1/product')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ page: 2, limit: 2 })
         .send()
@@ -129,13 +129,13 @@ describe('Product routes', () => {
     });
   });
 
-  describe('GET /v1/products/:productId', () => {
+  describe('GET /v1/product/:productId', () => {
     test('should return 200 and the product object if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertProducts([productOne]);
 
       const res = await request(app)
-        .get(`/v1/products/${productOne._id}`)
+        .get(`/v1/product/${productOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
@@ -150,7 +150,7 @@ describe('Product routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertProducts([productOne]);
 
-      await request(app).get(`/v1/products/${productOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).get(`/v1/product/${productOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if productId is not a valid mongo id', async () => {
@@ -158,7 +158,7 @@ describe('Product routes', () => {
       await insertProducts([productOne]);
 
       await request(app)
-        .get('/v1/products/invalidId')
+        .get('/v1/product/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -168,20 +168,20 @@ describe('Product routes', () => {
       await insertProducts([productTwo]);
 
       await request(app)
-        .get(`/v1/products/${productOne._id}`)
+        .get(`/v1/product/${productOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('DELETE /v1/products/:productId', () => {
+  describe('DELETE /v1/product/:productId', () => {
     test('should return 204 if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertProducts([productOne]);
 
       await request(app)
-        .delete(`/v1/products/${productOne._id}`)
+        .delete(`/v1/product/${productOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NO_CONTENT);
@@ -194,7 +194,7 @@ describe('Product routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertProducts([productOne]);
 
-      await request(app).delete(`/v1/products/${productOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).delete(`/v1/product/${productOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if productId is not a valid mongo id', async () => {
@@ -202,7 +202,7 @@ describe('Product routes', () => {
       await insertProducts([productOne]);
 
       await request(app)
-        .delete('/v1/products/invalidId')
+        .delete('/v1/product/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -212,14 +212,14 @@ describe('Product routes', () => {
       await insertProducts([productTwo]);
 
       await request(app)
-        .delete(`/v1/products/${productOne._id}`)
+        .delete(`/v1/product/${productOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('PATCH /v1/products/:productId', () => {
+  describe('PATCH /v1/product/:productId', () => {
     test('should return 200 and successfully update product if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertProducts([productOne]);
@@ -232,7 +232,7 @@ describe('Product routes', () => {
       };
 
       const res = await request(app)
-        .patch(`/v1/products/${productOne._id}`)
+        .patch(`/v1/product/${productOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.OK);
@@ -261,7 +261,7 @@ describe('Product routes', () => {
         unit: faker.random.word(),
         minStock: faker.random.word(),
       };
-      await request(app).patch(`/v1/products/${productOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
+      await request(app).patch(`/v1/product/${productOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if productId is not a valid mongo id', async () => {
@@ -274,7 +274,7 @@ describe('Product routes', () => {
         minStock: faker.random.word(),
       };
       await request(app)
-        .patch(`/v1/products/invalidId`)
+        .patch(`/v1/product/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.BAD_REQUEST);

@@ -11,7 +11,7 @@ const { unitOne, unitTwo, unitThree, insertUnits } = require('../fixtures/unit.f
 setupTestDB();
 
 describe('Unit routes', () => {
-  describe('POST /v1/units', () => {
+  describe('POST /v1/unit', () => {
     let newUnit;
 
     beforeEach(() => {
@@ -26,7 +26,7 @@ describe('Unit routes', () => {
       await insertUnits([unitOne]);
 
       const res = await request(app)
-        .post('/v1/units')
+        .post('/v1/unit')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(newUnit)
         .expect(httpStatus.CREATED);
@@ -39,16 +39,16 @@ describe('Unit routes', () => {
     });
 
     test('should return 401 error if access token is missing', async () => {
-      await request(app).post('/v1/units').send(newUnit).expect(httpStatus.UNAUTHORIZED);
+      await request(app).post('/v1/unit').send(newUnit).expect(httpStatus.UNAUTHORIZED);
     });
   });
 
-  describe('GET /v1/units', () => {
+  describe('GET /v1/unit', () => {
     test('should return 200 and apply the default query options', async () => {
       await insertUnits([unitOne, unitTwo]);
 
       const res = await request(app)
-        .get('/v1/units')
+        .get('/v1/unit')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
@@ -69,14 +69,14 @@ describe('Unit routes', () => {
     test('should return 401 if access token is missing', async () => {
       await insertUnits([unitOne, unitTwo]);
 
-      await request(app).get('/v1/units').send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).get('/v1/unit').send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 403 if a non-admin is trying to access all units', async () => {
       await insertUnits([unitOne, unitTwo]);
 
       await request(app)
-        .get('/v1/units')
+        .get('/v1/unit')
         .set('Authorization', `Bearer ${userTwoAccessToken}`)
         .send()
         .expect(httpStatus.FORBIDDEN);
@@ -86,7 +86,7 @@ describe('Unit routes', () => {
       await insertUnits([unitOne, unitTwo, unitThree]);
 
       const res = await request(app)
-        .get('/v1/units')
+        .get('/v1/unit')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ limit: 2 })
         .send()
@@ -108,7 +108,7 @@ describe('Unit routes', () => {
       await insertUnits([unitOne, unitTwo, unitThree]);
 
       const res = await request(app)
-        .get('/v1/units')
+        .get('/v1/unit')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ page: 2, limit: 2 })
         .send()
@@ -126,13 +126,13 @@ describe('Unit routes', () => {
     });
   });
 
-  describe('GET /v1/units/:unitId', () => {
+  describe('GET /v1/unit/:unitId', () => {
     test('should return 200 and the unit object if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertUnits([unitOne]);
 
       const res = await request(app)
-        .get(`/v1/units/${unitOne._id}`)
+        .get(`/v1/unit/${unitOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
@@ -147,7 +147,7 @@ describe('Unit routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertUnits([unitOne]);
 
-      await request(app).get(`/v1/units/${unitOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).get(`/v1/unit/${unitOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if unitId is not a valid mongo id', async () => {
@@ -155,7 +155,7 @@ describe('Unit routes', () => {
       await insertUnits([unitOne]);
 
       await request(app)
-        .get('/v1/units/invalidId')
+        .get('/v1/unit/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -165,20 +165,20 @@ describe('Unit routes', () => {
       await insertUnits([unitTwo]);
 
       await request(app)
-        .get(`/v1/units/${unitOne._id}`)
+        .get(`/v1/unit/${unitOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('DELETE /v1/units/:unitId', () => {
+  describe('DELETE /v1/unit/:unitId', () => {
     test('should return 204 if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertUnits([unitOne]);
 
       await request(app)
-        .delete(`/v1/units/${unitOne._id}`)
+        .delete(`/v1/unit/${unitOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NO_CONTENT);
@@ -191,7 +191,7 @@ describe('Unit routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertUnits([unitOne]);
 
-      await request(app).delete(`/v1/units/${unitOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).delete(`/v1/unit/${unitOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if unitId is not a valid mongo id', async () => {
@@ -199,7 +199,7 @@ describe('Unit routes', () => {
       await insertUnits([unitOne]);
 
       await request(app)
-        .delete('/v1/units/invalidId')
+        .delete('/v1/unit/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -209,14 +209,14 @@ describe('Unit routes', () => {
       await insertUnits([unitTwo]);
 
       await request(app)
-        .delete(`/v1/units/${unitOne._id}`)
+        .delete(`/v1/unit/${unitOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('PATCH /v1/units/:unitId', () => {
+  describe('PATCH /v1/unit/:unitId', () => {
     test('should return 200 and successfully update unit if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertUnits([unitOne]);
@@ -226,7 +226,7 @@ describe('Unit routes', () => {
       };
 
       const res = await request(app)
-        .patch(`/v1/units/${unitOne._id}`)
+        .patch(`/v1/unit/${unitOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.OK);
@@ -252,7 +252,7 @@ describe('Unit routes', () => {
         code: faker.random.word(),
         name: faker.random.word(),
       };
-      await request(app).patch(`/v1/units/${unitOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
+      await request(app).patch(`/v1/unit/${unitOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if unitId is not a valid mongo id', async () => {
@@ -262,7 +262,7 @@ describe('Unit routes', () => {
         name: faker.random.word(),
       };
       await request(app)
-        .patch(`/v1/units/invalidId`)
+        .patch(`/v1/unit/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.BAD_REQUEST);

@@ -11,7 +11,7 @@ const { categoryOne, categoryTwo, categoryThree, insertCategories } = require('.
 setupTestDB();
 
 describe('Category routes', () => {
-  describe('POST /v1/categories', () => {
+  describe('POST /v1/category', () => {
     let newCategory;
 
     beforeEach(() => {
@@ -26,7 +26,7 @@ describe('Category routes', () => {
       await insertCategories([categoryOne]);
 
       const res = await request(app)
-        .post('/v1/categories')
+        .post('/v1/category')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(newCategory)
         .expect(httpStatus.CREATED);
@@ -39,16 +39,16 @@ describe('Category routes', () => {
     });
 
     test('should return 401 error if access token is missing', async () => {
-      await request(app).post('/v1/categories').send(newCategory).expect(httpStatus.UNAUTHORIZED);
+      await request(app).post('/v1/category').send(newCategory).expect(httpStatus.UNAUTHORIZED);
     });
   });
 
-  describe('GET /v1/categories', () => {
+  describe('GET /v1/category', () => {
     test('should return 200 and apply the default query options', async () => {
       await insertCategories([categoryOne, categoryTwo]);
 
       const res = await request(app)
-        .get('/v1/categories')
+        .get('/v1/category')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
@@ -69,14 +69,14 @@ describe('Category routes', () => {
     test('should return 401 if access token is missing', async () => {
       await insertCategories([categoryOne, categoryTwo]);
 
-      await request(app).get('/v1/categories').send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).get('/v1/category').send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 403 if a non-admin is trying to access all categories', async () => {
       await insertCategories([categoryOne, categoryTwo]);
 
       await request(app)
-        .get('/v1/categories')
+        .get('/v1/category')
         .set('Authorization', `Bearer ${userTwoAccessToken}`)
         .send()
         .expect(httpStatus.FORBIDDEN);
@@ -86,7 +86,7 @@ describe('Category routes', () => {
       await insertCategories([categoryOne, categoryTwo, categoryThree]);
 
       const res = await request(app)
-        .get('/v1/categories')
+        .get('/v1/category')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ limit: 2 })
         .send()
@@ -108,7 +108,7 @@ describe('Category routes', () => {
       await insertCategories([categoryOne, categoryTwo, categoryThree]);
 
       const res = await request(app)
-        .get('/v1/categories')
+        .get('/v1/category')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ page: 2, limit: 2 })
         .send()
@@ -126,13 +126,13 @@ describe('Category routes', () => {
     });
   });
 
-  describe('GET /v1/categories/:categoryId', () => {
+  describe('GET /v1/category/:categoryId', () => {
     test('should return 200 and the category object if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertCategories([categoryOne]);
 
       const res = await request(app)
-        .get(`/v1/categories/${categoryOne._id}`)
+        .get(`/v1/category/${categoryOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
@@ -147,7 +147,7 @@ describe('Category routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertCategories([categoryOne]);
 
-      await request(app).get(`/v1/categories/${categoryOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).get(`/v1/category/${categoryOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if categoryId is not a valid mongo id', async () => {
@@ -155,7 +155,7 @@ describe('Category routes', () => {
       await insertCategories([categoryOne]);
 
       await request(app)
-        .get('/v1/categories/invalidId')
+        .get('/v1/category/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -165,20 +165,20 @@ describe('Category routes', () => {
       await insertCategories([categoryTwo]);
 
       await request(app)
-        .get(`/v1/categories/${categoryOne._id}`)
+        .get(`/v1/category/${categoryOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('DELETE /v1/categories/:categoryId', () => {
+  describe('DELETE /v1/category/:categoryId', () => {
     test('should return 204 if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertCategories([categoryOne]);
 
       await request(app)
-        .delete(`/v1/categories/${categoryOne._id}`)
+        .delete(`/v1/category/${categoryOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NO_CONTENT);
@@ -191,7 +191,7 @@ describe('Category routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertCategories([categoryOne]);
 
-      await request(app).delete(`/v1/categories/${categoryOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).delete(`/v1/category/${categoryOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if categoryId is not a valid mongo id', async () => {
@@ -199,7 +199,7 @@ describe('Category routes', () => {
       await insertCategories([categoryOne]);
 
       await request(app)
-        .delete('/v1/categories/invalidId')
+        .delete('/v1/category/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -209,14 +209,14 @@ describe('Category routes', () => {
       await insertCategories([categoryTwo]);
 
       await request(app)
-        .delete(`/v1/categories/${categoryOne._id}`)
+        .delete(`/v1/category/${categoryOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('PATCH /v1/categories/:categoryId', () => {
+  describe('PATCH /v1/category/:categoryId', () => {
     test('should return 200 and successfully update category if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertCategories([categoryOne]);
@@ -226,7 +226,7 @@ describe('Category routes', () => {
       };
 
       const res = await request(app)
-        .patch(`/v1/categories/${categoryOne._id}`)
+        .patch(`/v1/category/${categoryOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.OK);
@@ -252,7 +252,7 @@ describe('Category routes', () => {
         code: faker.random.word(),
         name: faker.random.word(),
       };
-      await request(app).patch(`/v1/categories/${categoryOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
+      await request(app).patch(`/v1/category/${categoryOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if categoryId is not a valid mongo id', async () => {
@@ -262,7 +262,7 @@ describe('Category routes', () => {
         name: faker.random.word(),
       };
       await request(app)
-        .patch(`/v1/categories/invalidId`)
+        .patch(`/v1/category/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.BAD_REQUEST);

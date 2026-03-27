@@ -11,7 +11,7 @@ const { saleOne, saleTwo, saleThree, insertSales } = require('../fixtures/sale.f
 setupTestDB();
 
 describe('Sale routes', () => {
-  describe('POST /v1/sales', () => {
+  describe('POST /v1/sale', () => {
     let newSale;
 
     beforeEach(() => {
@@ -31,7 +31,7 @@ describe('Sale routes', () => {
       await insertSales([saleOne]);
 
       const res = await request(app)
-        .post('/v1/sales')
+        .post('/v1/sale')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(newSale)
         .expect(httpStatus.CREATED);
@@ -44,16 +44,16 @@ describe('Sale routes', () => {
     });
 
     test('should return 401 error if access token is missing', async () => {
-      await request(app).post('/v1/sales').send(newSale).expect(httpStatus.UNAUTHORIZED);
+      await request(app).post('/v1/sale').send(newSale).expect(httpStatus.UNAUTHORIZED);
     });
   });
 
-  describe('GET /v1/sales', () => {
+  describe('GET /v1/sale', () => {
     test('should return 200 and apply the default query options', async () => {
       await insertSales([saleOne, saleTwo]);
 
       const res = await request(app)
-        .get('/v1/sales')
+        .get('/v1/sale')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
@@ -74,14 +74,14 @@ describe('Sale routes', () => {
     test('should return 401 if access token is missing', async () => {
       await insertSales([saleOne, saleTwo]);
 
-      await request(app).get('/v1/sales').send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).get('/v1/sale').send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 403 if a non-admin is trying to access all sales', async () => {
       await insertSales([saleOne, saleTwo]);
 
       await request(app)
-        .get('/v1/sales')
+        .get('/v1/sale')
         .set('Authorization', `Bearer ${userTwoAccessToken}`)
         .send()
         .expect(httpStatus.FORBIDDEN);
@@ -91,7 +91,7 @@ describe('Sale routes', () => {
       await insertSales([saleOne, saleTwo, saleThree]);
 
       const res = await request(app)
-        .get('/v1/sales')
+        .get('/v1/sale')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ limit: 2 })
         .send()
@@ -113,7 +113,7 @@ describe('Sale routes', () => {
       await insertSales([saleOne, saleTwo, saleThree]);
 
       const res = await request(app)
-        .get('/v1/sales')
+        .get('/v1/sale')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ page: 2, limit: 2 })
         .send()
@@ -131,13 +131,13 @@ describe('Sale routes', () => {
     });
   });
 
-  describe('GET /v1/sales/:saleId', () => {
+  describe('GET /v1/sale/:saleId', () => {
     test('should return 200 and the sale object if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertSales([saleOne]);
 
       const res = await request(app)
-        .get(`/v1/sales/${saleOne._id}`)
+        .get(`/v1/sale/${saleOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
@@ -152,7 +152,7 @@ describe('Sale routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertSales([saleOne]);
 
-      await request(app).get(`/v1/sales/${saleOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).get(`/v1/sale/${saleOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if saleId is not a valid mongo id', async () => {
@@ -160,7 +160,7 @@ describe('Sale routes', () => {
       await insertSales([saleOne]);
 
       await request(app)
-        .get('/v1/sales/invalidId')
+        .get('/v1/sale/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -170,20 +170,20 @@ describe('Sale routes', () => {
       await insertSales([saleTwo]);
 
       await request(app)
-        .get(`/v1/sales/${saleOne._id}`)
+        .get(`/v1/sale/${saleOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('DELETE /v1/sales/:saleId', () => {
+  describe('DELETE /v1/sale/:saleId', () => {
     test('should return 204 if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertSales([saleOne]);
 
       await request(app)
-        .delete(`/v1/sales/${saleOne._id}`)
+        .delete(`/v1/sale/${saleOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NO_CONTENT);
@@ -196,7 +196,7 @@ describe('Sale routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertSales([saleOne]);
 
-      await request(app).delete(`/v1/sales/${saleOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).delete(`/v1/sale/${saleOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if saleId is not a valid mongo id', async () => {
@@ -204,7 +204,7 @@ describe('Sale routes', () => {
       await insertSales([saleOne]);
 
       await request(app)
-        .delete('/v1/sales/invalidId')
+        .delete('/v1/sale/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -214,14 +214,14 @@ describe('Sale routes', () => {
       await insertSales([saleTwo]);
 
       await request(app)
-        .delete(`/v1/sales/${saleOne._id}`)
+        .delete(`/v1/sale/${saleOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('PATCH /v1/sales/:saleId', () => {
+  describe('PATCH /v1/sale/:saleId', () => {
     test('should return 200 and successfully update sale if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertSales([saleOne]);
@@ -236,7 +236,7 @@ describe('Sale routes', () => {
       };
 
       const res = await request(app)
-        .patch(`/v1/sales/${saleOne._id}`)
+        .patch(`/v1/sale/${saleOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.OK);
@@ -267,7 +267,7 @@ describe('Sale routes', () => {
         totalAmount: faker.random.word(),
         items: faker.random.word(),
       };
-      await request(app).patch(`/v1/sales/${saleOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
+      await request(app).patch(`/v1/sale/${saleOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if saleId is not a valid mongo id', async () => {
@@ -282,7 +282,7 @@ describe('Sale routes', () => {
         items: faker.random.word(),
       };
       await request(app)
-        .patch(`/v1/sales/invalidId`)
+        .patch(`/v1/sale/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.BAD_REQUEST);

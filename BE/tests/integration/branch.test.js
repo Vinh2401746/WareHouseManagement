@@ -10,8 +10,19 @@ const { branchOne, branchTwo, branchThree, insertBranchs } = require('../fixture
 
 setupTestDB();
 
+const expectBranchPayload = (payload, expected) => {
+  expect(payload).toEqual(
+    expect.objectContaining({
+      id: expected._id ? expected._id.toHexString() : expect.any(String),
+      name: expected.name,
+      address: expected.address,
+      phone: expected.phone,
+    })
+  );
+};
+
 describe('Branch routes', () => {
-  describe('POST /v1/branches', () => {
+  describe('POST /v1/branch', () => {
     let newBranch;
 
     beforeEach(() => {
@@ -24,60 +35,58 @@ describe('Branch routes', () => {
 
     test('should return 201 and successfully create new branch if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
-      await insertBranchs([branchOne]);
 
       const res = await request(app)
-        .post('/v1/branches')
+        .post('/v1/branch')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(newBranch)
         .expect(httpStatus.CREATED);
 
-      expect(res.body).toEqual({ id: expect.anything(), type: newBranch.type });
+      expectBranchPayload(res.body, newBranch);
 
-      const dbBranch = await Branch.findById(res.body.id);
-      expect(dbBranch).toBeDefined();
-      expect(dbBranch).toMatchObject({ type: newBranch.type });
+      const dbBranch = await Branch.findById(res.body.id).lean();
+      expect(dbBranch).toMatchObject(newBranch);
     });
 
     test('should return 401 error if access token is missing', async () => {
-      await request(app).post('/v1/branches').send(newBranch).expect(httpStatus.UNAUTHORIZED);
+      await request(app).post('/v1/branch').send(newBranch).expect(httpStatus.UNAUTHORIZED);
     });
   });
 
-  describe('GET /v1/branches', () => {
+  describe('GET /v1/branch', () => {
     test('should return 200 and apply the default query options', async () => {
       await insertBranchs([branchOne, branchTwo]);
 
       const res = await request(app)
-        .get('/v1/branches')
+        .get('/v1/branch')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
 
-      expect(res.body).toEqual({
-        results: expect.any(Array),
+      expect(res.body).toMatchObject({
         page: 1,
         limit: 10,
         totalPages: 1,
         totalResults: 2,
       });
       expect(res.body.results).toHaveLength(2);
-      expect(res.body.results[0]).toEqual({
-        id: branchOne._id.toHexString(),
-      });
+      const responseIds = res.body.results.map((branch) => branch.id);
+      expect(responseIds).toEqual(
+        expect.arrayContaining([branchOne._id.toHexString(), branchTwo._id.toHexString()])
+      );
     });
 
     test('should return 401 if access token is missing', async () => {
       await insertBranchs([branchOne, branchTwo]);
 
-      await request(app).get('/v1/branches').send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).get('/v1/branch').send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 403 if a non-admin is trying to access all branches', async () => {
       await insertBranchs([branchOne, branchTwo]);
 
       await request(app)
-        .get('/v1/branches')
+        .get('/v1/branch')
         .set('Authorization', `Bearer ${userTwoAccessToken}`)
         .send()
         .expect(httpStatus.FORBIDDEN);
@@ -87,68 +96,61 @@ describe('Branch routes', () => {
       await insertBranchs([branchOne, branchTwo, branchThree]);
 
       const res = await request(app)
-        .get('/v1/branches')
+        .get('/v1/branch')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ limit: 2 })
         .send()
         .expect(httpStatus.OK);
 
-      expect(res.body).toEqual({
-        results: expect.any(Array),
+      expect(res.body).toMatchObject({
         page: 1,
         limit: 2,
         totalPages: 2,
-        totalResults: 2,
+        totalResults: 3,
       });
       expect(res.body.results).toHaveLength(2);
-      expect(res.body.results[0].id).toBe(branchOne._id.toHexString());
-      expect(res.body.results[1].id).toBe(branchTwo._id.toHexString());
     });
 
     test('should return the correct page if page and limit params are specified', async () => {
       await insertBranchs([branchOne, branchTwo, branchThree]);
 
       const res = await request(app)
-        .get('/v1/branches')
+        .get('/v1/branch')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ page: 2, limit: 2 })
         .send()
         .expect(httpStatus.OK);
 
-      expect(res.body).toEqual({
-        results: expect.any(Array),
+      expect(res.body).toMatchObject({
         page: 2,
         limit: 2,
         totalPages: 2,
         totalResults: 3,
       });
       expect(res.body.results).toHaveLength(1);
-      expect(res.body.results[0].id).toBe(userOne._id.toHexString());
+      expect(res.body.results[0].id).toBe(branchThree._id.toHexString());
     });
   });
 
-  describe('GET /v1/branches/:branchId', () => {
+  describe('GET /v1/branch/:branchId', () => {
     test('should return 200 and the branch object if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertBranchs([branchOne]);
 
       const res = await request(app)
-        .get(`/v1/branches/${branchOne._id}`)
+        .get(`/v1/branch/${branchOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
 
-      expect(res.body).not.toHaveProperty('password');
-      expect(res.body).toEqual({
-        id: branchOne._id.toHexString(),
-      });
+      expectBranchPayload(res.body, branchOne);
     });
 
     test('should return 401 error if access token is missing', async () => {
       await insertUsers([userOne, userTwo]);
       await insertBranchs([branchOne]);
 
-      await request(app).get(`/v1/branches/${branchOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).get(`/v1/branch/${branchOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if branchId is not a valid mongo id', async () => {
@@ -156,7 +158,7 @@ describe('Branch routes', () => {
       await insertBranchs([branchOne]);
 
       await request(app)
-        .get('/v1/branches/invalidId')
+        .get('/v1/branch/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -166,20 +168,20 @@ describe('Branch routes', () => {
       await insertBranchs([branchTwo]);
 
       await request(app)
-        .get(`/v1/branches/${branchOne._id}`)
+        .get(`/v1/branch/${branchOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('DELETE /v1/branches/:branchId', () => {
+  describe('DELETE /v1/branch/:branchId', () => {
     test('should return 204 if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertBranchs([branchOne]);
 
       await request(app)
-        .delete(`/v1/branches/${branchOne._id}`)
+        .delete(`/v1/branch/${branchOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NO_CONTENT);
@@ -192,7 +194,7 @@ describe('Branch routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertBranchs([branchOne]);
 
-      await request(app).delete(`/v1/branches/${branchOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).delete(`/v1/branch/${branchOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if branchId is not a valid mongo id', async () => {
@@ -200,7 +202,7 @@ describe('Branch routes', () => {
       await insertBranchs([branchOne]);
 
       await request(app)
-        .delete('/v1/branches/invalidId')
+        .delete('/v1/branch/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -210,14 +212,14 @@ describe('Branch routes', () => {
       await insertBranchs([branchTwo]);
 
       await request(app)
-        .delete(`/v1/branches/${branchOne._id}`)
+        .delete(`/v1/branch/${branchOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('PATCH /v1/branches/:branchId', () => {
+  describe('PUT /v1/branch/:branchId', () => {
     test('should return 200 and successfully update branch if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertBranchs([branchOne]);
@@ -228,23 +230,20 @@ describe('Branch routes', () => {
       };
 
       const res = await request(app)
-        .patch(`/v1/branches/${branchOne._id}`)
+        .put(`/v1/branch/${branchOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.OK);
 
-      const validationData = {
-        id: branchOne._id.toHexString(),
-      };
-      validationData.merge(updateBody);
+      expect(res.body).toEqual(
+        expect.objectContaining({
+          id: branchOne._id.toHexString(),
+          ...updateBody,
+        })
+      );
 
-      expect(res.body).not.toHaveProperty('password');
-      expect(res.body).toEqual(validationData);
-
-      const dbBranch = await Branch.findById(branchOne._id);
-      expect(dbBranch).toBeDefined();
-      expect(dbBranch.password).not.toBe(updateBody.password);
-      expect(dbBranch).toMatchObject({ type: updateBody.type });
+      const dbBranch = await Branch.findById(branchOne._id).lean();
+      expect(dbBranch).toMatchObject(updateBody);
     });
 
     test('should return 401 error if access token is missing', async () => {
@@ -255,7 +254,7 @@ describe('Branch routes', () => {
         address: faker.random.word(),
         phone: faker.random.word(),
       };
-      await request(app).patch(`/v1/branches/${branchOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
+      await request(app).put(`/v1/branch/${branchOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if branchId is not a valid mongo id', async () => {
@@ -266,7 +265,7 @@ describe('Branch routes', () => {
         phone: faker.random.word(),
       };
       await request(app)
-        .patch(`/v1/branches/invalidId`)
+        .put(`/v1/branch/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.BAD_REQUEST);

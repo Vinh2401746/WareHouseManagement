@@ -16,7 +16,7 @@ const {
 setupTestDB();
 
 describe('InventoryTransaction routes', () => {
-  describe('POST /v1/inventoryTransactions', () => {
+  describe('POST /v1/inventory', () => {
     let newInventoryTransaction;
 
     beforeEach(() => {
@@ -37,7 +37,7 @@ describe('InventoryTransaction routes', () => {
       await insertInventoryTransactions([inventoryTransactionOne]);
 
       const res = await request(app)
-        .post('/v1/inventoryTransactions')
+        .post('/v1/inventory')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(newInventoryTransaction)
         .expect(httpStatus.CREATED);
@@ -50,16 +50,16 @@ describe('InventoryTransaction routes', () => {
     });
 
     test('should return 401 error if access token is missing', async () => {
-      await request(app).post('/v1/inventoryTransactions').send(newInventoryTransaction).expect(httpStatus.UNAUTHORIZED);
+      await request(app).post('/v1/inventory').send(newInventoryTransaction).expect(httpStatus.UNAUTHORIZED);
     });
   });
 
-  describe('GET /v1/inventoryTransactions', () => {
+  describe('GET /v1/inventory', () => {
     test('should return 200 and apply the default query options', async () => {
       await insertInventoryTransactions([inventoryTransactionOne, inventoryTransactionTwo]);
 
       const res = await request(app)
-        .get('/v1/inventoryTransactions')
+        .get('/v1/inventory')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
@@ -80,14 +80,14 @@ describe('InventoryTransaction routes', () => {
     test('should return 401 if access token is missing', async () => {
       await insertInventoryTransactions([inventoryTransactionOne, inventoryTransactionTwo]);
 
-      await request(app).get('/v1/inventoryTransactions').send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).get('/v1/inventory').send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 403 if a non-admin is trying to access all inventoryTransactions', async () => {
       await insertInventoryTransactions([inventoryTransactionOne, inventoryTransactionTwo]);
 
       await request(app)
-        .get('/v1/inventoryTransactions')
+        .get('/v1/inventory')
         .set('Authorization', `Bearer ${userTwoAccessToken}`)
         .send()
         .expect(httpStatus.FORBIDDEN);
@@ -97,7 +97,7 @@ describe('InventoryTransaction routes', () => {
       await insertInventoryTransactions([inventoryTransactionOne, inventoryTransactionTwo, inventoryTransactionThree]);
 
       const res = await request(app)
-        .get('/v1/inventoryTransactions')
+        .get('/v1/inventory')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ limit: 2 })
         .send()
@@ -119,7 +119,7 @@ describe('InventoryTransaction routes', () => {
       await insertInventoryTransactions([inventoryTransactionOne, inventoryTransactionTwo, inventoryTransactionThree]);
 
       const res = await request(app)
-        .get('/v1/inventoryTransactions')
+        .get('/v1/inventory')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ page: 2, limit: 2 })
         .send()
@@ -137,13 +137,13 @@ describe('InventoryTransaction routes', () => {
     });
   });
 
-  describe('GET /v1/inventoryTransactions/:inventoryTransactionId', () => {
+  describe('GET /v1/inventory/:inventoryTransactionId', () => {
     test('should return 200 and the inventoryTransaction object if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertInventoryTransactions([inventoryTransactionOne]);
 
       const res = await request(app)
-        .get(`/v1/inventoryTransactions/${inventoryTransactionOne._id}`)
+        .get(`/v1/inventory/${inventoryTransactionOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
@@ -159,7 +159,7 @@ describe('InventoryTransaction routes', () => {
       await insertInventoryTransactions([inventoryTransactionOne]);
 
       await request(app)
-        .get(`/v1/inventoryTransactions/${inventoryTransactionOne._id}`)
+        .get(`/v1/inventory/${inventoryTransactionOne._id}`)
         .send()
         .expect(httpStatus.UNAUTHORIZED);
     });
@@ -169,7 +169,7 @@ describe('InventoryTransaction routes', () => {
       await insertInventoryTransactions([inventoryTransactionOne]);
 
       await request(app)
-        .get('/v1/inventoryTransactions/invalidId')
+        .get('/v1/inventory/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -179,20 +179,20 @@ describe('InventoryTransaction routes', () => {
       await insertInventoryTransactions([inventoryTransactionTwo]);
 
       await request(app)
-        .get(`/v1/inventoryTransactions/${inventoryTransactionOne._id}`)
+        .get(`/v1/inventory/${inventoryTransactionOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('DELETE /v1/inventoryTransactions/:inventoryTransactionId', () => {
+  describe('DELETE /v1/inventory/:inventoryTransactionId', () => {
     test('should return 204 if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertInventoryTransactions([inventoryTransactionOne]);
 
       await request(app)
-        .delete(`/v1/inventoryTransactions/${inventoryTransactionOne._id}`)
+        .delete(`/v1/inventory/${inventoryTransactionOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NO_CONTENT);
@@ -206,7 +206,7 @@ describe('InventoryTransaction routes', () => {
       await insertInventoryTransactions([inventoryTransactionOne]);
 
       await request(app)
-        .delete(`/v1/inventoryTransactions/${inventoryTransactionOne._id}`)
+        .delete(`/v1/inventory/${inventoryTransactionOne._id}`)
         .send()
         .expect(httpStatus.UNAUTHORIZED);
     });
@@ -216,7 +216,7 @@ describe('InventoryTransaction routes', () => {
       await insertInventoryTransactions([inventoryTransactionOne]);
 
       await request(app)
-        .delete('/v1/inventoryTransactions/invalidId')
+        .delete('/v1/inventory/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -226,14 +226,14 @@ describe('InventoryTransaction routes', () => {
       await insertInventoryTransactions([inventoryTransactionTwo]);
 
       await request(app)
-        .delete(`/v1/inventoryTransactions/${inventoryTransactionOne._id}`)
+        .delete(`/v1/inventory/${inventoryTransactionOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('PATCH /v1/inventoryTransactions/:inventoryTransactionId', () => {
+  describe('PATCH /v1/inventory/:inventoryTransactionId', () => {
     test('should return 200 and successfully update inventoryTransaction if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertInventoryTransactions([inventoryTransactionOne]);
@@ -249,7 +249,7 @@ describe('InventoryTransaction routes', () => {
       };
 
       const res = await request(app)
-        .patch(`/v1/inventoryTransactions/${inventoryTransactionOne._id}`)
+        .patch(`/v1/inventory/${inventoryTransactionOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.OK);
@@ -282,7 +282,7 @@ describe('InventoryTransaction routes', () => {
         items: faker.random.word(),
       };
       await request(app)
-        .patch(`/v1/inventoryTransactions/${inventoryTransactionOne._id}`)
+        .patch(`/v1/inventory/${inventoryTransactionOne._id}`)
         .send(updateBody)
         .expect(httpStatus.UNAUTHORIZED);
     });
@@ -300,7 +300,7 @@ describe('InventoryTransaction routes', () => {
         items: faker.random.word(),
       };
       await request(app)
-        .patch(`/v1/inventoryTransactions/invalidId`)
+        .patch(`/v1/inventory/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.BAD_REQUEST);

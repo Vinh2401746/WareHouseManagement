@@ -11,7 +11,7 @@ const { supplierOne, supplierTwo, supplierThree, insertSuppliers } = require('..
 setupTestDB();
 
 describe('Supplier routes', () => {
-  describe('POST /v1/suppliers', () => {
+  describe('POST /v1/supplier', () => {
     let newSupplier;
 
     beforeEach(() => {
@@ -28,7 +28,7 @@ describe('Supplier routes', () => {
       await insertSuppliers([supplierOne]);
 
       const res = await request(app)
-        .post('/v1/suppliers')
+        .post('/v1/supplier')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(newSupplier)
         .expect(httpStatus.CREATED);
@@ -41,16 +41,16 @@ describe('Supplier routes', () => {
     });
 
     test('should return 401 error if access token is missing', async () => {
-      await request(app).post('/v1/suppliers').send(newSupplier).expect(httpStatus.UNAUTHORIZED);
+      await request(app).post('/v1/supplier').send(newSupplier).expect(httpStatus.UNAUTHORIZED);
     });
   });
 
-  describe('GET /v1/suppliers', () => {
+  describe('GET /v1/supplier', () => {
     test('should return 200 and apply the default query options', async () => {
       await insertSuppliers([supplierOne, supplierTwo]);
 
       const res = await request(app)
-        .get('/v1/suppliers')
+        .get('/v1/supplier')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
@@ -71,14 +71,14 @@ describe('Supplier routes', () => {
     test('should return 401 if access token is missing', async () => {
       await insertSuppliers([supplierOne, supplierTwo]);
 
-      await request(app).get('/v1/suppliers').send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).get('/v1/supplier').send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 403 if a non-admin is trying to access all suppliers', async () => {
       await insertSuppliers([supplierOne, supplierTwo]);
 
       await request(app)
-        .get('/v1/suppliers')
+        .get('/v1/supplier')
         .set('Authorization', `Bearer ${userTwoAccessToken}`)
         .send()
         .expect(httpStatus.FORBIDDEN);
@@ -88,7 +88,7 @@ describe('Supplier routes', () => {
       await insertSuppliers([supplierOne, supplierTwo, supplierThree]);
 
       const res = await request(app)
-        .get('/v1/suppliers')
+        .get('/v1/supplier')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ limit: 2 })
         .send()
@@ -110,7 +110,7 @@ describe('Supplier routes', () => {
       await insertSuppliers([supplierOne, supplierTwo, supplierThree]);
 
       const res = await request(app)
-        .get('/v1/suppliers')
+        .get('/v1/supplier')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ page: 2, limit: 2 })
         .send()
@@ -128,13 +128,13 @@ describe('Supplier routes', () => {
     });
   });
 
-  describe('GET /v1/suppliers/:supplierId', () => {
+  describe('GET /v1/supplier/:supplierId', () => {
     test('should return 200 and the supplier object if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
 
       const res = await request(app)
-        .get(`/v1/suppliers/${supplierOne._id}`)
+        .get(`/v1/supplier/${supplierOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
@@ -149,7 +149,7 @@ describe('Supplier routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
 
-      await request(app).get(`/v1/suppliers/${supplierOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).get(`/v1/supplier/${supplierOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if supplierId is not a valid mongo id', async () => {
@@ -157,7 +157,7 @@ describe('Supplier routes', () => {
       await insertSuppliers([supplierOne]);
 
       await request(app)
-        .get('/v1/suppliers/invalidId')
+        .get('/v1/supplier/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -167,20 +167,20 @@ describe('Supplier routes', () => {
       await insertSuppliers([supplierTwo]);
 
       await request(app)
-        .get(`/v1/suppliers/${supplierOne._id}`)
+        .get(`/v1/supplier/${supplierOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('DELETE /v1/suppliers/:supplierId', () => {
+  describe('DELETE /v1/supplier/:supplierId', () => {
     test('should return 204 if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
 
       await request(app)
-        .delete(`/v1/suppliers/${supplierOne._id}`)
+        .delete(`/v1/supplier/${supplierOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NO_CONTENT);
@@ -193,7 +193,7 @@ describe('Supplier routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
 
-      await request(app).delete(`/v1/suppliers/${supplierOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).delete(`/v1/supplier/${supplierOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if supplierId is not a valid mongo id', async () => {
@@ -201,7 +201,7 @@ describe('Supplier routes', () => {
       await insertSuppliers([supplierOne]);
 
       await request(app)
-        .delete('/v1/suppliers/invalidId')
+        .delete('/v1/supplier/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -211,14 +211,14 @@ describe('Supplier routes', () => {
       await insertSuppliers([supplierTwo]);
 
       await request(app)
-        .delete(`/v1/suppliers/${supplierOne._id}`)
+        .delete(`/v1/supplier/${supplierOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('PATCH /v1/suppliers/:supplierId', () => {
+  describe('PATCH /v1/supplier/:supplierId', () => {
     test('should return 200 and successfully update supplier if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
@@ -230,7 +230,7 @@ describe('Supplier routes', () => {
       };
 
       const res = await request(app)
-        .patch(`/v1/suppliers/${supplierOne._id}`)
+        .patch(`/v1/supplier/${supplierOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.OK);
@@ -258,7 +258,7 @@ describe('Supplier routes', () => {
         email: faker.random.word(),
         address: faker.random.word(),
       };
-      await request(app).patch(`/v1/suppliers/${supplierOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
+      await request(app).patch(`/v1/supplier/${supplierOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if supplierId is not a valid mongo id', async () => {
@@ -270,7 +270,7 @@ describe('Supplier routes', () => {
         address: faker.random.word(),
       };
       await request(app)
-        .patch(`/v1/suppliers/invalidId`)
+        .patch(`/v1/supplier/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.BAD_REQUEST);

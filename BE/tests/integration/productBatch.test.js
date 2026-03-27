@@ -16,7 +16,7 @@ const {
 setupTestDB();
 
 describe('ProductBatch routes', () => {
-  describe('POST /v1/productBatchs', () => {
+  describe('POST /v1/productBatch', () => {
     let newProductBatch;
 
     beforeEach(() => {
@@ -35,7 +35,7 @@ describe('ProductBatch routes', () => {
       await insertProductBatchs([productBatchOne]);
 
       const res = await request(app)
-        .post('/v1/productBatchs')
+        .post('/v1/productBatch')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(newProductBatch)
         .expect(httpStatus.CREATED);
@@ -48,16 +48,16 @@ describe('ProductBatch routes', () => {
     });
 
     test('should return 401 error if access token is missing', async () => {
-      await request(app).post('/v1/productBatchs').send(newProductBatch).expect(httpStatus.UNAUTHORIZED);
+      await request(app).post('/v1/productBatch').send(newProductBatch).expect(httpStatus.UNAUTHORIZED);
     });
   });
 
-  describe('GET /v1/productBatchs', () => {
+  describe('GET /v1/productBatch', () => {
     test('should return 200 and apply the default query options', async () => {
       await insertProductBatchs([productBatchOne, productBatchTwo]);
 
       const res = await request(app)
-        .get('/v1/productBatchs')
+        .get('/v1/productBatch')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
@@ -78,14 +78,14 @@ describe('ProductBatch routes', () => {
     test('should return 401 if access token is missing', async () => {
       await insertProductBatchs([productBatchOne, productBatchTwo]);
 
-      await request(app).get('/v1/productBatchs').send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).get('/v1/productBatch').send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 403 if a non-admin is trying to access all productBatchs', async () => {
       await insertProductBatchs([productBatchOne, productBatchTwo]);
 
       await request(app)
-        .get('/v1/productBatchs')
+        .get('/v1/productBatch')
         .set('Authorization', `Bearer ${userTwoAccessToken}`)
         .send()
         .expect(httpStatus.FORBIDDEN);
@@ -95,7 +95,7 @@ describe('ProductBatch routes', () => {
       await insertProductBatchs([productBatchOne, productBatchTwo, productBatchThree]);
 
       const res = await request(app)
-        .get('/v1/productBatchs')
+        .get('/v1/productBatch')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ limit: 2 })
         .send()
@@ -117,7 +117,7 @@ describe('ProductBatch routes', () => {
       await insertProductBatchs([productBatchOne, productBatchTwo, productBatchThree]);
 
       const res = await request(app)
-        .get('/v1/productBatchs')
+        .get('/v1/productBatch')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .query({ page: 2, limit: 2 })
         .send()
@@ -135,13 +135,13 @@ describe('ProductBatch routes', () => {
     });
   });
 
-  describe('GET /v1/productBatchs/:productBatchId', () => {
+  describe('GET /v1/productBatch/:productBatchId', () => {
     test('should return 200 and the productBatch object if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertProductBatchs([productBatchOne]);
 
       const res = await request(app)
-        .get(`/v1/productBatchs/${productBatchOne._id}`)
+        .get(`/v1/productBatch/${productBatchOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.OK);
@@ -156,7 +156,7 @@ describe('ProductBatch routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertProductBatchs([productBatchOne]);
 
-      await request(app).get(`/v1/productBatchs/${productBatchOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).get(`/v1/productBatch/${productBatchOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if productBatchId is not a valid mongo id', async () => {
@@ -164,7 +164,7 @@ describe('ProductBatch routes', () => {
       await insertProductBatchs([productBatchOne]);
 
       await request(app)
-        .get('/v1/productBatchs/invalidId')
+        .get('/v1/productBatch/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -174,20 +174,20 @@ describe('ProductBatch routes', () => {
       await insertProductBatchs([productBatchTwo]);
 
       await request(app)
-        .get(`/v1/productBatchs/${productBatchOne._id}`)
+        .get(`/v1/productBatch/${productBatchOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('DELETE /v1/productBatchs/:productBatchId', () => {
+  describe('DELETE /v1/productBatch/:productBatchId', () => {
     test('should return 204 if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertProductBatchs([productBatchOne]);
 
       await request(app)
-        .delete(`/v1/productBatchs/${productBatchOne._id}`)
+        .delete(`/v1/productBatch/${productBatchOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NO_CONTENT);
@@ -200,7 +200,7 @@ describe('ProductBatch routes', () => {
       await insertUsers([userOne, userTwo]);
       await insertProductBatchs([productBatchOne]);
 
-      await request(app).delete(`/v1/productBatchs/${productBatchOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app).delete(`/v1/productBatch/${productBatchOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if productBatchId is not a valid mongo id', async () => {
@@ -208,7 +208,7 @@ describe('ProductBatch routes', () => {
       await insertProductBatchs([productBatchOne]);
 
       await request(app)
-        .delete('/v1/productBatchs/invalidId')
+        .delete('/v1/productBatch/invalidId')
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.BAD_REQUEST);
@@ -218,14 +218,14 @@ describe('ProductBatch routes', () => {
       await insertProductBatchs([productBatchTwo]);
 
       await request(app)
-        .delete(`/v1/productBatchs/${productBatchOne._id}`)
+        .delete(`/v1/productBatch/${productBatchOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
         .expect(httpStatus.NOT_FOUND);
     });
   });
 
-  describe('PATCH /v1/productBatchs/:productBatchId', () => {
+  describe('PATCH /v1/productBatch/:productBatchId', () => {
     test('should return 200 and successfully update productBatch if data is ok', async () => {
       await insertUsers([userOne, userTwo]);
       await insertProductBatchs([productBatchOne]);
@@ -239,7 +239,7 @@ describe('ProductBatch routes', () => {
       };
 
       const res = await request(app)
-        .patch(`/v1/productBatchs/${productBatchOne._id}`)
+        .patch(`/v1/productBatch/${productBatchOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.OK);
@@ -269,7 +269,7 @@ describe('ProductBatch routes', () => {
         quantity: faker.random.number(),
         importPrice: faker.random.number(),
       };
-      await request(app).patch(`/v1/productBatchs/${productBatchOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
+      await request(app).patch(`/v1/productBatch/${productBatchOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if productBatchId is not a valid mongo id', async () => {
@@ -283,7 +283,7 @@ describe('ProductBatch routes', () => {
         importPrice: faker.random.number(),
       };
       await request(app)
-        .patch(`/v1/productBatchs/invalidId`)
+        .patch(`/v1/productBatch/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.BAD_REQUEST);
