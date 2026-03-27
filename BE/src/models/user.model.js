@@ -36,6 +36,11 @@ const userSchema = mongoose.Schema(
       private: true, // used by the toJSON plugin
     },
     role: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Role',
+      default: null,
+    },
+    roleKey: {
       type: String,
       enum: roles,
       default: 'user',
@@ -43,7 +48,7 @@ const userSchema = mongoose.Schema(
     branch: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Branch',
-      required: true,
+      default: null,
     },
     isEmailVerified: {
       type: Boolean,
@@ -82,7 +87,8 @@ userSchema.methods.isPasswordMatch = async function (password) {
 
 userSchema.pre('save', async function (next) {
   const user = this;
-  if (user.isModified('password')) {
+  const shouldSkipHash = user.$locals && user.$locals.skipPasswordHash;
+  if (user.isModified('password') && !shouldSkipHash) {
     user.password = await bcrypt.hash(user.password, 8);
   }
   next();

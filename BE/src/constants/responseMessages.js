@@ -23,9 +23,12 @@ const responseMessages = {
     emailTaken: 'Email đã được sử dụng',
     currentPasswordIncorrect: 'Mật khẩu hiện tại không đúng',
     notFoundByEmail: 'Không tìm thấy người dùng với email này',
+    roleNotFound: 'Không tìm thấy vai trò phù hợp',
+    superadminImmutable: 'Không thể chỉnh sửa hoặc xoá tài khoản superadmin',
   },
   branch: {
     notFound: 'Không tìm thấy cửa hàng',
+    required: 'Vui lòng chọn chi nhánh hợp lệ cho người dùng này',
   },
   warehouse: {
     notFound: 'Không tìm thấy kho',
@@ -45,6 +48,21 @@ const responseMessages = {
   },
   unit: {
     notFound: 'Không tìm thấy đơn vị',
+  },
+  permission: {
+    notFound: 'Không tìm thấy quyền',
+    codeExists: 'Mã quyền đã tồn tại',
+    systemImmutable: 'Không thể chỉnh sửa quyền hệ thống',
+    systemDeleteForbidden: 'Không thể xóa quyền hệ thống',
+    inUse: 'Quyền đang được sử dụng bởi vai trò khác',
+    invalidSelection: 'Danh sách quyền không hợp lệ',
+  },
+  role: {
+    notFound: 'Không tìm thấy vai trò',
+    keyExists: 'Mã vai trò đã tồn tại',
+    immutable: 'Không thể chỉnh sửa vai trò cố định',
+    systemDeleteForbidden: 'Không thể xóa vai trò hệ thống',
+    inUse: 'Vai trò đang được gán cho người dùng khác',
   },
   inventory: {
     notFound: 'Không tìm thấy giao dịch tồn kho',

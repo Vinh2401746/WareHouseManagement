@@ -1,5 +1,7 @@
 module.exports.Token = require('./token.model');
 module.exports.User = require('./user.model');
+module.exports.Role = require('./role.model');
+module.exports.Permission = require('./permission.model');
 module.exports.Branch = require('./branch.model');
 module.exports.InventoryTransaction = require('./inventoryTransaction.model');
 module.exports.Product = require('./product.model');
