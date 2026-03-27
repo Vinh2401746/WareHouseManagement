@@ -4,6 +4,7 @@ const { Product, ProductBatch, InventoryTransaction, Sale } = require('../models
 const ApiError = require('../utils/ApiError');
 const responseMessages = require('../constants/responseMessages');
 const { INVENTORY_TRANSACTION_TYPES, INVENTORY_TRANSACTION_REASONS } = require('../constants/inventoryTransaction.constant');
+const { resolveScopedWarehouseIds } = require('../utils/branchScope');
 
 const DEFAULT_DATE_RANGE_DAYS = 30;
 const MAX_PAGE_LIMIT = 100;
@@ -369,7 +370,7 @@ const buildOverviewWarnings = (rows) => {
   return warnings;
 };
 
-const getInventoryOverview = async (filters = {}, options = {}) => {
+const getInventoryOverview = async (filters = {}, options = {}, context = {}) => {
   const productFilter = buildProductFilter(filters);
   const paginationOptions = buildPaginationOptions(options);
   const [productsPage, dateRange] = await Promise.all([
@@ -377,7 +378,10 @@ const getInventoryOverview = async (filters = {}, options = {}) => {
     Promise.resolve(resolveDateRange(filters)),
   ]);
 
-  const warehouseIds = normalizeObjectIdArray(filters.warehouseIds || filters.warehouseId || filters.warehouse);
+  const requestedWarehouseFilter = filters.warehouseIds || filters.warehouseId || filters.warehouse;
+  const scopedWarehouseInput = await resolveScopedWarehouseIds(requestedWarehouseFilter, context);
+  const warehouseFilterInput = scopedWarehouseInput === null ? requestedWarehouseFilter : scopedWarehouseInput;
+  const warehouseIds = normalizeObjectIdArray(warehouseFilterInput);
   const productIds = productsPage.results.map((doc) => normalizeObjectId(doc._id || doc.id)).filter(Boolean);
 
   const [stockMeta, saleMeta, manualMeta] = await Promise.all([
@@ -573,13 +577,16 @@ const buildDetailHistories = ({ imports, manualExports, sales }) => ({
   sales,
 });
 
-const getInventoryDetail = async (productId, filters = {}) => {
+const getInventoryDetail = async (productId, filters = {}, context = {}) => {
   const product = await Product.findById(productId).populate('unit');
   if (!product) {
     throw new ApiError(httpStatus.NOT_FOUND, responseMessages.product.notFound);
   }
 
-  const warehouseIds = normalizeObjectIdArray(filters.warehouseIds || filters.warehouseId || filters.warehouse);
+  const requestedWarehouseFilter = filters.warehouseIds || filters.warehouseId || filters.warehouse;
+  const scopedWarehouseInput = await resolveScopedWarehouseIds(requestedWarehouseFilter, context);
+  const warehouseFilterInput = scopedWarehouseInput === null ? requestedWarehouseFilter : scopedWarehouseInput;
+  const warehouseIds = normalizeObjectIdArray(warehouseFilterInput);
   const dateRange = resolveDateRange(filters);
   const productObjectId = normalizeObjectId(product._id);
 

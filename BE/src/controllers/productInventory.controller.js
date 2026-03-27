@@ -2,6 +2,12 @@ const pick = require('../utils/pick');
 const catchAsync = require('../utils/catchAsync');
 const { productInventoryService } = require('../services');
 
+const buildScopeContext = (req) => ({
+  branch: req.user ? req.user.branch : null,
+  role: req.userRole,
+  isGlobalRole: req.isGlobalRole,
+});
+
 const getInventoryOverview = catchAsync(async (req, res) => {
   const filterFields = [
     'keyword',
@@ -20,14 +26,16 @@ const getInventoryOverview = catchAsync(async (req, res) => {
 
   const filters = pick(req.query, filterFields);
   const options = pick(req.query, optionFields);
-  const result = await productInventoryService.getInventoryOverview(filters, options);
+  const scopeContext = buildScopeContext(req);
+  const result = await productInventoryService.getInventoryOverview(filters, options, scopeContext);
   res.send(result);
 });
 
 const getInventoryDetail = catchAsync(async (req, res) => {
   const filterFields = ['warehouse', 'warehouseId', 'warehouseIds', 'startDate', 'endDate', 'dateFrom', 'dateTo'];
   const filters = pick(req.query, filterFields);
-  const result = await productInventoryService.getInventoryDetail(req.params.productId, filters);
+  const scopeContext = buildScopeContext(req);
+  const result = await productInventoryService.getInventoryDetail(req.params.productId, filters, scopeContext);
   res.send(result);
 });
 

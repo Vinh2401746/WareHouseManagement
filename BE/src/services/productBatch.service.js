@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const { ProductBatch, Product } = require('../models');
 const ApiError = require('../utils/ApiError');
 const responseMessages = require('../constants/responseMessages');
+const { applyWarehouseScope } = require('../utils/branchScope');
 
 /**
  * Create a productBatch
@@ -69,9 +70,10 @@ const createProductBatch = async (productBatchBody) => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const queryProductBatches = async (filter, options) => {
-  options.populate = 'product warehouse';
-  const productBatches = await ProductBatch.paginate(filter, options);
+const queryProductBatches = async (filter, options, context = {}) => {
+  const scopedFilter = await applyWarehouseScope(filter, context);
+  const queryOptions = { ...options, populate: 'product warehouse' };
+  const productBatches = await ProductBatch.paginate(scopedFilter, queryOptions);
   return productBatches;
 };
 

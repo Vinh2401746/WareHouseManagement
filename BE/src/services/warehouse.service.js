@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const { Warehouse } = require('../models');
 const ApiError = require('../utils/ApiError');
 const responseMessages = require('../constants/responseMessages');
+const { applyBranchScope } = require('../utils/branchScope');
 
 /**
  * Create a warehouse
@@ -22,9 +23,10 @@ const createWarehouse = async (warehouseBody) => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const queryWarehouses = async (filter, options) => {
-  options.populate = 'branch';
-  const warehouses = await Warehouse.paginate(filter, options);
+const queryWarehouses = async (filter, options, context = {}) => {
+  const scopedFilter = applyBranchScope(filter, context);
+  const queryOptions = { ...options, populate: 'branch' };
+  const warehouses = await Warehouse.paginate(scopedFilter, queryOptions);
   return warehouses;
 };
 

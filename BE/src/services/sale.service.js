@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const { Sale, InventoryTransaction, ProductBatch, Warehouse } = require('../models');
 const ApiError = require('../utils/ApiError');
 const responseMessages = require('../constants/responseMessages');
+const { applyBranchScope, applyWarehouseScope } = require('../utils/branchScope');
 
 // Hàm gom logic làm tròn để tránh lệch tiền giữa BE và FE
 const roundCurrency = (value) => Math.round(value);
@@ -195,8 +196,10 @@ const createSale = async (saleBody, user) => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const querySales = async (filter, options) => {
-  const sales = await Sale.paginate(filter, options);
+const querySales = async (filter, options, context = {}) => {
+  const branchScopedFilter = applyBranchScope(filter, context);
+  const scopedFilter = await applyWarehouseScope(branchScopedFilter, context);
+  const sales = await Sale.paginate(scopedFilter, options);
   return sales;
 };
 

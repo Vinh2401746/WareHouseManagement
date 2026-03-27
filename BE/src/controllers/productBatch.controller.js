@@ -5,6 +5,12 @@ const catchAsync = require('../utils/catchAsync');
 const { productBatchService } = require('../services');
 const responseMessages = require('../constants/responseMessages');
 
+const buildScopeContext = (req) => ({
+  branch: req.user ? req.user.branch : null,
+  role: req.userRole,
+  isGlobalRole: req.isGlobalRole,
+});
+
 const createProductBatch = catchAsync(async (req, res) => {
   const productBatch = await productBatchService.createProductBatch(req.body);
   res.status(httpStatus.CREATED).send(productBatch);
@@ -21,7 +27,8 @@ const getProductBatchs = catchAsync(async (req, res) => {
     'importPrice',
   ]);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await productBatchService.queryProductBatches(filter, options);
+  const scopeContext = buildScopeContext(req);
+  const result = await productBatchService.queryProductBatches(filter, options, scopeContext);
   res.send(result);
 });
 

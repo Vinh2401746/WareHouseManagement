@@ -3,6 +3,7 @@ const { InventoryTransaction, ProductBatch, Product } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { INVENTORY_TRANSACTION_TYPES, INVENTORY_TRANSACTION_REASONS } = require('../constants/inventoryTransaction.constant');
 const responseMessages = require('../constants/responseMessages');
+const { applyWarehouseScope } = require('../utils/branchScope');
 
 const populateInventoryTransactionQuery = (query) =>
   query
@@ -155,7 +156,7 @@ const createInventoryTransaction = async (inventoryTransactionBody) => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const queryInventoryTransactions = async (filter, options) => {
+const queryInventoryTransactions = async (filter, options, context = {}) => {
   let sort = '';
   if (options.sortBy) {
     const sortingCriteria = [];
@@ -172,9 +173,11 @@ const queryInventoryTransactions = async (filter, options) => {
   const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
   const skip = (page - 1) * limit;
 
-  const countPromise = InventoryTransaction.countDocuments(filter).exec();
+  const scopedFilter = await applyWarehouseScope(filter, context);
+
+  const countPromise = InventoryTransaction.countDocuments(scopedFilter).exec();
   const docsPromise = populateInventoryTransactionQuery(
-    InventoryTransaction.find(filter).sort(sort).skip(skip).limit(limit)
+    InventoryTransaction.find(scopedFilter).sort(sort).skip(skip).limit(limit)
   ).exec();
 
   const [totalResults, results] = await Promise.all([countPromise, docsPromise]);
