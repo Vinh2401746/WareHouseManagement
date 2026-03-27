@@ -9,3 +9,5 @@ module.exports.productBatchController = require('./productBatch.controller');
 module.exports.inventoryTransactionController = require('./inventoryTransaction.controller');
 module.exports.saleController = require('./sale.controller');
 module.exports.unitController = require('./unit.controller');
+module.exports.permissionController = require('./permission.controller');
+module.exports.roleController = require('./role.controller');

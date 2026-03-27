@@ -5,6 +5,12 @@ const catchAsync = require('../utils/catchAsync');
 const { userService } = require('../services');
 const responseMessages = require('../constants/responseMessages');
 
+const buildScopeContext = (req) => ({
+  branch: req.user ? req.user.branch : null,
+  role: req.userRole,
+  isGlobalRole: req.isGlobalRole,
+});
+
 const createUser = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
   res.status(httpStatus.CREATED).send(user);
@@ -13,7 +19,8 @@ const createUser = catchAsync(async (req, res) => {
 const getUsers = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['name', 'role', 'branch']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await userService.queryUsers(filter, options);
+  const scopeContext = buildScopeContext(req);
+  const result = await userService.queryUsers(filter, options, scopeContext);
   res.send(result);
 });
 
@@ -55,12 +62,11 @@ const changeUserPassword = catchAsync(async (req, res) => {
 });
 
 const getMyPermissions = catchAsync(async (req, res) => {
-  const permissions = userService.getUserPermissions(req.user.role);
-  res.status(httpStatus.OK).send({
-    userId: req.user.id,
-    role: req.user.role,
-    permissions,
+  const payload = await userService.getUserPermissions(req.user, {
+    role: req.userRole,
+    permissionsByGroup: req.userPermissionsByGroup,
   });
+  res.status(httpStatus.OK).send(payload);
 });
 
 module.exports = {
