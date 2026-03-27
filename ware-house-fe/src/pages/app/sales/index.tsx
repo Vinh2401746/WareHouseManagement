@@ -12,17 +12,16 @@ import {
 import { TableCommon } from "../../../components/table/table";
 import { AppRoutes } from "../../../router/routes";
 
-import type { GetInventoriesRequest } from "../../../types/inventory";
 
 import { deleteWarehouseApi } from "../../../api/warehouse";
 import type { DeleteWarehouseRequestType } from "../../../types/warehouse";
-import { comfirmInventoryApi, getInventoriesApi } from "../../../api/inventory/inventory";
+import {  comfirmInventoryApi } from "../../../api/inventory/inventory";
 import { formatDate, formatNumber } from "../../../utils/helper";
-import type { CancelFormRef } from "./components/cancel-import";
-import CancelImport from "./components/cancel-import";
+
 import NoPermissonPage from "../../404-developing/no-permission";
 import { usePermission } from "../../../hooks/usePermission";
 import { useNavigate } from "react-router-dom";
+import { getInvoicesApi } from "../../../api/sales";
 //['PENDING', 'COMPLETED', 'CANCELED']
 const renderStatus = (status: string) => {
   switch (status) {
@@ -35,28 +34,28 @@ const renderStatus = (status: string) => {
 
     case "CANCELED":
 
-      return 'Đã huỷ';
+      return 'Đã đóng';
 
     default:
       return 'Không xác định';
   }
 }
-const WarehouseImportAndExport = memo(() => {
+const SalePage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const cancelRef= useRef<CancelFormRef>(null)
 
   const navigate = useNavigate()
   const { data, isLoading, refetch, error, isError } = useQuery({
-    queryKey: [QueryKeys.category.list, { page, limit }],
-    queryFn: ({ queryKey }) => {
-      const [, payload] = queryKey as [string, GetInventoriesRequest];
-      return getInventoriesApi(payload);
+    queryKey: [QueryKeys.sales.list, { page, limit }],
+    queryFn: () => {
+      return getInvoicesApi({ page, limit });
     },
     gcTime: 15 * 60 * 1000, // 15 phut cache
     // enabled:false
   });
-      const {isManager,canView} = usePermission("inventoryTransactions")
+
+  console.log("data",data)
+  const { isManager, canView } = usePermission("inventoryTransactions")
 
 
   useEffect(() => {
@@ -105,8 +104,8 @@ const WarehouseImportAndExport = memo(() => {
         case "update":
           // dispatchToast("warning", "Tính năng đang phát triển")
           // formRef.current?.show(record);
-          navigate(AppRoutes.warehouse_import_export_detail,{
-            state:record
+          navigate(AppRoutes.warehouse_import_export_detail, {
+            state: record
           })
           break;
         case "approval":
@@ -122,19 +121,18 @@ const WarehouseImportAndExport = memo(() => {
           }
           break;
         case "cancel":
-          if(record.status === "PENDING") {
+          if (record.status === "PENDING") {
             //call api ccael
             // mutateCancel({id:record})
-            cancelRef.current?.show(record.id)
             return;
           }
-           dispatchToast("info", "Không thể huỷ đơn này do đã duyệt.")
+          dispatchToast("info", "Không thể huỷ đơn này do đã duyệt.")
           break;
         default:
           break;
       }
     },
-    [mutate, mutateConfirm, navigate],
+    [mutate],
   );
 
   const columns: ColumnsType = useMemo(
@@ -215,13 +213,6 @@ const WarehouseImportAndExport = memo(() => {
         align: "center",
         render: (record) => formatDate(record)
       },
-         {
-        title: "Trạng thái",
-        dataIndex: "status",
-        key: "status",
-        align: "center",
-        render: (record) => renderStatus(record)
-      },
       {
         title: "Tuỳ chọn",
         dataIndex: "",
@@ -240,11 +231,11 @@ const WarehouseImportAndExport = memo(() => {
                 color={"blue"}
                 variant={"outlined"}
                 onClick={() => onAction("update", record)}
-                   disabled={!isManager}
+                disabled={!isManager}
               >
                 Chi Tiết Đơn
               </Tag>
-           
+
               {
                 record.status == "PENDING" &&
                 <>
@@ -252,23 +243,23 @@ const WarehouseImportAndExport = memo(() => {
                     <Tag
                       color={"green"}
                       variant={"outlined"}
-                         disabled={!isManager}
+                      disabled={!isManager}
                     >
                       {renderStatus(record?.status)}
                     </Tag>
 
                   </Popconfirm>
-                    <Popconfirm
-                      title="Xác nhận huỷ đơn nhập kho này?"
-                      cancelText="Huỷ"
-                      okText="Xác nhận"
-                      onConfirm={() => onAction("cancel", record)}
-                         disabled={!isManager}
-                    >
-                      <Tag color={"yellow"} variant={"outlined"}>
-                        Huỷ đơn
-                      </Tag>
-                    </Popconfirm>
+                  <Popconfirm
+                    title="Xác nhận huỷ đơn nhập kho này?"
+                    cancelText="Huỷ"
+                    okText="Xác nhận"
+                    onConfirm={() => onAction("cancel", record)}
+                    disabled={!isManager}
+                  >
+                    <Tag color={"yellow"} variant={"outlined"}>
+                      Huỷ đơn
+                    </Tag>
+                  </Popconfirm>
                 </>
               }
 
@@ -287,9 +278,9 @@ const WarehouseImportAndExport = memo(() => {
         },
       },
     ],
-    [isManager, onAction],
+    [onAction],
   );
-  if(!canView) return <NoPermissonPage />
+  if (!canView) return <NoPermissonPage />
   return (
     <div style={{ rowGap: 24, display: "flex", flexDirection: "column" }}>
       <Breadcrumb
@@ -299,7 +290,7 @@ const WarehouseImportAndExport = memo(() => {
             title: (
               <>
                 <UserOutlined />
-                <span>Nhập kho</span>
+                <span>Bán hàng</span>
               </>
             ),
           },
@@ -311,11 +302,11 @@ const WarehouseImportAndExport = memo(() => {
           icon={<DownloadOutlined />}
           onClick={() => {
             // formRef.current?.show({})
-              navigate(AppRoutes.warehouse_import_export_detail)
-        }}
-             disabled={!isManager}
+            navigate(AppRoutes.create_invoice)
+          }}
+          disabled={!isManager}
         >
-          Tạo đơn nhập kho
+          Tạo đơn
         </Button>
         {/* <Button
           type="primary"
@@ -336,9 +327,9 @@ const WarehouseImportAndExport = memo(() => {
           return {
             onDoubleClick: () => {
               // formRef.current?.show({ ...record });
-                navigate(AppRoutes.warehouse_import_export_detail,{
-            state:record
-          })
+              navigate(AppRoutes.warehouse_import_export_detail, {
+                state: record
+              })
             },
           };
         }}
@@ -355,8 +346,7 @@ const WarehouseImportAndExport = memo(() => {
           onChange={(page) => setPage(page)}
         />
       </Flex>
-      <CancelImport ref={cancelRef} onSuccessModal={() => { refetch() }} />
     </div>
   );
 });
-export default WarehouseImportAndExport;
+export default SalePage;

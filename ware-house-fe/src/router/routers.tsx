@@ -5,6 +5,9 @@ import { createBrowserRouter } from "react-router-dom";
 import { AppRoutes } from "./routes";
 import { GuestRoute, PrivateRoute } from "../components/protect-route";
 import NoPermissonPage from "../pages/404-developing/no-permission";
+import WarehouseImportExportDetailPage from "../pages/app/warehouse_import_export/detail";
+import SalePage from "../pages/app/sales";
+import { CreateInvoicePage } from "../pages/app/sales/create_invoice";
 
 
 const LoginPage = Loadable(lazy(() => import('../pages/auth/login-page')));
@@ -88,10 +91,20 @@ export const router = createBrowserRouter(
           id: AppRoutes.warehouse_import_export,
           element: <WarehouseImportAndExport />,
         },
+           {
+          path: AppRoutes.warehouse_import_export_detail,
+          id: AppRoutes.warehouse_import_export_detail,
+          element: <WarehouseImportExportDetailPage />,
+        },
         {
           path: AppRoutes.sales_invoice,
           id: AppRoutes.sales_invoice,
-          element: <DevelopingPage />,
+          element: <SalePage />,
+        },
+         {
+          path: AppRoutes.create_invoice,
+          id: AppRoutes.create_invoice,
+          element: <CreateInvoicePage />,
         },
         {
           path: AppRoutes.unit.list,

@@ -22,5 +22,8 @@ export const QueryKeys = {
   },
   warehouse: {
     list: 'warehouse'
+  },
+  sales:{
+    list: 'sales'
   }
 };

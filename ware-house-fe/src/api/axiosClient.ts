@@ -37,14 +37,14 @@ AxiosClient.interceptors.response.use(
     return Promise.resolve(res.data);
   },
   async (err: AxiosResponse | any) => {
-    console.log("rrror", err);
+    // console.log("rrror", err);
     
-    if ([err?.response?.status,err.status].includes(401) && !err.config.url.includes('auth')) {
+    if ([Number(err?.response?.status),Number(err.status)].includes(401) && !err.config.url.includes('auth') || err.status === 401) {
       store.dispatch(removeCurrentUser());
       dispatchToast("error","Hết phiên làm việc. Vui lòng đăng nhập lại.")
-      // setTimeout(() => {
-      //   router.navigate(AppRoutes.root, { replace: true });
-      // }, 0);
+      setTimeout(() => {
+        router.navigate(AppRoutes.root, { replace: true });
+      }, 0);
     }
     return Promise.reject(err);
   },
