@@ -8,3 +8,5 @@ module.exports.productBatchValidation = require('./productBatch.validation');
 module.exports.inventoryTransactionValidation = require('./inventoryTransaction.validation');
 module.exports.saleValidation = require('./sale.validation');
 module.exports.unitValidation = require('./unit.validation');
+module.exports.permissionValidation = require('./permission.validation');
+module.exports.roleValidation = require('./role.validation');

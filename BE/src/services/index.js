@@ -11,3 +11,5 @@ module.exports.supplierService = require('./supplier.service');
 module.exports.inventoryTransactionService = require('./inventoryTransaction.service');
 module.exports.saleService = require('./sale.service');
 module.exports.unitService = require('./unit.service');
+module.exports.permissionService = require('./permission.service');
+module.exports.roleService = require('./role.service');
