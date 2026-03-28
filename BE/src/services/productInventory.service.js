@@ -126,6 +126,7 @@ const mapProductBasics = (productDoc) => {
     id: data._id ? data._id.toString() : data.id,
     code: data.code,
     name: data.name,
+    imageUrl: data.imageUrl || null,
     minStock: data.minStock || 0,
     unit: data.unit
       ? {
