@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKeys } from "../../../constants/query-keys";
-import { getInventoryProduct, getProductsApi } from "../../../api/products";
-import { Breadcrumb, Col, Flex, Image, Pagination, Row, Spin, Splitter, Tag } from "antd";
+import { getInventoryProduct } from "../../../api/products";
+import { Breadcrumb, Col, Flex, Image, Pagination, Row, Spin, Splitter } from "antd";
 import { ROOT_IMAGE_IMAGE } from "../../../constants/common";
 import {
   ProductInvoiceList,
@@ -11,6 +11,7 @@ import {
 } from "./product_invoice_list";
 import { UserOutlined } from "@ant-design/icons";
 import { AppRoutes } from "../../../router/routes";
+import dispatchToast from "../../../constants/toast";
 
 export type ProductItem = {
   id: string;
@@ -18,7 +19,7 @@ export type ProductItem = {
   name: string;
   code: string;
   price?: number;
-  totalStock ?: number
+  totalStock?: number
 };
 
 export type CreateInvoiceRef = {
@@ -34,16 +35,16 @@ export const CreateInvoicePage = () => {
 
 
   const { data, isFetching } = useQuery({
-    queryKey: [QueryKeys.products.list_invent],
-    queryFn: () => getInventoryProduct(),
+    queryKey: [QueryKeys.products.list_invent, { page, limit }],
+    queryFn: () => getInventoryProduct({ page, limit }),
   });
 
-  const products = useMemo(() => data?.results?.map((item)=>({
+  const products = useMemo(() => data?.results?.map((item: any) => ({
     ...item.product,
-    totalStock:item?.totalStock || ''
+    totalStock: item?.totalStock || ''
   })) || [], [data]);
-  
-  console.log("products=",products)
+
+
 
   const handleAddProduct = useCallback((product: ProductItem) => {
     invoiceListRef.current?.addProduct(product);
@@ -61,12 +62,16 @@ export const CreateInvoicePage = () => {
     return (
       <>
         {products.map((item: ProductItem) => (
-          <Col key={item?.id || ""} xxl={6} xl={8} lg={8} md={8} sm={12} xs={12} onClick={() => handleAddProduct(item)}>
+          <Col key={item?.id || ""} xxl={6} xl={8} lg={8} md={8} sm={12} xs={12} onClick={() => {
+            if (Number(item?.totalStock || 0) <= 0) return dispatchToast("warning", "Sản phẩm đã hết trong kho hiện tại!")
+            handleAddProduct(item)
+          }}>
             <Row gutter={8} style={{
               border: selectedIds.includes(item.id) ? '1.5px solid #1677ff' : '1.5px solid transparent',
               borderRadius: 8,
               padding: 6,
               transition: 'border-color 0.2s',
+              backgroundColor: Number(item?.totalStock || 0) <= 0 ? "#e3e4e6ff" : "transparent"
             }}>
               <Col>
                 <Image
@@ -79,6 +84,7 @@ export const CreateInvoicePage = () => {
               <Col>
                 <Flex vertical gap={6}>
                   <span>{item?.name || ""}</span>
+                  <span>Tồn kho: {item?.totalStock || "0"}</span>
                   {/* <Tag
                     color="green"
                     variant="outlined"
@@ -118,7 +124,7 @@ export const CreateInvoicePage = () => {
         ]}
       />
       <Splitter style={{ minHeight: window.screen.height - 400 }}>
-        <Splitter.Panel defaultSize="80%" min="50%" max="80%" style={{ padding: 4 }}>
+        <Splitter.Panel defaultSize="70%" min="50%" max="70%" style={{ padding: 12 }}>
           <Row gutter={[12, 12]}>{renderProduct()}</Row>
           <Flex justify="end">
             <Pagination
@@ -135,7 +141,7 @@ export const CreateInvoicePage = () => {
             />
           </Flex>
         </Splitter.Panel>
-        <Splitter.Panel>
+        <Splitter.Panel style={{ padding: 25 }}>
           <ProductInvoiceList ref={invoiceListRef} removeFromList={handleRemoveFromList} />
         </Splitter.Panel>
       </Splitter>

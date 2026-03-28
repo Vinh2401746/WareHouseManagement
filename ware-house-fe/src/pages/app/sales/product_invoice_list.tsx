@@ -237,7 +237,7 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
     }, [finalMoney?.discountMoney, finalMoney?.taxMoney, finalMoney?.totalAmount, finalMoney?.totalAmountAfterFax]);
 
     return (
-      <Row gutter={[24, 24]} style={{ padding: 20, flexDirection: "column" }}>
+      <Row gutter={[24, 24]} style={{  flexDirection: "column" }}>
         {items.length === 0 && (
           <Col
             span={24}

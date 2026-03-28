@@ -57,6 +57,6 @@ export const exportCurrentExProduct = () => {
   return AxiosClient.get(`product/export`, { responseType: 'blob' });
 }
 
-export const getInventoryProduct = () =>{
-   return AxiosClient.get(`product/inventory-overview`);
+export const getInventoryProduct = (payload:{page:number, limit:number }) =>{
+   return AxiosClient.get(`product/inventory-overview?page=${payload.page || 1}&limit=${payload.limit || 10}`);
 }
