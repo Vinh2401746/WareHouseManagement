@@ -75,16 +75,20 @@ export const CreateInvoicePage = () => {
             }}>
               <Col>
                 <Image
+                  preview={false}
                   width={50}
                   height={50}
+                  style={{ borderRadius: 8 }}
                   alt=""
-                  src={`${ROOT_IMAGE_IMAGE}${item?.imageUrl || ""}`}
+                  src={item?.imageUrl ? `${ROOT_IMAGE_IMAGE}${item?.imageUrl}` : 'https://images.pexels.com/photos/16211537/pexels-photo-16211537.jpeg'}
                 />
               </Col>
               <Col>
                 <Flex vertical gap={6}>
                   <span>{item?.name || ""}</span>
-                  <span>Tồn kho: {item?.totalStock || "0"}</span>
+                  <span style={{
+                    color: Number(item?.totalStock) < 10 ? "red" : 'black'
+                  }}>Tồn kho: {item?.totalStock || "0"}</span>
                   {/* <Tag
                     color="green"
                     variant="outlined"
@@ -142,7 +146,10 @@ export const CreateInvoicePage = () => {
           </Flex>
         </Splitter.Panel>
         <Splitter.Panel style={{ padding: 25 }}>
-          <ProductInvoiceList ref={invoiceListRef} removeFromList={handleRemoveFromList} />
+          <ProductInvoiceList ref={invoiceListRef} removeFromList={handleRemoveFromList} removeAllFromList={() => {
+            if (selectedIds.length == 0) { return dispatchToast('warning', "Không có sản phẩm trong đơn nhập để xoá.") }
+            setSelectedIds([]); dispatchToast('success', "Đã xoá tất cả sản phẩm khỏi đơn hàng")
+          }} />
         </Splitter.Panel>
       </Splitter>
     </div>

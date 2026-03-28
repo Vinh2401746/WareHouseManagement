@@ -6,14 +6,17 @@ import {
   useMemo,
   useState,
 } from "react";
-import { Button, Col, Flex, Image, Input, Row, Tag } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { Button, Col, DatePicker, Flex, Form, Image, Input, Row, Tag } from "antd";
+import { DeleteOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import {
   DISCOUNT_PERCENT,
   ROOT_IMAGE_IMAGE,
   TAX_PERCENT,
 } from "../../../constants/common";
 import { formatNumber } from "../../../utils/helper";
+import { useForm } from "antd/es/form/Form";
+import dayjs from "dayjs";
+import dispatchToast from "../../../constants/toast";
 
 export type InvoiceItem = {
   id: string;
@@ -22,6 +25,7 @@ export type InvoiceItem = {
   imageUrl: string;
   quantity: number;
   price: number;
+  totalStock:number
 };
 
 export type ProductInvoiceListRef = {
@@ -31,6 +35,7 @@ export type ProductInvoiceListRef = {
     code: string;
     imageUrl?: string;
     price?: number;
+    totalStock?: number;
   }) => void;
   getItems: () => InvoiceItem[];
   clearItems: () => void;
@@ -38,83 +43,58 @@ export type ProductInvoiceListRef = {
 
 type Props = {
   removeFromList?: (id: string) => void;
+  removeAllFromList?: () => void;
 };
 
+type FormSale = {
+  note: string
+  saleDate: Date
+  customerName: string
+  discountPercent: number
+}
+
 export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
-  ({ removeFromList }, ref) => {
+  ({ removeFromList, removeAllFromList }, ref) => {
     const [items, setItems] = useState<InvoiceItem[]>([]);
-    // const [calculateMoney, setCalculateMoney] = useState({
-    //   totalAmount: 0,
-    //   discountMoney: 0,
-    //   taxMoney: 0,
-    //   totalAmountAfterFax: 0,
-    // });
+    const [form] = useForm<FormSale>()
+    const discountPercent = Form.useWatch("discountPercent", form) ?? 0;
 
-    useEffect(() => {
-      //   Thành tiền = (SL × Đơn giá) × (1 − CK%) × (1 + Thuế%)
-      //  A:tổng tiền = Sum ( thành tiền )
 
-      // B: chiết khấu = tổng tiền  x %CK
 
-      // C :thuế = tổng tiền * 8%
+    const finalMoney = useMemo(() => {
+      const total = Math.round(
+        items.reduce(
+          (prevValue, currentItem) =>
+            prevValue +
+            Number(currentItem?.quantity || 0) *
+            Number(currentItem?.price || 0),
+          0,
+        ),
+      );
+      const discount = Math.round(total * (discountPercent / 100));
+      const tax = Math.round(total * (TAX_PERCENT / 100));
 
-      // kết qủa =. A - B + C
+      // console.log("render",items)
+      return {
+        totalAmount: total || 0,
+        discountMoney: discount,
+        taxMoney: tax,
+        totalAmountAfterFax: total - discount + tax,
+      }
 
-        // const total = Math.round(items.filter(it =>it.product).reduce((item,currentValue)=>(Number(currentValue.quantity) * Number(currentValue.price)) + (Number(item?.quantity || 0) * Number(item?.price || 0)),0)) ;
-        // const total = Math.round(
-        //   items.reduce(
-        //     (prevValue, currentItem) =>
-        //       prevValue +
-        //       Number(currentItem?.quantity || 0) *
-        //         Number(currentItem?.price || 0),
-        //     0,
-        //   ),
-        // );
-        // const discount = Math.round(total * (DISCOUNT_PERCENT / 100));
-        // const tax = Math.round(total * (TAX_PERCENT / 100));
-
-        // // console.log("render",items)
-        // setCalculateMoney({
-        //   totalAmount: total || 0,
-        //   discountMoney: discount,
-        //   taxMoney: tax,
-        //   totalAmountAfterFax: total - discount + tax,
-        // });
-        // do anything
-      
-    }, []);
-
-    const finalMoney  = useMemo(()=> {
-           const total = Math.round(
-          items.reduce(
-            (prevValue, currentItem) =>
-              prevValue +
-              Number(currentItem?.quantity || 0) *
-                Number(currentItem?.price || 0),
-            0,
-          ),
-        );
-        const discount = Math.round(total * (DISCOUNT_PERCENT / 100));
-        const tax = Math.round(total * (TAX_PERCENT / 100));
-
-        // console.log("render",items)
-        return {
-          totalAmount: total || 0,
-          discountMoney: discount,
-          taxMoney: tax,
-          totalAmountAfterFax: total - discount + tax,
-        }
-
-    },[items])
+    }, [items,discountPercent])
 
     useImperativeHandle(
       ref,
       () => ({
         addProduct(product) {
-        //   console.log("log==", { product, items });
           setItems((prev) => {
             const exists = prev.find((i) => i.id === product.id);
             if (exists) {
+              if (exists.quantity +  1 > exists.totalStock) {
+                dispatchToast("warning", "Số lượng không được vượt quá tồn kho");
+                return prev;
+              }
               return prev.map((i) =>
                 i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i,
               );
@@ -128,6 +108,7 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
                 imageUrl: product.imageUrl ?? "",
                 quantity: 1,
                 price: product.price ?? 0,
+                totalStock: product.totalStock ?? 0,
               },
             ];
           });
@@ -139,9 +120,15 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
     );
 
     const handleIncrease = (id: string) => {
-      setItems((prev) =>
-        prev.map((i) => (i.id === id ? { ...i, quantity: i.quantity + 1 } : i)),
-      );
+      setItems((prev) => {
+        const item = prev.find((i) => i.id === id);
+        if (!item) return prev;
+        if (item.quantity + 1 > item.totalStock) {
+          dispatchToast("warning", "Số lượng không được vượt quá tồn kho");
+          return prev;
+        }
+        return prev.map((i) => (i.id === id ? { ...i, quantity: i.quantity + 1 } : i));
+      });
     };
 
     const handleDecrease = (id: string) => {
@@ -168,7 +155,8 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
     const handleRemove = (id: string) => {
       removeFromList?.(id);
       setItems((prev) => prev.filter((i) => i.id !== id));
-    };    const renderTotalMoney = useCallback(() => {
+    };
+    const renderTotalMoney = useCallback(() => {
       return (
         <div
           style={{
@@ -214,7 +202,7 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
               paddingBottom: 12,
             }}
           >
-            <span style={{ fontSize: 16, fontWeight: 500 }}>Tổng thuế</span>
+            <span style={{ fontSize: 16, fontWeight: 500 }}>Tổng thuế (VAT)</span>
             <span style={{ fontSize: 16, fontWeight: 500, color: "#f54a00" }}>
               {`${formatNumber(finalMoney?.taxMoney || 0)}`} đ
             </span>
@@ -236,14 +224,52 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
       );
     }, [finalMoney?.discountMoney, finalMoney?.taxMoney, finalMoney?.totalAmount, finalMoney?.totalAmountAfterFax]);
 
+    const renderForm = useCallback(() => {
+
+      return (
+        <Form form={form} initialValues={{
+          saleDate: dayjs(new Date()),
+          customerName: '',
+          discountPercent: 0,
+          note: '',
+        }}>
+          <Form.Item name={"customerName"}>
+            <Input placeholder="Nhập tên khách hàng" ></Input>
+          </Form.Item>
+          {/* <Form.Item name={"saleDate"}>
+            <DatePicker style={{ width: '100%' }} placeholder="Ngày bán hàng" format={"DD/MM/YYYY"} ></DatePicker>
+          </Form.Item> */}
+          <Form.Item name="discountPercent">
+            <Input type={"number"} placeholder="Giảm giá" suffix={"%"}></Input>
+          </Form.Item>
+          <Form.Item name={"note"}>
+            <Input placeholder="Ghi chú" ></Input>
+          </Form.Item>
+        </Form>
+      )
+    }, [])
+
     return (
-      <Row gutter={[24, 24]} style={{  flexDirection: "column" }}>
+      <Row gutter={[24, 24]} style={{ flexDirection: "column" }}>
         {items.length === 0 && (
-          <Col
-            span={24}
-            style={{ color: "#aaa", textAlign: "center", marginTop: 20 }}
-          >
-            Chọn sản phẩm từ danh sách bên trái
+          <Col span={24}>
+            <Flex vertical align="center" gap={12} style={{ padding: "32px 0" }}>
+              <div
+                style={{
+                  width: 100,
+                  height: 100,
+                  borderRadius: "50%",
+                  background: "#e8f0fe",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <ShoppingCartOutlined style={{ fontSize: 48, color: "#1677ff" }} />
+              </div>
+              <span style={{ fontSize: 18, fontWeight: 600, color: "#222" }}>Giỏ hàng trống</span>
+              <span style={{ fontSize: 14, color: "#888" }}>Chưa có sản phẩm nào được chọn.</span>
+            </Flex>
           </Col>
         )}
         {items.map((item) => (
@@ -254,7 +280,7 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
                   width={50}
                   height={50}
                   alt=""
-                  src={`${ROOT_IMAGE_IMAGE}${item.imageUrl}`}
+                  src={item?.imageUrl ? `${ROOT_IMAGE_IMAGE}${item?.imageUrl}` : 'https://images.pexels.com/photos/16211537/pexels-photo-16211537.jpeg'}
                 />
               </Col>
               <Col flex={1}>
@@ -298,7 +324,31 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
             </Row>
           </Col>
         ))}
+
+
+        {renderForm()}
         {renderTotalMoney()}
+
+          <Flex gap={8} justify="space-between">
+            <Button
+              danger
+              type="primary"
+              style={{ background: "#e03131" }}
+              onClick={() => {
+                removeAllFromList?.();
+                setItems([]);
+              }}
+            >
+              Hủy đơn
+            </Button>
+            <Button
+              type="primary"
+              style={{ background: "#2f9e44", flex: 1 }}
+              onClick={() => dispatchToast("warning", "Tính năng đang phát triển")}
+            >
+              Tính tiền
+            </Button>
+          </Flex>
       </Row>
     );
   },

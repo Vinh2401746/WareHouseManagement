@@ -5,13 +5,22 @@ const responseMessages = require('../constants/responseMessages');
 const { User } = require('../models');
 const { extractPermissionCodes, formatPermissionsByGroup, isSuperAdminRole, isGlobalRole } = require('../utils/rbac');
 
+const mongoose = require('mongoose');
+
 const populateUserRole = async (user) => {
+  const rawUser = await User.findById(user.id).populate('branch').lean();
+  if (!rawUser) return null;
+
+  // Guard: role field contains invalid value (e.g. legacy string "admin")
+  const isValidRoleId = rawUser.role && mongoose.Types.ObjectId.isValid(rawUser.role);
+  if (!isValidRoleId) {
+    return { ...rawUser, role: null };
+  }
+
   const populatedUser = await User.findById(user.id)
     .populate({
       path: 'role',
-      populate: {
-        path: 'permissions',
-      },
+      populate: { path: 'permissions' },
     })
     .populate('branch');
   return populatedUser;
