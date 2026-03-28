@@ -1,14 +1,16 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKeys } from "../../../constants/query-keys";
-import { getProductsApi } from "../../../api/products";
-import { Col, Flex, Image, Pagination, Row, Spin, Splitter, Tag } from "antd";
+import { getInventoryProduct, getProductsApi } from "../../../api/products";
+import { Breadcrumb, Col, Flex, Image, Pagination, Row, Spin, Splitter, Tag } from "antd";
 import { ROOT_IMAGE_IMAGE } from "../../../constants/common";
 import {
   ProductInvoiceList,
   type ProductInvoiceListRef,
   type InvoiceItem,
 } from "./product_invoice_list";
+import { UserOutlined } from "@ant-design/icons";
+import { AppRoutes } from "../../../router/routes";
 
 export type ProductItem = {
   id: string;
@@ -16,6 +18,7 @@ export type ProductItem = {
   name: string;
   code: string;
   price?: number;
+  totalStock ?: number
 };
 
 export type CreateInvoiceRef = {
@@ -31,11 +34,16 @@ export const CreateInvoicePage = () => {
 
 
   const { data, isFetching } = useQuery({
-    queryKey: [QueryKeys.products.list, { page, limit }],
-    queryFn: () => getProductsApi({ page, limit }),
+    queryKey: [QueryKeys.products.list_invent],
+    queryFn: () => getInventoryProduct(),
   });
 
-  const products = useMemo(() => data?.results || [], [data]);
+  const products = useMemo(() => data?.results?.map((item)=>({
+    ...item.product,
+    totalStock:item?.totalStock || ''
+  })) || [], [data]);
+  
+  console.log("products=",products)
 
   const handleAddProduct = useCallback((product: ProductItem) => {
     invoiceListRef.current?.addProduct(product);
@@ -53,7 +61,7 @@ export const CreateInvoicePage = () => {
     return (
       <>
         {products.map((item: ProductItem) => (
-          <Col key={item?.id || ""} xxl={6} xl={8} lg={8} md={8} sm={12} xs={12}    onClick={() => handleAddProduct(item)}>
+          <Col key={item?.id || ""} xxl={6} xl={8} lg={8} md={8} sm={12} xs={12} onClick={() => handleAddProduct(item)}>
             <Row gutter={8} style={{
               border: selectedIds.includes(item.id) ? '1.5px solid #1677ff' : '1.5px solid transparent',
               borderRadius: 8,
@@ -96,8 +104,21 @@ export const CreateInvoicePage = () => {
 
   return (
     <div className="invoice-layout">
+      <Breadcrumb
+        items={[
+          {
+            href: AppRoutes.sales_invoice,
+            title: (
+              <>
+                <UserOutlined />
+                <span>Quay lại</span>
+              </>
+            ),
+          },
+        ]}
+      />
       <Splitter style={{ minHeight: window.screen.height - 400 }}>
-        <Splitter.Panel defaultSize="80%" min="50%" max="80%" style={{padding:4}}>
+        <Splitter.Panel defaultSize="80%" min="50%" max="80%" style={{ padding: 4 }}>
           <Row gutter={[12, 12]}>{renderProduct()}</Row>
           <Flex justify="end">
             <Pagination

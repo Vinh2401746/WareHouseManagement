@@ -56,3 +56,7 @@ export const importTemplateProduct = (file: File) => {
 export const exportCurrentExProduct = () => {
   return AxiosClient.get(`product/export`, { responseType: 'blob' });
 }
+
+export const getInventoryProduct = () =>{
+   return AxiosClient.get(`product/inventory-overview`);
+}

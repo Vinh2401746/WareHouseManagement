@@ -3,7 +3,8 @@ export const QueryKeys = {
     users: "users",
   },
   products:{
-    list: 'products'
+    list: 'products',
+    list_invent: 'list_invent'
   },
   category:{
     list: 'category'
