@@ -1,22 +1,23 @@
 import {
   forwardRef,
   useCallback,
-  useEffect,
   useImperativeHandle,
   useMemo,
   useState,
 } from "react";
-import { Button, Col, DatePicker, Flex, Form, Image, Input, Row, Tag } from "antd";
-import { DeleteOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import { Button, Col, Flex, Form, Image, Input, Modal, Row, Segmented, Tag } from "antd";
+import { DeleteOutlined, PrinterOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import {
-  DISCOUNT_PERCENT,
-  ROOT_IMAGE_IMAGE,
   TAX_PERCENT,
+  ROOT_IMAGE_IMAGE,
 } from "../../../constants/common";
 import { formatNumber } from "../../../utils/helper";
 import { useForm } from "antd/es/form/Form";
 import dayjs from "dayjs";
 import dispatchToast from "../../../constants/toast";
+import { useMutation } from "@tanstack/react-query";
+import { createInvoiceApi } from "../../../api/sales";
+import { useAppSelector } from "../../../store/hooks";
 
 export type InvoiceItem = {
   id: string;
@@ -58,7 +59,11 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
     const [items, setItems] = useState<InvoiceItem[]>([]);
     const [form] = useForm<FormSale>()
     const discountPercent = Form.useWatch("discountPercent", form) ?? 0;
-
+    const [checkoutVisible, setCheckoutVisible] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState<"Tiền mặt" | "Chuyển khoản">("Tiền mặt");
+    const [customerPaid, setCustomerPaid] = useState<number>(0);
+    const [createdAt, setCreatedAt] = useState<string>("");
+    const userInfor = useAppSelector(state=>state.user.user)
 
 
     const finalMoney = useMemo(() => {
@@ -156,6 +161,26 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
       removeFromList?.(id);
       setItems((prev) => prev.filter((i) => i.id !== id));
     };
+
+    const handleOpenCheckout = () => {
+      if (items.length === 0) {
+        dispatchToast("warning", "Vui lòng chọn ít nhất một sản phẩm");
+        return;
+      }
+      const hasInvalidPrice = items.some((i) => !i.price || i.price <= 0);
+      if (hasInvalidPrice) {
+        dispatchToast("warning", "Vui lòng nhập giá cho tất cả sản phẩm");
+        return;
+      }
+      if (!finalMoney.totalAmount || !finalMoney.totalAmountAfterFax) {
+        dispatchToast("warning", "Tổng tiền không hợp lệ");
+        return;
+      }
+      setCustomerPaid(finalMoney.totalAmountAfterFax);
+      setCreatedAt(dayjs().format("HH:mm:ss DD/M/YYYY"));
+      setCheckoutVisible(true);
+    };
+
     const renderTotalMoney = useCallback(() => {
       return (
         <div
@@ -249,7 +274,42 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
       )
     }, [])
 
+    
+    const { mutate} = useMutation({
+      mutationFn: (payload: { 
+        customerName: string;
+         branch: string; 
+         warehouse: string; 
+         saleDate: Date; 
+         note: string; 
+         items: { product: string; quantity: number; price: number; }[]; }) => createInvoiceApi(payload),
+         onSuccess:() =>{
+          dispatchToast("success", "Tạo hoá đơn bán hàng thành công")
+         },
+         onError:()=>{
+           dispatchToast("error", "Tạo hoá đơn bán hàng thất bại")
+         }
+    })
+
+    const handleCreateInvoice = useCallback(()=>{
+      console.log("12312")
+      mutate({
+        customerName:form.getFieldValue('customerName') || "customer name",
+        saleDate:form.getFieldValue('saleDate') || new Date(),
+        note : form.getFieldValue('note') || '',
+        items: items.map(item=>({
+          product:item.id,
+          quantity:item.quantity,
+          price:item.price
+        })),
+        branch: userInfor?.branch?.id || '69bac2279924c4e470fc59f1',
+        warehouse:''
+      })
+    },[form, items, userInfor])
+
+
     return (
+      <>
       <Row gutter={[24, 24]} style={{ flexDirection: "column" }}>
         {items.length === 0 && (
           <Col span={24}>
@@ -341,15 +401,114 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
             >
               Hủy đơn
             </Button>
+              <Button
+              danger
+              type="primary"
+              style={{ background: "#e7991bff" }}
+              onClick={() => {
+                removeAllFromList?.();
+                setItems([]);
+              }}
+            >
+              Lưu tạm
+            </Button>
             <Button
               type="primary"
-              style={{ background: "#2f9e44", flex: 1 }}
-              onClick={() => dispatchToast("warning", "Tính năng đang phát triển")}
+              style={{ background: "#2f9e44", flex: 1}}
+              onClick={handleOpenCheckout}
             >
               Tính tiền
             </Button>
           </Flex>
       </Row>
+
+      <Modal
+        title="Tính tiền"
+        open={checkoutVisible}
+        onCancel={() => setCheckoutVisible(false)}
+        footer={null}
+        width={700}
+      >
+        <Flex gap={24}>
+          {/* Cột trái */}
+          <div style={{ flex: 1, background: "#f5f7fa", borderRadius: 10, padding: 20 }}>
+            <Segmented
+              block
+              options={["Tiền mặt", "Chuyển khoản"]}
+              value={paymentMethod}
+              onChange={(v) => setPaymentMethod(v as "Tiền mặt" | "Chuyển khoản")}
+              style={{ marginBottom: 20 }}
+            />
+            {paymentMethod === "Tiền mặt" ? (
+              <>
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ marginBottom: 4 }}>
+                    Tiền khách trả <span style={{ color: "red" }}>*</span>
+                  </div>
+                  <Input
+                    value={customerPaid}
+                    onChange={(e) => setCustomerPaid(Number(e.target.value.replace(/[^0-9]/g, "")))}
+                    suffix="VNĐ"
+                    size="large"
+                  />
+                </div>
+                <div style={{ marginBottom: 4 }}>Tiền thừa trả khách</div>
+                <Input
+                  value={Math.max(0, customerPaid - finalMoney.totalAmountAfterFax)}
+                  readOnly
+                  suffix="VNĐ"
+                  size="large"
+                />
+              </>
+            ) : (
+              <Flex vertical align="center" gap={8}>
+                <img
+                  src="https://1pro.vn/wp-content/uploads/2025/03/IMG_7559.jpg"
+                  alt="QR chuyển khoản"
+                  style={{ width: 180, height: 180, borderRadius: 8 }}
+                />
+                <span style={{ color: "#555", fontSize: 13 }}>Quét mã QR để thanh toán</span>
+              </Flex>
+            )}
+          </div>
+
+          {/* Cột phải */}
+          <div style={{ flex: 1, background: "#f5f7fa", borderRadius: 10, padding: 20 }}>
+            <Flex justify="space-between" style={{ marginBottom: 10 }}>
+              <span style={{ color: "#555" }}>Ngày tạo</span>
+              <span>{createdAt}</span>
+            </Flex>
+            <Flex justify="space-between" style={{ marginBottom: 10 }}>
+              <span style={{ color: "#555" }}>Thành tiền</span>
+              <span>{formatNumber(finalMoney.totalAmount)} đ</span>
+            </Flex>
+            <Flex justify="space-between" style={{ marginBottom: 10 }}>
+              <span style={{ color: "#555" }}>Chiết khấu</span>
+              <span>{formatNumber(finalMoney.discountMoney)} đ</span>
+            </Flex>
+            <Flex justify="space-between" style={{ marginBottom: 10, paddingBottom: 10, borderBottom: "1px solid #e0e0e0" }}>
+              <span style={{ color: "#555" }}>VAT</span>
+              <span>{formatNumber(finalMoney.taxMoney)} đ</span>
+            </Flex>
+            <Flex justify="space-between" style={{ marginBottom: 20 }}>
+              <span style={{ fontWeight: 600, fontSize: 15 }}>Tổng thanh toán</span>
+              <span style={{ fontWeight: 600, fontSize: 15 }}>{formatNumber(finalMoney.totalAmountAfterFax)} đ</span>
+            </Flex>
+            <Flex justify="center" style={{ marginBottom: 20 }}>
+              <Button icon={<PrinterOutlined />} type="text" onClick={() => dispatchToast("warning", "Tính năng đang phát triển")}>
+                In hóa đơn tạm tính
+              </Button>
+            </Flex>
+            <Flex gap={12}>
+              <Button size="large" style={{ flex: 1 }} onClick={() => setCheckoutVisible(false)}>Đóng</Button>
+              <Button size="large" type="primary" style={{ flex: 1 }} onClick={handleCreateInvoice}>
+                Thanh toán
+              </Button>
+            </Flex>
+          </div>
+        </Flex>
+      </Modal>
+      </>
     );
   },
 );

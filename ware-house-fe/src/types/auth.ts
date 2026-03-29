@@ -10,6 +10,13 @@ export type AuthResponseLoginType = {
     email: string;
     name: string;
     id: string;
+    roleKey: string;
+    branch: {
+      name: string,
+      phone: string,
+      address: string,
+      id: string
+    },
   };
   tokens: {
     access: {

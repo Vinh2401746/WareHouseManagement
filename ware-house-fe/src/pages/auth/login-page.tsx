@@ -75,7 +75,7 @@ const LoginPage = memo(() => {
           initialValues={{
             remember: true,
             email: "admin@gmail.com",
-            password: "admin123",
+            password:  "admin123",
           }}
           onFinish={onFinish}
           //   onFinishFailed={onFinishFailed}

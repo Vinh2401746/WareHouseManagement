@@ -22,6 +22,13 @@ const fakeAuthResponse: AuthResponseLoginType = {
     email: "john.doe@example.com",
     name: "John Doe",
     id: "a3f9c2b1-7e4d-4c9a-9f2a-123456789abc",
+    branch:{
+       name: "1111",
+      phone: "1111",
+      address: "1111",
+      id: "1111"
+    },
+    roleKey: "superadmin",
   },
   tokens: {
     access: {
