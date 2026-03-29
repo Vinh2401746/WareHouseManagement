@@ -14,8 +14,10 @@ const createSale = {
       code: Joi.string().trim(),
       customerName: Joi.string().trim().required(),
       note: Joi.string().allow('', null),
-      branch: Joi.string().required().custom(objectId),
-      warehouse: Joi.string().required().custom(objectId),
+      branch: Joi.string().custom(objectId),
+      warehouse: Joi.string().custom(objectId),
+      //   branch: Joi.string().required().custom(objectId),
+      // warehouse: Joi.string().required().custom(objectId),
       saleDate: Joi.date(),
       items: Joi.array().items(saleItemSchema).min(1).required(),
     })
