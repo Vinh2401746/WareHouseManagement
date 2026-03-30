@@ -4,12 +4,9 @@ const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { productService } = require('../services');
 const responseMessages = require('../constants/responseMessages');
+const { buildScopeContext } = require('../utils/branchScope');
 
-const buildScopeContext = (req) => ({
-  branch: req.user ? req.user.branch : null,
-  role: req.userRole,
-  isGlobalRole: req.isGlobalRole,
-});
+
 
 const cleanupUploadedFile = async (req) => {
   if (typeof req.cleanupUploadedFile === 'function') {

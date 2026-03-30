@@ -5,12 +5,9 @@ const catchAsync = require('../utils/catchAsync');
 const { userService } = require('../services');
 const responseMessages = require('../constants/responseMessages');
 const { ROLES } = require('../constants/permission.constant');
+const { buildScopeContext } = require('../utils/branchScope');
 
-const buildScopeContext = (req) => ({
-  branch: req.user ? req.user.branch : null,
-  role: req.userRole,
-  isGlobalRole: req.isGlobalRole,
-});
+
 
 const createUser = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);

@@ -120,9 +120,25 @@ const applyWarehouseScope = async (filter = {}, context = {}) => {
   return scopedFilter;
 };
 
+/**
+ * Tạo scope context từ request object.
+ * Quan trọng: Luôn extract branch ID thay vì giữ nguyên populated object,
+ * vì req.user.branch có thể là populated object (có _id, name, phone...)
+ * và .toString() trên object sẽ cho "[object Object]" thay vì ID.
+ *
+ * @param {Object} req - Express request (đã qua auth middleware)
+ * @returns {{ branch: string|null, role: Object, isGlobalRole: boolean }}
+ */
+const buildScopeContext = (req) => ({
+  branch: req.user ? extractId(req.user.branch) : null,
+  role: req.userRole,
+  isGlobalRole: req.isGlobalRole,
+});
+
 module.exports = {
   applyBranchScope,
   applyWarehouseScope,
   resolveScopedWarehouseIds,
   extractId,
+  buildScopeContext,
 };

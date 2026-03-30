@@ -1,12 +1,9 @@
 const pick = require('../utils/pick');
 const catchAsync = require('../utils/catchAsync');
 const { productInventoryService } = require('../services');
+const { buildScopeContext } = require('../utils/branchScope');
 
-const buildScopeContext = (req) => ({
-  branch: req.user ? req.user.branch : null,
-  role: req.userRole,
-  isGlobalRole: req.isGlobalRole,
-});
+
 
 const getInventoryOverview = catchAsync(async (req, res) => {
   const filterFields = [
