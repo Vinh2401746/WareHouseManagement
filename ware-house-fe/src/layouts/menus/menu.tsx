@@ -9,6 +9,7 @@ import {
   ImportOutlined,
   FileDoneOutlined,
   FunctionOutlined,
+  SafetyOutlined,
 } from "@ant-design/icons";
 import { Flex, Layout, Menu, type MenuProps } from "antd";
 import type { ItemType, MenuItemType } from "antd/es/menu/interface";
@@ -18,6 +19,18 @@ import { AppRoutes } from "../../router/routes";
 import {  useAppSelector } from "../../store/hooks";
 
 const { Sider } = Layout;
+
+const ROUTE_PERMISSIONS: Record<string, string> = {
+  [AppRoutes.user.list]: "user",
+  [AppRoutes.role]: "user",
+  [AppRoutes.products]: "products",
+  [AppRoutes.supplier]: "suppliers",
+  [AppRoutes.unit.list]: "units",
+  [AppRoutes.warehouse.list]: "warehouses",
+  [AppRoutes.branch.list]: "branches",
+  [AppRoutes.warehouse_import_export]: "inventoryTransactions",
+  [AppRoutes.sales_invoice]: "inventoryTransactions",
+};
 
 const items: ItemType<MenuItemType>[] = [
   {
@@ -29,6 +42,11 @@ const items: ItemType<MenuItemType>[] = [
     key: AppRoutes.user.list,
     icon: <UserOutlined />,
     label: "Người dùng",
+  },
+  {
+    key: AppRoutes.role,
+    icon: <SafetyOutlined />,
+    label: "Vai trò & Phân quyền",
   },
   {
     key: AppRoutes.products,
@@ -90,6 +108,33 @@ export const MenusApp = () => {
     },
     [navigate],
   );
+
+  const currentPermisson = useAppSelector((state: any) => state.auth.permission?.permissions);
+  const user = useAppSelector((state: any) => state.auth.user);
+  const permissionInfo = useAppSelector((state: any) => state.auth.permission);
+
+  const filteredItems = items.filter(item => {
+    const key = item?.key as string;
+    if (key === AppRoutes.home.dashboard) return true; 
+    
+    const roleName = user?.role?.name?.toLowerCase();
+    const roleKeyUser = user?.roleKey?.toLowerCase();
+    const permRole = permissionInfo?.role?.toLowerCase();
+    const permRoleKey = permissionInfo?.roleKey?.toLowerCase();
+
+    const isSuperAdmin = [roleName, roleKeyUser, permRole, permRoleKey].some(r => 
+        r === 'admin' || r === 'superadmin' || r === 'super admin'
+    );
+    
+    if (isSuperAdmin) return true;
+    
+    const module = ROUTE_PERMISSIONS[key];
+    if (!module) return true;
+    
+    const canView = currentPermisson?.[module as keyof typeof currentPermisson]?.join('')?.includes("get") || false;
+    return canView;
+  });
+
   return (
     <Sider
       trigger={null}
@@ -110,7 +155,7 @@ export const MenusApp = () => {
         theme="dark"
         mode="inline"
         defaultSelectedKeys={[AppRoutes.home.dashboard]}
-        items={items}
+        items={filteredItems}
         selectedKeys={[location.pathname]}
         
       />

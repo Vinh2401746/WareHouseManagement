@@ -131,15 +131,16 @@ export const AppHeader = () => {
         <Input
           style={{
             maxWidth: "300px",
+            marginLeft: 16,
           }}
           placeholder="Tìm kiếm..."
           prefix={<SearchOutlined />}
         />
       </Flex>
 
-      <Flex gap={24} align="center">
-        <Badge count={9} size="default">
-          <BellFilled style={{ color: "white", fontSize: 20 }} />
+      <Flex gap={24} align="center" style={{ marginRight: 16 }}>
+        <Badge count={9} size="default" style={{ marginRight: 10 }}>
+          <BellFilled style={{ color: "white", fontSize: 20, cursor: 'pointer' }} />
         </Badge>
         <Dropdown
           {...sharedProps}

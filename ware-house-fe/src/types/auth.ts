@@ -31,7 +31,7 @@ export type AuthResponseLoginType = {
 };
 
 
-export type roles = 'admin' | 'user' | null
+export type roles = string | null;
 // {
 //     "userId": "699e6094c97cd347e08563b1",
 //     "role": "admin",

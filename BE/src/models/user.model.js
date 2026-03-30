@@ -2,8 +2,6 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const { toJSON, paginate } = require('./plugins');
-const { roles } = require('../config/roles');
-
 const userSchema = mongoose.Schema(
   {
     name: {
@@ -42,7 +40,6 @@ const userSchema = mongoose.Schema(
     },
     roleKey: {
       type: String,
-      enum: roles,
       default: 'user',
     },
     branch: {

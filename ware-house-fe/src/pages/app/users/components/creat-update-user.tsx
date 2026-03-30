@@ -1,9 +1,8 @@
 import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { Modal, Form, Input, Select } from "antd";
-import { ROLES } from "../../../../constants/common";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createUser, updateUser } from "../../../../api/users/users";
-import type { roles } from "../../../../types/auth";
+import { getRolesApi } from "../../../../api/roles";
 import dispatchToast from "../../../../constants/toast";
 import { QueryKeys } from "../../../../constants/query-keys";
 import { getBranchsApi } from "../../../../api/branch";
@@ -11,7 +10,7 @@ import { getBranchsApi } from "../../../../api/branch";
 export type UserFormData = {
   name: string;
   email: string;
-  role: roles;
+  role: string | null;
   id: string;
   password: string;
   branch:string
@@ -83,15 +82,17 @@ const UserFormModal = forwardRef<UserFormRef>((_, ref) => {
     },
   });
 
-   const { data } = useQuery({
-    queryKey: [QueryKeys.branch.list, {page:0, limit:100000}],
-    queryFn: ({ queryKey }) => {
-    return getBranchsApi({page:0 , limit:100000});
-  },
-    gcTime: 15 * 60 * 1000 // 15 phut cache
+  const { data } = useQuery({
+    queryKey: [QueryKeys.branch.list, {page:1, limit:100000}],
+    queryFn: () => getBranchsApi({page:1 , limit:100000}),
+    gcTime: 15 * 60 * 1000 
   });
 
-  console.log("data",data)
+  const { data: dataRoles, isLoading: isLoadingRoles } = useQuery({
+    queryKey: [QueryKeys.role.list, {page:1, limit:100000}],
+    queryFn: () => getRolesApi({page:1 , limit:100000}),
+    gcTime: 15 * 60 * 1000 
+  });
 
   const onFinish = (values: UserFormData) => {
     // console.log("Submit:", values);
@@ -152,7 +153,14 @@ const UserFormModal = forwardRef<UserFormRef>((_, ref) => {
             { required: true, message: "Vui lòng chọn quyền người dùng" },
           ]}
         >
-          <Select options={ROLES} />
+          <Select 
+            placeholder="Chọn một quyền"
+            loading={isLoadingRoles}
+            options={dataRoles?.results?.map((item: any) => ({
+              label: item.name,
+              value: item.id
+            })) || []} 
+          />
         </Form.Item>
          <Form.Item
           label="Cửa hàng"
@@ -161,7 +169,7 @@ const UserFormModal = forwardRef<UserFormRef>((_, ref) => {
             { required: true, message: "Vui lòng chọn cửa hàng người dùng" },
           ]}
         >
-          <Select options={data?.results?.map(item=>({
+          <Select options={data?.results?.map((item: any)=>({
             label:item.name,
             value:item.id
           })) || []} />

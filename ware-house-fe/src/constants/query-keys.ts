@@ -26,5 +26,8 @@ export const QueryKeys = {
   },
   sales:{
     list: 'sales'
+  },
+  role: {
+    list: 'roles'
   }
 };

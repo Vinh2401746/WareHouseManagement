@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QueryKeys } from "../../../constants/query-keys";
 import { deleteUser, getUsers } from "../../../api/users/users";
+import { getRolesApi } from "../../../api/roles";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Breadcrumb,
@@ -27,8 +28,19 @@ const UserPage = memo(() => {
   const { data, isFetching, isError, error } = useQuery({
     queryKey: [QueryKeys.users.users, page, limit],
     queryFn: () => getUsers({ page, limit }),
-    
   });
+
+  const { data: roleData } = useQuery({
+    queryKey: [QueryKeys.role.list, { page: 1, limit: 1000 }],
+    queryFn: () => getRolesApi({ page: 1, limit: 1000 }),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const roleMap = useMemo(() => {
+    const map = new Map<string, string>();
+    roleData?.results?.forEach((r: any) => map.set(r.id, r.name));
+    return map;
+  }, [roleData?.results]);
 
   useEffect(()=>{
     if(isError){
@@ -95,6 +107,10 @@ const UserPage = memo(() => {
       dataIndex: "role",
       key: "role",
       align: "center",
+      render: (roleId: string, record: any) => {
+        const name = roleMap.get(roleId) || record.roleKey || roleId;
+        return <Tag color="geekblue">{name}</Tag>;
+      }
     },
     {
       title: "Tuỳ chọn",

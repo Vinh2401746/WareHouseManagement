@@ -10,7 +10,7 @@ import dispatchToast from "../constants/toast";
 
 
 const AxiosClient = axios.create({
-  baseURL: 'http://localhost:3000/v1/',
+  baseURL: 'http://localhost:4000/v1/',
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -39,7 +39,8 @@ AxiosClient.interceptors.response.use(
   async (err: AxiosResponse | any) => {
     // console.log("rrror", err);
 
-    if ([Number(err?.response?.status), Number(err.status)].includes(401) && !err.config.url.includes('auth') || err.status === 401) {
+    const status = Number(err?.response?.status) || Number(err?.status);
+    if (status === 401 && !err.config?.url?.includes('auth')) {
       store.dispatch(removeCurrentUser());
       dispatchToast("error", "Hết phiên làm việc. Vui lòng đăng nhập lại.")
       setTimeout(() => {
