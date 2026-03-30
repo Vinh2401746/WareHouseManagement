@@ -5,6 +5,12 @@ const catchAsync = require('../utils/catchAsync');
 const { productService } = require('../services');
 const responseMessages = require('../constants/responseMessages');
 
+const buildScopeContext = (req) => ({
+  branch: req.user ? req.user.branch : null,
+  role: req.userRole,
+  isGlobalRole: req.isGlobalRole,
+});
+
 const cleanupUploadedFile = async (req) => {
   if (typeof req.cleanupUploadedFile === 'function') {
     await req.cleanupUploadedFile();
@@ -30,6 +36,11 @@ const buildProductPayload = (req, { allowRemoveImage = false } = {}) => {
 
 const createProduct = catchAsync(async (req, res) => {
   const payload = buildProductPayload(req);
+  const scopeContext = buildScopeContext(req);
+
+  if (!scopeContext.isGlobalRole && scopeContext.branch) {
+    if (!payload.branch) payload.branch = scopeContext.branch;
+  }
 
   try {
     const product = await productService.createProduct(payload);
@@ -43,7 +54,8 @@ const createProduct = catchAsync(async (req, res) => {
 const getProducts = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['code', 'name', 'unit', 'minStock']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await productService.queryProducts(filter, options);
+  const scopeContext = buildScopeContext(req);
+  const result = await productService.queryProducts(filter, options, scopeContext);
   res.send(result);
 });
 
@@ -91,7 +103,8 @@ const importProducts = catchAsync(async (req, res) => {
   if (!req.file) {
     throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.product.excel.invalidFile);
   }
-  const result = await productService.importProductsFromExcel(req.file.buffer);
+  const scopeContext = buildScopeContext(req);
+  const result = await productService.importProductsFromExcel(req.file.buffer, scopeContext);
   res.status(httpStatus.OK).send(result);
 });
 
@@ -101,7 +114,8 @@ const importProducts = catchAsync(async (req, res) => {
  */
 const exportProducts = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['code', 'name']);
-  const buffer = await productService.exportProductsToExcel(filter);
+  const scopeContext = buildScopeContext(req);
+  const buffer = await productService.exportProductsToExcel(filter, scopeContext);
 
   const filename = `products_${Date.now()}.xlsx`;
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

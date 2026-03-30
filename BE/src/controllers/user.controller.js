@@ -4,6 +4,7 @@ const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { userService } = require('../services');
 const responseMessages = require('../constants/responseMessages');
+const { ROLES } = require('../constants/permission.constant');
 
 const buildScopeContext = (req) => ({
   branch: req.user ? req.user.branch : null,
@@ -33,7 +34,24 @@ const getUser = catchAsync(async (req, res) => {
 });
 
 const updateUser = catchAsync(async (req, res) => {
-  const user = await userService.updateUserById(req.params.userId, req.body);
+  const targetUserId = req.params.userId;
+  const currentUserId = req.user ? String(req.user.id) : null;
+  const currentUserRoleKey = req.userRole ? req.userRole.key : null;
+  const isAdminOrSuper = currentUserRoleKey === ROLES.ADMIN || currentUserRoleKey === ROLES.SUPERADMIN;
+
+  if (targetUserId !== currentUserId && !isAdminOrSuper) {
+    throw new ApiError(httpStatus.FORBIDDEN, 'Bạn không có quyền thay đổi thông tin của người dùng khác');
+  }
+
+  const updateBody = { ...req.body };
+  if (!isAdminOrSuper) {
+    if (Object.prototype.hasOwnProperty.call(updateBody, 'role')) delete updateBody.role;
+    if (Object.prototype.hasOwnProperty.call(updateBody, 'roleId')) delete updateBody.roleId;
+    if (Object.prototype.hasOwnProperty.call(updateBody, 'roleKey')) delete updateBody.roleKey;
+    if (Object.prototype.hasOwnProperty.call(updateBody, 'branch')) delete updateBody.branch;
+  }
+
+  const user = await userService.updateUserById(targetUserId, updateBody);
   res.send(user);
 });
 

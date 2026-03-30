@@ -7,6 +7,7 @@ const ApiError = require('../utils/ApiError');
 const responseMessages = require('../constants/responseMessages');
 const config = require('../config/config');
 const logger = require('../config/logger');
+const { applyBranchScope } = require('../utils/branchScope');
 
 const normalizeRelativeImagePath = (imagePath) => {
   if (!imagePath) {
@@ -92,9 +93,10 @@ const createProduct = async (productBody) => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const queryProducts = async (filter, options) => {
+const queryProducts = async (filter, options, context = {}) => {
+  const scopedFilter = applyBranchScope(filter, context);
   options.populate = 'unit';
-  const products = await Product.paginate(filter, options);
+  const products = await Product.paginate(scopedFilter, options);
   products.results = products.results.map((result) => formatProductResponse(result));
   return products;
 };
@@ -245,7 +247,7 @@ const getProductImportTemplate = async () => {
  * @param {Buffer} buffer - Excel file buffer
  * @returns {Promise<{ imported: number, updated: number, errors: Array }>}
  */
-const importProductsFromExcel = async (buffer) => {
+const importProductsFromExcel = async (buffer, context = {}) => {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(buffer);
 
@@ -351,6 +353,11 @@ const importProductsFromExcel = async (buffer) => {
       } else {
         const productData = { code, name, unit: unit._id, minStock };
         if (packageVal) productData.package = packageVal;
+
+        if (!context.isGlobalRole && context.branch) {
+          productData.branch = context.branch;
+        }
+
         await Product.create(productData);
         imported += 1;
       }
@@ -368,9 +375,9 @@ const importProductsFromExcel = async (buffer) => {
  * @param {Object} filter - Optional filter (code, name, etc.)
  * @returns {Promise<Buffer>}
  */
-const exportProductsToExcel = async (filter = {}) => {
-  // Fetch all matching products (no pagination)
-  const products = await Product.find(filter).populate('unit').lean();
+const exportProductsToExcel = async (filter = {}, context = {}) => {
+  const scopedFilter = applyBranchScope(filter, context);
+  const products = await Product.find(scopedFilter).populate('unit').lean();
 
   const workbook = new ExcelJS.Workbook();
   workbook.creator = 'WareHouseManagement';

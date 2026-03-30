@@ -9,6 +9,11 @@ const productSchema = mongoose.Schema(
       unique: true,
       trim: true,
     },
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      default: null,
+    },
     name: {
       type: String,
       required: true,
