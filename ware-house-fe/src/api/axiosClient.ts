@@ -10,7 +10,7 @@ import dispatchToast from "../constants/toast";
 
 
 const AxiosClient = axios.create({
-  baseURL: 'https://api.sanghh.space/v1/',
+  baseURL: 'http://localhost:3000/v1/',
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -21,7 +21,7 @@ const AxiosClient = axios.create({
 
 AxiosClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig<any>) => {
-    const {token} = store.getState().user.tokens.access;
+    const { token } = store.getState().user.tokens.access;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -38,10 +38,10 @@ AxiosClient.interceptors.response.use(
   },
   async (err: AxiosResponse | any) => {
     // console.log("rrror", err);
-    
-    if ([Number(err?.response?.status),Number(err.status)].includes(401) && !err.config.url.includes('auth') || err.status === 401) {
+
+    if ([Number(err?.response?.status), Number(err.status)].includes(401) && !err.config.url.includes('auth') || err.status === 401) {
       store.dispatch(removeCurrentUser());
-      dispatchToast("error","Hết phiên làm việc. Vui lòng đăng nhập lại.")
+      dispatchToast("error", "Hết phiên làm việc. Vui lòng đăng nhập lại.")
       setTimeout(() => {
         router.navigate(AppRoutes.root, { replace: true });
       }, 0);

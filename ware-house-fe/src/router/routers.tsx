@@ -84,7 +84,7 @@ export const router = createBrowserRouter(
         {
           path: AppRoutes.store,
           id: AppRoutes.store,
-          element: <DevelopingPage />,
+          element: <BranchPage />,
         },
         {
           path: AppRoutes.warehouse_import_export,

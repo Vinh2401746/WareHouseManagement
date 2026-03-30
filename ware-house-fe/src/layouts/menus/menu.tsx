@@ -1,9 +1,14 @@
 import { useCallback } from "react";
 import {
   HomeOutlined,
-  UploadOutlined,
   UserOutlined,
-  VideoCameraOutlined,
+  AppstoreOutlined,
+  ContactsOutlined,
+  DatabaseOutlined,
+  ShopOutlined,
+  ImportOutlined,
+  FileDoneOutlined,
+  FunctionOutlined,
 } from "@ant-design/icons";
 import { Flex, Layout, Menu, type MenuProps } from "antd";
 import type { ItemType, MenuItemType } from "antd/es/menu/interface";
@@ -27,7 +32,7 @@ const items: ItemType<MenuItemType>[] = [
   },
   {
     key: AppRoutes.products,
-    icon: <VideoCameraOutlined />,
+    icon: <AppstoreOutlined />,
     label: "Sản phẩm",
   },
   // {
@@ -37,7 +42,7 @@ const items: ItemType<MenuItemType>[] = [
   // },
    {
     key: AppRoutes.supplier,
-    icon: <UploadOutlined />,
+    icon: <ContactsOutlined />,
     label: "Nhà cung cấp",
   },
   //    {
@@ -47,27 +52,27 @@ const items: ItemType<MenuItemType>[] = [
   // },
    {
     key: AppRoutes.unit.list,
-    icon: <UploadOutlined />,
+    icon: <FunctionOutlined />,
     label: "Đơn vị",
   },
    {
     key: AppRoutes.warehouse.list,
-    icon: <UploadOutlined />,
+    icon: <DatabaseOutlined />,
     label: "Kho",
   },
    {
     key: AppRoutes.branch.list,
-    icon: <UploadOutlined />,
+    icon: <ShopOutlined />,
     label: "Cửa hàng",
   },
    {
     key: AppRoutes.warehouse_import_export,
-    icon: <UploadOutlined />,
+    icon: <ImportOutlined />,
     label: "Nhập kho",
   },
    {
     key: AppRoutes.sales_invoice,
-    icon: <UploadOutlined />,
+    icon: <FileDoneOutlined />,
     label: "Hoá đơn bán hàng",
   },
 ];
@@ -91,7 +96,8 @@ export const MenusApp = () => {
       collapsible
       collapsed={collapsed}
       width={220}
-      collapsedWidth={80}
+      collapsedWidth={0}
+      breakpoint="lg"
     >
       <Flex gap={10} align="center" justify="center" style={{ marginTop: 10 }}>
         {/* {!collapsed && (

@@ -28,20 +28,20 @@ const computeLineAmounts = (quantity, price) => {
  */
 const createSale = async (saleBody, user) => {
   const { branch, warehouse, items, customerName, note, saleDate, code } = saleBody;
-  // const warehouseDoc = await Warehouse.findById(warehouse);
+  const warehouseDoc = await Warehouse.findById(warehouse);
 
-  // if (!warehouseDoc) {
-  //   throw new ApiError(httpStatus.NOT_FOUND, responseMessages.warehouse.notFound);
-  // }
+  if (!warehouseDoc) {
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.warehouse.notFound);
+  }
 
-  // const resolvedBranch = branch || warehouseDoc.branch;
-  // if (!resolvedBranch) {
-  //   throw new ApiError(httpStatus.NOT_FOUND, responseMessages.branch.notFound);
-  // }
+  const resolvedBranch = branch || warehouseDoc.branch;
+  if (!resolvedBranch) {
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.branch.notFound);
+  }
 
-  // if (branch && warehouseDoc.branch && warehouseDoc.branch.toString() !== branch) {
-  //   throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.sale.branchWarehouseMismatch);
-  // }
+  if (branch && warehouseDoc.branch && warehouseDoc.branch.toString() !== branch) {
+    throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.sale.branchWarehouseMismatch);
+  }
 
   const now = new Date();
   const saleItems = [];
@@ -238,7 +238,7 @@ const deleteSaleById = async (saleId) => {
   if (!sale) {
     throw new ApiError(httpStatus.NOT_FOUND, responseMessages.sale.notFound);
   }
-  await sale.remove();
+  await Sale.findByIdAndDelete(saleId);
   return sale;
 };
 
