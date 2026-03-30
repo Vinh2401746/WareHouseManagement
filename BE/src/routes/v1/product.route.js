@@ -28,6 +28,13 @@ router.get(
 );
 
 router.get(
+  '/pos',
+  auth('getProductInventory'),
+  validate(productValidation.getProductsForPOS),
+  productInventoryController.getProductsForPOS
+);
+
+router.get(
   '/:productId/inventory-detail',
   auth('getProductInventory'),
   validate(productValidation.getInventoryDetail),

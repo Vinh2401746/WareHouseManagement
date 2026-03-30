@@ -20,6 +20,7 @@ export type ProductFormData = {
   category: string;
   unit: string;
   minStock: number | null;
+  sellingPrice: number | null;
   id: string;
   image: any
 };
@@ -35,6 +36,7 @@ const initForm: ProductFormData = {
   category: '',
   unit: '',
   minStock: null,
+  sellingPrice: null,
   id: "",
   image: null
 };
@@ -152,6 +154,7 @@ const ProductFormModal = forwardRef<ProductFormRef, ProductFormModalProps>(
       mutate({
         ...values,
         minStock: Number(values.minStock),
+        sellingPrice: Number(values.sellingPrice || 0),
         image: (values?.image as any)?.[0]?.originFileObj
       });
     };
@@ -270,17 +273,44 @@ const ProductFormModal = forwardRef<ProductFormRef, ProductFormModalProps>(
               },
               {
                 validator(_, value) {
-                  console.log("valuee", value[0] == "0");
+                  console.log("valuee", value && value[0] == "0");
 
                   const includesNumber = ONLY_NUMBER.test(value);
                   if (!includesNumber) {
                     return Promise.resolve();
                   }
-                  if (value[0] == "0") {
+                  if (value && value[0] == "0" && value.length > 1) {
                     return Promise.reject("Vui lòng nhập tồn kho hợp lệ");
                   }
                   if (Number(value) < 0) {
                     return Promise.reject("Tồn kho không được nhỏ hơn 0");
+                  }
+                  return Promise.reject("Vui lòng chỉ nhập số");
+                },
+              },
+            ]}
+          >
+            <Input defaultValue={""} />
+          </Form.Item>
+          <Form.Item
+            label="Giá bán hàng (VNĐ)"
+            name="sellingPrice"
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng nhập giá bán",
+              },
+              {
+                validator(_, value) {
+                  const includesNumber = ONLY_NUMBER.test(value);
+                  if (!includesNumber) {
+                    return Promise.resolve();
+                  }
+                  if (value && value[0] == "0" && value.length > 1) {
+                    return Promise.reject("Vui lòng nhập giá bán hợp lệ");
+                  }
+                  if (Number(value) < 0) {
+                    return Promise.reject("Giá bán không được nhỏ hơn 0");
                   }
                   return Promise.reject("Vui lòng chỉ nhập số");
                 },

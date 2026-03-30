@@ -39,7 +39,20 @@ const getInventoryDetail = catchAsync(async (req, res) => {
   res.send(result);
 });
 
+const getProductsForPOS = catchAsync(async (req, res) => {
+  const filterFields = ['keyword', 'warehouseId'];
+  const optionFields = ['sortBy', 'limit', 'page'];
+  
+  const filters = pick(req.query, filterFields);
+  const options = pick(req.query, optionFields);
+  const scopeContext = buildScopeContext(req);
+  
+  const result = await productInventoryService.getProductsForPOS(filters, options, scopeContext);
+  res.send(result);
+});
+
 module.exports = {
   getInventoryOverview,
   getInventoryDetail,
+  getProductsForPOS,
 };

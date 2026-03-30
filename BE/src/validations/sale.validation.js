@@ -12,13 +12,16 @@ const createSale = {
   body: Joi.object()
     .keys({
       code: Joi.string().trim(),
-      customerName: Joi.string().trim().required(),
+      customerName: Joi.string().trim().allow('', null),
+      customer: Joi.string().custom(objectId),
       note: Joi.string().allow('', null),
+      status: Joi.string().valid('DRAFT', 'COMPLETED', 'CANCELLED'),
       branch: Joi.string().custom(objectId),
-      warehouse: Joi.string().custom(objectId),
-      //   branch: Joi.string().required().custom(objectId),
-      // warehouse: Joi.string().required().custom(objectId),
+      warehouse: Joi.string().custom(objectId).required(),
       saleDate: Joi.date(),
+      discountMoney: Joi.number().min(0),
+      taxMoney: Joi.number().min(0),
+      paidAmount: Joi.number().min(0),
       items: Joi.array().items(saleItemSchema).min(1).required(),
     })
     .unknown(false),
@@ -54,11 +57,16 @@ const updateSale = {
   body: Joi.object()
     .keys({
       code: Joi.string().trim(),
-      customerName: Joi.string().trim(),
+      customerName: Joi.string().trim().allow('', null),
+      customer: Joi.string().custom(objectId),
+      status: Joi.string().valid('DRAFT', 'COMPLETED', 'CANCELLED'),
       note: Joi.string().allow('', null),
       branch: Joi.string().custom(objectId),
       warehouse: Joi.string().custom(objectId),
       saleDate: Joi.date(),
+      discountMoney: Joi.number().min(0),
+      taxMoney: Joi.number().min(0),
+      paidAmount: Joi.number().min(0),
       items: Joi.array().items(saleItemSchema).min(1),
     })
     .min(1),

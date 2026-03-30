@@ -67,10 +67,16 @@ const getProductDocumentById = (id) => Product.findById(id).populate('unit');
 /**
  * Get product by id
  * @param {ObjectId} id
+ * @param {Object} [context]
  * @returns {Promise<Product>}
  */
-const getProductById = async (id) => {
+const getProductById = async (id, context) => {
   const product = await getProductDocumentById(id);
+  if (product && context && !context.isGlobalRole && context.branch) {
+    if (product.branch && product.branch.toString() !== context.branch.toString()) {
+      throw new ApiError(httpStatus.FORBIDDEN, responseMessages.common.forbidden);
+    }
+  }
   return formatProductResponse(product);
 };
 
@@ -105,12 +111,18 @@ const queryProducts = async (filter, options, context = {}) => {
  * Update product by id
  * @param {ObjectId} productId
  * @param {Object} updateBody
+ * @param {Object} [context]
  * @returns {Promise<Product>}
  */
-const updateProductById = async (productId, updateBody) => {
+const updateProductById = async (productId, updateBody, context) => {
   const product = await getProductDocumentById(productId);
   if (!product) {
     throw new ApiError(httpStatus.NOT_FOUND, responseMessages.product.notFound);
+  }
+  if (context && !context.isGlobalRole && context.branch) {
+    if (product.branch && product.branch.toString() !== context.branch.toString()) {
+      throw new ApiError(httpStatus.FORBIDDEN, responseMessages.common.forbidden);
+    }
   }
 
   const data = { ...updateBody };
@@ -142,12 +154,18 @@ const updateProductById = async (productId, updateBody) => {
 /**
  * Delete product by id
  * @param {ObjectId} productId
+ * @param {Object} [context]
  * @returns {Promise<Product>}
  */
-const deleteProductById = async (productId) => {
+const deleteProductById = async (productId, context) => {
   const product = await getProductDocumentById(productId);
   if (!product) {
     throw new ApiError(httpStatus.NOT_FOUND, responseMessages.product.notFound);
+  }
+  if (context && !context.isGlobalRole && context.branch) {
+    if (product.branch && product.branch.toString() !== context.branch.toString()) {
+      throw new ApiError(httpStatus.FORBIDDEN, responseMessages.common.forbidden);
+    }
   }
   const previousImagePath = product.imagePath;
   await product.remove();

@@ -11,13 +11,16 @@ export const getInvoicesApi = async (payload: {
 };
 
 export const createInvoiceApi = async (payload: {
-    customerName: string, // Tên khách hàng
-    branch: string, // id cửa hàng (FE tự động lấy trong thông tin user)
-    warehouse: string, // id kho
-    // supplier: 69a1cef6c6f2f045ec943acc,
-    // deliveryPerson: bAJHN SÁNG,
-    saleDate: Date, // ngày bán hàng (ko truyền thì sẽ hiện ngày hiện tại)
-    note: string, // Ghi chú
+    customerName?: string,
+    customer?: string, 
+    branch: string,
+    warehouse: string,
+    saleDate: Date,
+    note?: string,
+    status: 'DRAFT' | 'COMPLETED' | 'CANCELLED',
+    discountMoney?: number,
+    taxMoney?: number,
+    paidAmount?: number,
     items: {
         product: string,
         quantity: number,

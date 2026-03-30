@@ -1,8 +1,9 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKeys } from "../../../constants/query-keys";
-import { getInventoryProduct } from "../../../api/products";
-import { Breadcrumb, Col, Flex, Image, Pagination, Row, Spin, Splitter } from "antd";
+import { getProductsForPOS } from "../../../api/products";
+import { getWarehousesApi } from "../../../api/warehouse";
+import { Breadcrumb, Col, Flex, Image, Pagination, Row, Spin, Splitter, Select, Input } from "antd";
 import { ROOT_IMAGE_IMAGE } from "../../../constants/common";
 import {
   ProductInvoiceList,
@@ -19,6 +20,8 @@ export type ProductItem = {
   name: string;
   code: string;
   price?: number;
+  // mapped from API
+  sellingPrice?: number;
   totalStock?: number
 };
 
@@ -30,20 +33,28 @@ export type CreateInvoiceRef = {
 export const CreateInvoicePage = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
+  const [keyword, setKeyword] = useState("");
+  const [warehouseId, setWarehouseId] = useState<string>("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const invoiceListRef = useRef<ProductInvoiceListRef>(null);
 
+  // Fetch warehouses
+  const { data: warehouseData } = useQuery({
+    queryKey: [QueryKeys.warehouse.list, { limit: 100 }],
+    queryFn: () => getWarehousesApi({ page: 1, limit: 100 }),
+  });
+  const warehouses = warehouseData?.results || [];
 
   const { data, isFetching } = useQuery({
-    queryKey: [QueryKeys.products.list_invent, { page, limit }],
-    queryFn: () => getInventoryProduct({ page, limit }),
+    queryKey: [QueryKeys.products.list_invent, { page, limit, warehouseId, keyword }],
+    queryFn: () => getProductsForPOS({ page, limit, warehouseId, keyword }),
+    enabled: !!warehouseId, // Only fetch if a warehouse is selected
   });
 
   const products = useMemo(() => data?.results?.map((item: any) => ({
-    ...item.product,
-    totalStock: item?.totalStock || ''
+    ...item,
+    price: item.sellingPrice || 0, // Auto price
   })) || [], [data]);
-
 
 
   const handleAddProduct = useCallback((product: ProductItem) => {
@@ -58,6 +69,15 @@ export const CreateInvoicePage = () => {
   }, []);
 
   const renderProduct = useCallback(() => {
+    if (!warehouseId) {
+      return (
+        <Col span={24}>
+          <Flex justify="center" align="center" style={{ height: 200, color: '#888' }}>
+            Vui lòng chọn Kho để xem sản phẩm
+          </Flex>
+        </Col>
+      );
+    }
     if (isFetching) return <Spin />;
     return (
       <>
@@ -71,7 +91,8 @@ export const CreateInvoicePage = () => {
               borderRadius: 8,
               padding: 6,
               transition: 'border-color 0.2s',
-              backgroundColor: Number(item?.totalStock || 0) <= 0 ? "#e3e4e6ff" : "transparent"
+              backgroundColor: Number(item?.totalStock || 0) <= 0 ? "#e3e4e6ff" : "transparent",
+              cursor: 'pointer'
             }}>
               <Col>
                 <Image
@@ -85,23 +106,12 @@ export const CreateInvoicePage = () => {
               </Col>
               <Col>
                 <Flex vertical gap={6}>
-                  <span>{item?.name || ""}</span>
+                  <span style={{ fontWeight: 500, lineHeight: 1.2 }}>{item?.name || ""}</span>
+                  <span style={{ color: '#00a63e', fontWeight: 600 }}>{item.price?.toLocaleString()}đ</span>
                   <span style={{
-                    color: Number(item?.totalStock) < 10 ? "red" : 'black'
+                    fontSize: 12,
+                    color: Number(item?.totalStock) < 10 ? "red" : '#666'
                   }}>Tồn kho: {item?.totalStock || "0"}</span>
-                  {/* <Tag
-                    color="green"
-                    variant="outlined"
-                    style={{
-                      width: 40,
-                      justifyContent: "center",
-                      alignItems: "center",
-                      display: "flex",
-                      cursor: "pointer",
-                    }}
-                  >
-                    +
-                  </Tag> */}
                 </Flex>
               </Col>
             </Row>
@@ -109,47 +119,87 @@ export const CreateInvoicePage = () => {
         ))}
       </>
     );
-  }, [products, isFetching, handleAddProduct, selectedIds]);
-
+  }, [products, isFetching, handleAddProduct, selectedIds, warehouseId]);
 
   return (
     <div className="invoice-layout">
-      <Breadcrumb
-        items={[
-          {
-            href: AppRoutes.sales_invoice,
-            title: (
-              <>
-                <UserOutlined />
-                <span>Quay lại</span>
-              </>
-            ),
-          },
-        ]}
-      />
+      <Flex justify="space-between" align="center" style={{ marginBottom: 12 }}>
+        <Breadcrumb
+          items={[
+            {
+              href: AppRoutes.sales_invoice,
+              title: (
+                <>
+                  <UserOutlined />
+                  <span>Quay lại</span>
+                </>
+              ),
+            },
+          ]}
+        />
+      </Flex>
       <Splitter style={{ minHeight: window.screen.height - 400 }}>
-        <Splitter.Panel defaultSize="70%" min="50%" max="70%" style={{ padding: 12 }}>
-          <Row gutter={[12, 12]}>{renderProduct()}</Row>
-          <Flex justify="end">
-            <Pagination
-              current={page}
-              pageSize={limit}
-              total={data?.totalResults || 0}
-              onChange={(p) => setPage(p)}
-              onShowSizeChange={(_, size) => {
-                setLimit(size);
+        <Splitter.Panel defaultSize="70%" min="50%" max="70%" style={{ padding: 12, display: 'flex', flexDirection: 'column' }}>
+          
+          <Flex gap={12} style={{ marginBottom: 16 }}>
+            <Select 
+              placeholder="Chọn kho bán hàng"
+              style={{ width: 250 }}
+              value={warehouseId || undefined}
+              onChange={(val) => {
+                setWarehouseId(val);
+                setPage(1);
+                if (selectedIds.length > 0) {
+                  invoiceListRef.current?.clearItems();
+                  setSelectedIds([]);
+                  dispatchToast('info', 'Giỏ hàng đã được làm mới do đổi kho');
+                }
+              }}
+              options={warehouses.map((w: any) => ({ label: w.name, value: w.id }))}
+            />
+            <Input.Search 
+              placeholder="Tìm kiếm sản phẩm..." 
+              style={{ maxWidth: 300 }} 
+              allowClear
+              onSearch={(val) => {
+                setKeyword(val);
                 setPage(1);
               }}
-              showSizeChanger
-              style={{ marginTop: 12, textAlign: "right" }}
             />
           </Flex>
+
+          <Row gutter={[12, 12]} style={{ flex: 1, alignContent: 'flex-start' }}>{renderProduct()}</Row>
+          
+          {warehouseId && (
+            <Flex justify="end">
+              <Pagination
+                current={page}
+                pageSize={limit}
+                total={data?.totalResults || 0}
+                onChange={(p) => setPage(p)}
+                onShowSizeChange={(_, size) => {
+                  setLimit(size);
+                  setPage(1);
+                }}
+                showSizeChanger
+                style={{ marginTop: 12, textAlign: "right" }}
+              />
+            </Flex>
+          )}
+
         </Splitter.Panel>
         <Splitter.Panel style={{ padding: 25 }}>
-          <ProductInvoiceList ref={invoiceListRef} removeFromList={handleRemoveFromList} removeAllFromList={() => {
-            if (selectedIds.length == 0) { return dispatchToast('warning', "Không có sản phẩm trong đơn nhập để xoá.") }
-            setSelectedIds([]); dispatchToast('success', "Đã xoá tất cả sản phẩm khỏi đơn hàng")
-          }} />
+          <ProductInvoiceList 
+            ref={invoiceListRef} 
+            removeFromList={handleRemoveFromList} 
+            warehouseId={warehouseId}
+            onCancel={() => {
+              if (selectedIds.length == 0) { return dispatchToast('warning', "Không có sản phẩm trong đơn để huỷ."); }
+              setSelectedIds([]); 
+              invoiceListRef.current?.clearItems();
+              dispatchToast('success', "Đã xoá tất cả sản phẩm khỏi giỏ");
+            }} 
+          />
         </Splitter.Panel>
       </Splitter>
     </div>

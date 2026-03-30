@@ -13,3 +13,4 @@ module.exports.saleService = require('./sale.service');
 module.exports.unitService = require('./unit.service');
 module.exports.permissionService = require('./permission.service');
 module.exports.roleService = require('./role.service');
+module.exports.customerService = require('./customer.service');

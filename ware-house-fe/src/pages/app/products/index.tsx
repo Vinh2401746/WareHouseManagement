@@ -114,6 +114,13 @@ const ProductsPage = memo(() => {
         render: (value: any) => value?.name || ''
       },
       {
+        title: "Giá bán",
+        dataIndex: "sellingPrice",
+        key: "sellingPrice",
+        align: "center",
+        render: (value) => <span style={{ fontWeight: 'bold' }}>{formatNumber(value)} đ</span>
+      },
+      {
         title: "Tồn kho tối thiểu",
         dataIndex: "minStock",
         key: "minStock",

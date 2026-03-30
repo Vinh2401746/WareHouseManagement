@@ -76,14 +76,17 @@ const normalizeProductPayload = async (req, res, next) => {
       }
     });
 
-    if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'minStock')) {
-      const normalized = normalizeNumber(req.body.minStock);
-      if (normalized === undefined) {
-        delete req.body.minStock;
-      } else {
-        req.body.minStock = normalized;
+    const NUMBER_FIELDS = ['minStock', 'sellingPrice'];
+    NUMBER_FIELDS.forEach((field) => {
+      if (req.body && Object.prototype.hasOwnProperty.call(req.body, field)) {
+        const normalized = normalizeNumber(req.body[field]);
+        if (normalized === undefined) {
+          delete req.body[field];
+        } else {
+          req.body[field] = normalized;
+        }
       }
-    }
+    });
 
     if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'removeImage')) {
       req.body.removeImage = normalizeBoolean(req.body.removeImage);

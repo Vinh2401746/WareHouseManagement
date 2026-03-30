@@ -10,3 +10,4 @@ module.exports.saleValidation = require('./sale.validation');
 module.exports.unitValidation = require('./unit.validation');
 module.exports.permissionValidation = require('./permission.validation');
 module.exports.roleValidation = require('./role.validation');
+module.exports.customerValidation = require('./customer.validation');

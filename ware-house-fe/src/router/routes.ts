@@ -14,6 +14,7 @@ export const AppRoutes = {
   products: '/products',
   category: '/category',
   supplier: '/supplier',
+  customer: '/customer',
   warehouse: {
     list: '/warehouse'
   },

@@ -10,7 +10,7 @@ import dispatchToast from "../constants/toast";
 
 
 const AxiosClient = axios.create({
-  baseURL: 'http://localhost:4000/v1/',
+  baseURL: 'http://localhost:3000/v1/',
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',

@@ -25,17 +25,14 @@ import { getInvoicesApi } from "../../../api/sales";
 //['PENDING', 'COMPLETED', 'CANCELED']
 const renderStatus = (status: string) => {
   switch (status) {
+    case "DRAFT":
+      return 'Lưu nháp';
     case "PENDING":
-
       return 'Đang chờ duyệt';
     case "COMPLETED":
-
-      return 'Đã duyệt';
-
+      return 'Hoàn thành';
     case "CANCELED":
-
-      return 'Đã đóng';
-
+      return 'Đã huỷ';
     default:
       return 'Không xác định';
   }
@@ -145,13 +142,6 @@ const SalePage = memo(() => {
         align: "center",
         width: 80,
       },
-      // {
-      //   title: "Loại",
-      //   dataIndex: "type",
-      //   key: "type",
-      //   align: "center",
-      //   render: (record) => record  == "IMPORT" ? "Nhập" : "Xuất",
-      // },
       {
         title: "Tên Kho",
         dataIndex: "warehouse",
@@ -160,10 +150,18 @@ const SalePage = memo(() => {
         render: (record) => record?.name
       },
       {
-        title: "Lý do",
-        dataIndex: "reason",
-        key: "reason",
+        title: "Khách hàng",
+        dataIndex: "customerName",
+        key: "customerName",
         align: "center",
+        render: (val, record) => record.customer ? record.customer.name : val || 'Khách vãng lai'
+      },
+      {
+        title: "Trạng thái",
+        dataIndex: "status",
+        key: "status",
+        align: "center",
+        render: (record) => renderStatus(record)
       },
       {
         title: "Người tạo",
@@ -173,9 +171,9 @@ const SalePage = memo(() => {
         render: (record) => record?.email
       },
       {
-        title: "Tổng tiền thanh toán",
-        dataIndex: "totalAmountAfterFax",
-        key: "totalAmountAfterFax",
+        title: "Tổng tiền",
+        dataIndex: "totalAmount",
+        key: "totalAmount",
         align: "center",
         render: (record) => formatNumber(record) + ' đ'
       },
@@ -194,17 +192,11 @@ const SalePage = memo(() => {
         render: (record) => formatNumber(record) + ' đ'
       },
       {
-        title: "Tổng tiền",
-        dataIndex: "totalAmount",
-        key: "totalAmount",
+        title: "Tổng phải thu",
+        dataIndex: "totalAmountAfterFax",
+        key: "totalAmountAfterFax",
         align: "center",
         render: (record) => formatNumber(record) + ' đ'
-      },
-      {
-        title: "Người vận chuyển",
-        dataIndex: "deliveryPerson",
-        key: "deliveryPerson",
-        align: "center",
       },
       {
         title: "Ngày tạo",

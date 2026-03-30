@@ -12,3 +12,4 @@ module.exports.Warehouse = require('./warehouse.model');
 module.exports.Product = require('./product.model');
 module.exports.Supplier = require('./supplier.model');
 module.exports.Unit = require('./unit.model');
+module.exports.Customer = require('./customer.model');

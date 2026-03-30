@@ -11,3 +11,4 @@ module.exports.saleController = require('./sale.controller');
 module.exports.unitController = require('./unit.controller');
 module.exports.permissionController = require('./permission.controller');
 module.exports.roleController = require('./role.controller');
+module.exports.customerController = require('./customer.controller');

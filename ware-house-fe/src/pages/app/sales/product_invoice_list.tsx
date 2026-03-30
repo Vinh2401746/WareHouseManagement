@@ -5,7 +5,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { Button, Col, Flex, Form, Image, Input, Modal, Row, Segmented, Tag } from "antd";
+import { Button, Col, Flex, Form, Image, Input, Modal, Row, Segmented, Tag, Select, Spin } from "antd";
 import { DeleteOutlined, PrinterOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import {
   TAX_PERCENT,
@@ -15,9 +15,10 @@ import { formatNumber } from "../../../utils/helper";
 import { useForm } from "antd/es/form/Form";
 import dayjs from "dayjs";
 import dispatchToast from "../../../constants/toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createInvoiceApi } from "../../../api/sales";
-import { useAppSelector } from "../../../store/hooks";
+import { getCustomersApi } from "../../../api/customer";
+
 
 export type InvoiceItem = {
   id: string;
@@ -43,51 +44,54 @@ export type ProductInvoiceListRef = {
 };
 
 type Props = {
+  warehouseId: string;
   removeFromList?: (id: string) => void;
-  removeAllFromList?: () => void;
+  onCancel?: () => void;
 };
 
 type FormSale = {
   note: string
   saleDate: Date
+  customerId: string
   customerName: string
   discountPercent: number
 }
 
 export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
-  ({ removeFromList, removeAllFromList }, ref) => {
+  ({ removeFromList, onCancel, warehouseId }, ref) => {
     const [items, setItems] = useState<InvoiceItem[]>([]);
     const [form] = useForm<FormSale>()
-    const discountPercent = Form.useWatch("discountPercent", form) ?? 0;
+    const discountPercent = Form.useWatch("discountPercent", form) || 0;
     const [checkoutVisible, setCheckoutVisible] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<"Tiền mặt" | "Chuyển khoản">("Tiền mặt");
     const [customerPaid, setCustomerPaid] = useState<number>(0);
     const [createdAt, setCreatedAt] = useState<string>("");
-    const userInfor = useAppSelector(state=>state.user.user)
 
+
+    // Customer search state
+    const [customerKeyword, setCustomerKeyword] = useState("");
+    const { data: customerData, isFetching: fetchingCustomers } = useQuery({
+      queryKey: ["customers", customerKeyword],
+      queryFn: () => getCustomersApi({ limit: 20, page: 1, keyword: customerKeyword }),
+    });
 
     const finalMoney = useMemo(() => {
       const total = Math.round(
         items.reduce(
-          (prevValue, currentItem) =>
-            prevValue +
-            Number(currentItem?.quantity || 0) *
-            Number(currentItem?.price || 0),
+          (prev, item) => prev + Number(item.quantity) * Number(item.price),
           0,
         ),
       );
       const discount = Math.round(total * (discountPercent / 100));
       const tax = Math.round(total * (TAX_PERCENT / 100));
 
-      // console.log("render",items)
       return {
         totalAmount: total || 0,
         discountMoney: discount,
         taxMoney: tax,
         totalAmountAfterFax: total - discount + tax,
       }
-
-    }, [items,discountPercent])
+    }, [items, discountPercent])
 
     useImperativeHandle(
       ref,
@@ -162,17 +166,26 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
       setItems((prev) => prev.filter((i) => i.id !== id));
     };
 
-    const handleOpenCheckout = () => {
+    const validateItems = () => {
+      if (!warehouseId) {
+        dispatchToast("warning", "Vui lòng chọn Kho xuất hàng ở bên trái");
+        return false;
+      }
       if (items.length === 0) {
         dispatchToast("warning", "Vui lòng chọn ít nhất một sản phẩm");
-        return;
+        return false;
       }
       const hasInvalidPrice = items.some((i) => !i.price || i.price <= 0);
       if (hasInvalidPrice) {
-        dispatchToast("warning", "Vui lòng nhập giá cho tất cả sản phẩm");
-        return;
+        dispatchToast("warning", "Vui lòng nhập giá > 0 cho tất cả sản phẩm");
+        return false;
       }
-      if (!finalMoney.totalAmount || !finalMoney.totalAmountAfterFax) {
+      return true;
+    }
+
+    const handleOpenCheckout = () => {
+      if (!validateItems()) return;
+      if (!finalMoney.totalAmount || (!finalMoney.totalAmountAfterFax && finalMoney.totalAmountAfterFax !== 0)) {
         dispatchToast("warning", "Tổng tiền không hợp lệ");
         return;
       }
@@ -183,130 +196,121 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
 
     const renderTotalMoney = useCallback(() => {
       return (
-        <div
-          style={{
-            marginTop: 12,
-            marginBottom: 12,
-            display: "flex",
-            justifyContent: "flex-end",
-            rowGap: 8,
-            flexDirection: "column",
-          }}
-        >
-          {/* <div style={{ rowGap: 12, display: "flex", flexDirection: "column" }}> */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
+        <div style={{ marginTop: 12, marginBottom: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
             <span style={{ fontSize: 16, fontWeight: 500 }}>Tạm tính</span>
-            <span style={{ fontSize: 16, fontWeight: 500 }}>
-              {`${formatNumber(finalMoney?.totalAmount || 0)}`} đ
-            </span>
+            <span style={{ fontSize: 16, fontWeight: 500 }}>{`${formatNumber(finalMoney?.totalAmount || 0)}`} đ</span>
           </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
-            <span style={{ fontSize: 16, fontWeight: 500 }}>
-              Tổng chiết khấu
-            </span>
-            <span style={{ fontSize: 16, fontWeight: 500, color: "#00a63e" }}>
-              {`${formatNumber(finalMoney?.discountMoney || 0)}`} đ
-            </span>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span style={{ fontSize: 16, fontWeight: 500 }}>Tổng chiết khấu</span>
+            <span style={{ fontSize: 16, fontWeight: 500, color: "#00a63e" }}>{`${formatNumber(finalMoney?.discountMoney || 0)}`} đ</span>
           </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              minWidth: 200,
-              borderBottom: "1px solid #ebe6e7",
-              paddingBottom: 12,
-            }}
-          >
+          <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #ebe6e7", paddingBottom: 12 }}>
             <span style={{ fontSize: 16, fontWeight: 500 }}>Tổng thuế (VAT)</span>
-            <span style={{ fontSize: 16, fontWeight: 500, color: "#f54a00" }}>
-              {`${formatNumber(finalMoney?.taxMoney || 0)}`} đ
-            </span>
+            <span style={{ fontSize: 16, fontWeight: 500, color: "#f54a00" }}>{`${formatNumber(finalMoney?.taxMoney || 0)}`} đ</span>
           </div>
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
             <span style={{ fontSize: 20, fontWeight: 500 }}>Tổng cộng</span>
-            <span style={{ fontSize: 20, fontWeight: 500, color: "#155dfc" }}>
-              {`${formatNumber(finalMoney?.totalAmountAfterFax || 0)}`} đ
-            </span>
+            <span style={{ fontSize: 20, fontWeight: 500, color: "#155dfc" }}>{`${formatNumber(finalMoney?.totalAmountAfterFax || 0)}`} đ</span>
           </div>
-          {/* </div> */}
         </div>
       );
-    }, [finalMoney?.discountMoney, finalMoney?.taxMoney, finalMoney?.totalAmount, finalMoney?.totalAmountAfterFax]);
+    }, [finalMoney]);
 
     const renderForm = useCallback(() => {
-
       return (
         <Form form={form} initialValues={{
           saleDate: dayjs(new Date()),
+          customerId: null,
           customerName: '',
           discountPercent: 0,
           note: '',
         }}>
-          <Form.Item name={"customerName"}>
-            <Input placeholder="Nhập tên khách hàng" ></Input>
+          <Form.Item name="customerId" style={{ marginBottom: 12 }}>
+            <Select
+              allowClear
+              showSearch
+              placeholder="🔍 Chọn khách hàng..."
+              notFoundContent={fetchingCustomers ? <Spin size="small" /> : null}
+              onSearch={setCustomerKeyword}
+              onChange={(val, opt: any) => {
+                form.setFieldValue('customerName', opt ? opt.label : '');
+              }}
+              filterOption={false}
+              options={(customerData?.results || []).map((c: any) => ({
+                label: `${c.name} - ${c.phone}`,
+                value: c.id
+              }))}
+            />
           </Form.Item>
-          {/* <Form.Item name={"saleDate"}>
-            <DatePicker style={{ width: '100%' }} placeholder="Ngày bán hàng" format={"DD/MM/YYYY"} ></DatePicker>
-          </Form.Item> */}
-          <Form.Item name="discountPercent">
-            <Input type={"number"} placeholder="Giảm giá" suffix={"%"}></Input>
+          {/* Hidden field cho tên tự nhập nếu không chọn từ dropdown */}
+          <Form.Item name="customerName" style={{ marginBottom: 12 }}>
+            <Input placeholder="Hoặc nhập tên khách vãng lai..." />
           </Form.Item>
-          <Form.Item name={"note"}>
-            <Input placeholder="Ghi chú" ></Input>
+          
+          <Form.Item name="discountPercent" style={{ marginBottom: 12 }}>
+            <Input type="number" placeholder="Giảm giá" suffix="%" />
+          </Form.Item>
+          <Form.Item name="note" style={{ marginBottom: 12 }}>
+            <Input placeholder="Ghi chú" />
           </Form.Item>
         </Form>
       )
-    }, [])
+    }, [customerData, fetchingCustomers, form])
 
     
-    const { mutate} = useMutation({
-      mutationFn: (payload: { 
-        customerName: string;
-         branch: string; 
-         warehouse: string; 
-         saleDate: Date; 
-         note: string; 
-         items: { product: string; quantity: number; price: number; }[]; }) => createInvoiceApi(payload),
-         onSuccess:() =>{
-          dispatchToast("success", "Tạo hoá đơn bán hàng thành công")
-         },
-         onError:()=>{
-           dispatchToast("error", "Tạo hoá đơn bán hàng thất bại")
-         }
+    const { mutate, isPending } = useMutation({
+      mutationFn: createInvoiceApi,
+      onSuccess:() =>{
+        dispatchToast("success", "Tạo hoá đơn thành công!");
+        setCheckoutVisible(false);
+        setItems([]);
+        onCancel?.();
+        form.resetFields();
+      },
+      onError:(e: any)=>{
+        dispatchToast("error", e?.message || "Tạo hoá đơn thất bại!");
+      }
     })
 
-    const handleCreateInvoice = useCallback(()=>{
-      console.log("12312")
+    const handleSaveDraft = useCallback(() => {
+      if (!validateItems()) return;
       mutate({
-        customerName:form.getFieldValue('customerName') || "customer name",
-        saleDate:form.getFieldValue('saleDate') || new Date(),
-        note : form.getFieldValue('note') || '',
-        items: items.map(item=>({
-          product:item.id,
-          quantity:item.quantity,
-          price:item.price
+        customer: form.getFieldValue('customerId') || undefined,
+        customerName: form.getFieldValue('customerName') || "Khách vãng lai",
+        saleDate: form.getFieldValue('saleDate') || new Date(),
+        note: form.getFieldValue('note') || '',
+        status: 'DRAFT',
+        discountMoney: finalMoney.discountMoney,
+        taxMoney: finalMoney.taxMoney,
+        paidAmount: 0, // Lưu nháp thì chưa tính tiền
+        items: items.map(item => ({
+          product: item.id,
+          quantity: item.quantity,
+          price: item.price
         })),
-        branch: userInfor?.branch?.id || '69bac2279924c4e470fc59f1',
-        warehouse:''
-      })
-    },[form, items, userInfor])
+        warehouse: warehouseId
+      });
+    }, [form, items, warehouseId, mutate, finalMoney]);
 
+    const handleCreateInvoice = useCallback(() => {
+      mutate({
+        customer: form.getFieldValue('customerId') || undefined,
+        customerName: form.getFieldValue('customerName') || "Khách vãng lai",
+        saleDate: form.getFieldValue('saleDate') || new Date(),
+        note: form.getFieldValue('note') || '',
+        status: 'COMPLETED',
+        discountMoney: finalMoney.discountMoney,
+        taxMoney: finalMoney.taxMoney,
+        paidAmount: customerPaid,
+        items: items.map(item => ({
+          product: item.id,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        warehouse: warehouseId
+      });
+    }, [form, items, warehouseId, mutate, finalMoney, customerPaid]);
 
     return (
       <>
@@ -316,13 +320,8 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
             <Flex vertical align="center" gap={12} style={{ padding: "32px 0" }}>
               <div
                 style={{
-                  width: 100,
-                  height: 100,
-                  borderRadius: "50%",
-                  background: "#e8f0fe",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  width: 100, height: 100, borderRadius: "50%",
+                  background: "#e8f0fe", display: "flex", alignItems: "center", justifyContent: "center",
                 }}
               >
                 <ShoppingCartOutlined style={{ fontSize: 48, color: "#1677ff" }} />
@@ -337,9 +336,7 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
             <Row gutter={8} align="middle">
               <Col>
                 <Image
-                  width={50}
-                  height={50}
-                  alt=""
+                  width={50} height={50} alt=""
                   src={item?.imageUrl ? `${ROOT_IMAGE_IMAGE}${item?.imageUrl}` : 'https://images.pexels.com/photos/16211537/pexels-photo-16211537.jpeg'}
                 />
               </Col>
@@ -348,19 +345,15 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
                   <span>{item.name}</span>
                   <Flex gap={4} align="center">
                     <Tag
-                      color="red"
-                      variant="outlined"
+                      color="red" variant="outlined"
                       style={{ width: 28, justifyContent: "center", display: "flex", cursor: "pointer" }}
                       onClick={() => handleDecrease(item.id)}
                     >
                       −
                     </Tag>
-                    <span style={{ minWidth: 20, textAlign: "center" }}>
-                      {item.quantity}
-                    </span>
+                    <span style={{ minWidth: 20, textAlign: "center" }}>{item.quantity}</span>
                     <Tag
-                      color="green"
-                      variant="outlined"
+                      color="green" variant="outlined"
                       style={{ width: 28, justifyContent: "center", display: "flex", cursor: "pointer" }}
                       onClick={() => handleIncrease(item.id)}
                     >
@@ -372,12 +365,7 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
                       suffix="đ"
                       onBlur={(e) => handlePriceBlur(item.id, e.target.value)}
                     />
-                    <Button
-                      type="text"
-                      danger
-                      icon={<DeleteOutlined />}
-                      onClick={() => handleRemove(item.id)}
-                    />
+                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleRemove(item.id)} />
                   </Flex>
                 </Flex>
               </Col>
@@ -385,41 +373,38 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
           </Col>
         ))}
 
-
         {renderForm()}
         {renderTotalMoney()}
 
-          <Flex gap={8} justify="space-between">
-            <Button
-              danger
-              type="primary"
-              style={{ background: "#e03131" }}
-              onClick={() => {
-                removeAllFromList?.();
-                setItems([]);
-              }}
-            >
-              Hủy đơn
-            </Button>
-              <Button
-              danger
-              type="primary"
-              style={{ background: "#e7991bff" }}
-              onClick={() => {
-                removeAllFromList?.();
-                setItems([]);
-              }}
-            >
-              Lưu tạm
-            </Button>
-            <Button
-              type="primary"
-              style={{ background: "#2f9e44", flex: 1}}
-              onClick={handleOpenCheckout}
-            >
-              Tính tiền
-            </Button>
-          </Flex>
+        <Flex gap={8} justify="space-between" align="center">
+          <Button
+            danger
+            type="primary"
+            style={{ background: "#e03131" }}
+            onClick={() => {
+              onCancel?.();
+              setItems([]);
+              form.resetFields();
+            }}
+          >
+            Hủy đơn
+          </Button>
+          <Button
+            type="primary"
+            style={{ background: "#e7991bff" }}
+            onClick={handleSaveDraft}
+            loading={isPending}
+          >
+            Lưu tạm
+          </Button>
+          <Button
+            type="primary"
+            style={{ background: "#2f9e44", flex: 1}}
+            onClick={handleOpenCheckout}
+          >
+            Tính tiền
+          </Button>
+        </Flex>
       </Row>
 
       <Modal
@@ -430,7 +415,6 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
         width={700}
       >
         <Flex gap={24}>
-          {/* Cột trái */}
           <div style={{ flex: 1, background: "#f5f7fa", borderRadius: 10, padding: 20 }}>
             <Segmented
               block
@@ -472,7 +456,6 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
             )}
           </div>
 
-          {/* Cột phải */}
           <div style={{ flex: 1, background: "#f5f7fa", borderRadius: 10, padding: 20 }}>
             <Flex justify="space-between" style={{ marginBottom: 10 }}>
               <span style={{ color: "#555" }}>Ngày tạo</span>
@@ -501,7 +484,7 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
             </Flex>
             <Flex gap={12}>
               <Button size="large" style={{ flex: 1 }} onClick={() => setCheckoutVisible(false)}>Đóng</Button>
-              <Button size="large" type="primary" style={{ flex: 1 }} onClick={handleCreateInvoice}>
+              <Button size="large" type="primary" style={{ flex: 1 }} onClick={handleCreateInvoice} loading={isPending}>
                 Thanh toán
               </Button>
             </Flex>

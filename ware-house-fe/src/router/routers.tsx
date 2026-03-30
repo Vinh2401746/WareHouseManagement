@@ -13,7 +13,7 @@ import { CreateInvoicePage } from "../pages/app/sales/create_invoice";
 const LoginPage = Loadable(lazy(() => import('../pages/auth/login-page')));
 const UserPage = Loadable(lazy(() => import('../pages/app/users')));
 const RolePage = Loadable(lazy(() => import('../pages/app/roles')));
-const DashBoardPage = Loadable(lazy(() => import('../pages/app/dardboard/dashboard')));
+const DashBoardPage = Loadable(lazy(() => import('../pages/app/dashboard/dashboard')));
 const NotFoundPage = Loadable(lazy(() => import('../pages/404-developing/index')));
 
 const ForgotPasswordPage = Loadable(lazy(() => import('../pages/auth/forgot-pass')));
@@ -21,6 +21,7 @@ const SettingPasswordPage = Loadable(lazy(() => import('../pages/auth/setting-pa
 const ProductsPage = Loadable(lazy(() => import('../pages/app/products')));
 const CategoryPage = Loadable(lazy(() => import('../pages/app/category')));
 const SuppilerPage = Loadable(lazy(() => import('../pages/app/suppiler')));
+const CustomerPage = Loadable(lazy(() => import('../pages/app/customers')));
 const UnitPage = Loadable(lazy(() => import('../pages/app/unit')));
 const WarehousePage = Loadable(lazy(() => import('../pages/app/warehouse')));
 const BranchPage = Loadable(lazy( async () => import('../pages/app/branch')));
@@ -81,6 +82,11 @@ export const router = createBrowserRouter(
           path: AppRoutes.supplier,
           id: AppRoutes.supplier,
           element: <SuppilerPage />,
+        },
+        {
+          path: AppRoutes.customer,
+          id: AppRoutes.customer,
+          element: <CustomerPage />,
         },
         {
           path: AppRoutes.warehouse.list,

@@ -25,6 +25,7 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
   [AppRoutes.role]: "user",
   [AppRoutes.products]: "products",
   [AppRoutes.supplier]: "suppliers",
+  [AppRoutes.customer]: "suppliers", // Temporary reuse
   [AppRoutes.unit.list]: "units",
   [AppRoutes.warehouse.list]: "warehouses",
   [AppRoutes.branch.list]: "branches",
@@ -62,6 +63,11 @@ const items: ItemType<MenuItemType>[] = [
     key: AppRoutes.supplier,
     icon: <ContactsOutlined />,
     label: "Nhà cung cấp",
+  },
+   {
+    key: AppRoutes.customer,
+    icon: <UserOutlined />,
+    label: "Khách hàng",
   },
   //    {
   //   key: AppRoutes.branch.list,

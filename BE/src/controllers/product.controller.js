@@ -38,8 +38,8 @@ const createProduct = catchAsync(async (req, res) => {
   const payload = buildProductPayload(req);
   const scopeContext = buildScopeContext(req);
 
-  if (!scopeContext.isGlobalRole && scopeContext.branch) {
-    if (!payload.branch) payload.branch = scopeContext.branch;
+  if (scopeContext.branch && !payload.branch) {
+    payload.branch = scopeContext.branch;
   }
 
   try {
@@ -60,7 +60,8 @@ const getProducts = catchAsync(async (req, res) => {
 });
 
 const getProduct = catchAsync(async (req, res) => {
-  const product = await productService.getProductById(req.params.productId);
+  const scopeContext = buildScopeContext(req);
+  const product = await productService.getProductById(req.params.productId, scopeContext);
   if (!product) {
     throw new ApiError(httpStatus.NOT_FOUND, responseMessages.product.notFound);
   }
@@ -68,10 +69,15 @@ const getProduct = catchAsync(async (req, res) => {
 });
 
 const updateProduct = catchAsync(async (req, res) => {
+  const scopeContext = buildScopeContext(req);
   const payload = buildProductPayload(req, { allowRemoveImage: true });
 
+  if (scopeContext.branch && !payload.branch) {
+    payload.branch = scopeContext.branch;
+  }
+
   try {
-    const product = await productService.updateProductById(req.params.productId, payload);
+    const product = await productService.updateProductById(req.params.productId, payload, scopeContext);
     res.send(product);
   } catch (error) {
     await cleanupUploadedFile(req);
@@ -80,7 +86,8 @@ const updateProduct = catchAsync(async (req, res) => {
 });
 
 const deleteProduct = catchAsync(async (req, res) => {
-  await productService.deleteProductById(req.params.productId);
+  const scopeContext = buildScopeContext(req);
+  await productService.deleteProductById(req.params.productId, scopeContext);
   res.status(httpStatus.NO_CONTENT).send();
 });
 

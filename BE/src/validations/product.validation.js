@@ -23,6 +23,10 @@ const createProduct = {
       'number.integer': 'Số lượng tối thiểu phải là số nguyên',
       'number.min': 'Số lượng tối thiểu phải lớn hơn hoặc bằng 0',
     }),
+    sellingPrice: Joi.number().min(0).default(0).messages({
+      'number.base': 'Giá bán phải là số',
+      'number.min': 'Giá bán phải lớn hơn hoặc bằng 0',
+    }),
     package: Joi.string().messages({
       'string.base': 'Quy cách đóng gói phải là chuỗi',
     }),
@@ -58,6 +62,7 @@ const updateProduct = {
       name: Joi.string(),
       unit: Joi.string(),
       minStock: Joi.number().integer().min(0),
+      sellingPrice: Joi.number().min(0),
       package: Joi.string(),
       removeImage: Joi.boolean(),
     })
@@ -114,6 +119,16 @@ const getInventoryDetail = {
   }),
 };
 
+const getProductsForPOS = {
+  query: Joi.object().keys({
+    keyword: Joi.string().allow(''),
+    warehouseId: Joi.string().custom(objectId).required(),
+    sortBy: Joi.string(),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
+  }),
+};
+
 module.exports = {
   createProduct,
   getProducts,
@@ -124,4 +139,5 @@ module.exports = {
   exportProducts,
   getInventoryOverview,
   getInventoryDetail,
+  getProductsForPOS,
 };

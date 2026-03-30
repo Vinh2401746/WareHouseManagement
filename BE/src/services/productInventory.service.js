@@ -127,6 +127,7 @@ const mapProductBasics = (productDoc) => {
     code: data.code,
     name: data.name,
     imageUrl: data.imageUrl || null,
+    sellingPrice: data.sellingPrice || 0,
     minStock: data.minStock || 0,
     unit: data.unit
       ? {
@@ -637,7 +638,52 @@ const getInventoryDetail = async (productId, filters = {}, context = {}) => {
   };
 };
 
+const getProductsForPOS = async (filters = {}, options = {}, context = {}) => {
+  const productFilter = buildProductFilter({ keyword: filters.keyword });
+  const paginationOptions = buildPaginationOptions(options);
+
+  const productsPage = await Product.paginate(productFilter, paginationOptions);
+  
+  if (!filters.warehouseId) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Khuyến nghị: Phải có warehouseId để xem tồn kho ở POS');
+  }
+
+  const scopedWarehouseInput = await resolveScopedWarehouseIds(filters.warehouseId, context);
+  if (!scopedWarehouseInput) {
+    throw new ApiError(httpStatus.FORBIDDEN, 'Không có quyền truy cập kho này hoặc kho không tồn tại');
+  }
+  const warehouseIds = normalizeObjectIdArray(scopedWarehouseInput);
+  const productIds = productsPage.results.map((doc) => normalizeObjectId(doc._id || doc.id)).filter(Boolean);
+
+  const stockMeta = await aggregateStockMeta({ productIds, warehouseIds });
+
+  const rows = productsPage.results.map((productDoc) => {
+    const key = (productDoc._id || productDoc.id).toString();
+    const meta = stockMeta.get(key) || {};
+    const product = mapProductBasics(productDoc);
+    
+    return {
+      id: product.id,
+      code: product.code,
+      name: product.name,
+      imageUrl: product.imageUrl,
+      unit: product.unit,
+      sellingPrice: product.sellingPrice,
+      totalStock: meta.totalQuantity || 0,
+    };
+  });
+
+  return {
+    results: rows,
+    page: productsPage.page,
+    limit: productsPage.limit,
+    totalResults: productsPage.totalResults,
+    totalPages: productsPage.totalPages,
+  };
+};
+
 module.exports = {
   getInventoryOverview,
   getInventoryDetail,
+  getProductsForPOS,
 };

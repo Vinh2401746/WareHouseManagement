@@ -46,4 +46,4 @@ export const UNITS = [
 
 export const DISCOUNT_PERCENT = 2;
 export const TAX_PERCENT = 5;
-export const ROOT_IMAGE_IMAGE = "https://api.sanghh.space"
+export const ROOT_IMAGE_IMAGE = import.meta.env.VITE_API_URL?.replace(/\/v1\/?$/, '') || "http://localhost:3000";

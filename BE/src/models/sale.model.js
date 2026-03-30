@@ -10,6 +10,12 @@ const saleSchema = mongoose.Schema(
       trim: true,
     },
 
+    status: {
+      type: String,
+      enum: ['DRAFT', 'COMPLETED', 'CANCELLED'],
+      default: 'COMPLETED',
+    },
+
     branch: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Branch',
@@ -32,9 +38,13 @@ const saleSchema = mongoose.Schema(
       default: Date.now,
     },
 
+    customer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Customer',
+    },
+
     customerName: {
       type: String,
-      required: true,
       trim: true,
     },
 
@@ -65,6 +75,17 @@ const saleSchema = mongoose.Schema(
       type: Number,
       default: 0,
       min: 0,
+    },
+
+    paidAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    debtAmount: {
+      type: Number,
+      default: 0,
     },
 
     items: [
