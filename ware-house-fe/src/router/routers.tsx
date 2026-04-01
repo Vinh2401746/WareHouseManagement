@@ -8,6 +8,7 @@ import NoPermissonPage from "../pages/404-developing/no-permission";
 import WarehouseImportExportDetailPage from "../pages/app/warehouse_import_export/detail";
 import SalePage from "../pages/app/sales";
 import { CreateInvoicePage } from "../pages/app/sales/create_invoice";
+const SaleInvoiceDetailPage = Loadable(lazy(() => import('../pages/app/sales/detail_invoice')));
 
 
 const LoginPage = Loadable(lazy(() => import('../pages/auth/login-page')));
@@ -112,6 +113,11 @@ export const router = createBrowserRouter(
           path: AppRoutes.sales_invoice,
           id: AppRoutes.sales_invoice,
           element: <SalePage />,
+        },
+        {
+          path: AppRoutes.sales_invoice_detail,
+          id: AppRoutes.sales_invoice_detail,
+          element: <SaleInvoiceDetailPage />,
         },
          {
           path: AppRoutes.create_invoice,

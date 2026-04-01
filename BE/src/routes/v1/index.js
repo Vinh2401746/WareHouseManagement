@@ -14,6 +14,7 @@ const unitRoute = require('./unit.route');
 const inventoryTransactionRoute = require('./inventoryTransaction.route');
 const saleRoute = require('./sale.route');
 const customerRoute = require('./customer.route');
+const dashboardRoute = require('./dashboard.route');
 const config = require('../../config/config');
 
 const router = express.Router();
@@ -74,6 +75,10 @@ const defaultRoutes = [
   {
     path: '/customer',
     route: customerRoute,
+  },
+  {
+    path: '/dashboard',
+    route: dashboardRoute,
   },
 ];
 

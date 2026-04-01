@@ -33,5 +33,13 @@ export const createInvoiceApi = async (payload: {
 
 
 export const deleteInvoiceApi = async (payload: { id: string }) => {
-    return AxiosClient.delete(`supplier/${payload.id}`);
+    return AxiosClient.delete(`sale/${payload.id}`);
+};
+
+export const getInvoiceByIdApi = async (payload: { id: string }) => {
+    return AxiosClient.get(`sale/${payload.id}`);
+};
+
+export const updateInvoiceApi = async (payload: { id: string, data: any }) => {
+    return AxiosClient.patch(`sale/${payload.id}`, payload.data);
 };

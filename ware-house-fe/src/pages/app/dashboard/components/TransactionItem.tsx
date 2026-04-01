@@ -4,15 +4,29 @@ export const TransactionItem = ({
   name,
   value,
   red,
+  color,
+  unit,
 }: {
   name: string;
   value: string;
   red?: boolean;
-}) => (
-  <Flex justify="space-between" style={{ marginBottom: 12 }}>
-    <Text>{name}</Text>
-    <Text style={{ color: red ? "red" : value.startsWith("-") ? "red" : "green" }}>
-      {value} VNĐ
-    </Text>
-  </Flex>
-);
+  color?: string;
+  unit?: string;
+}) => {
+  let finalColor = color;
+  if (!finalColor) {
+    finalColor = red ? "red" : String(value).startsWith("-") ? "red" : "green";
+  }
+
+  return (
+    <Flex 
+      justify="space-between" 
+      style={{ padding: "12px 8px", borderBottom: "1px solid #f0f0f0" }}
+    >
+      <Text>{name}</Text>
+      <Text style={{ color: finalColor, fontWeight: 500 }}>
+        {value} {unit !== undefined ? unit : "VNĐ"}
+      </Text>
+    </Flex>
+  );
+};
