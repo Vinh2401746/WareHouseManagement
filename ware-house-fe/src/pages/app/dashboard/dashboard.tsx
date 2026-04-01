@@ -151,6 +151,22 @@ const DashBoardPage = () => {
               </Card>
             </Col>
           </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Card title="Cảnh báo Lô hàng sắp/đã Hết Hạn" extra={<Link to={AppRoutes.products}>Kiểm tra Kho</Link>}>
+                {data.expiringBatches && data.expiringBatches.length > 0 ? data.expiringBatches.map((b) => (
+                  <TransactionItem 
+                    key={b.id} 
+                    name={`[Lô: ${b.batchCode || 'N/A'}] - ${b.product ? b.product.name : 'Sản phẩm không rõ'}`} 
+                    value={`${b.quantity}`} 
+                    unit={` Hộp/Gói (HSD: ${dayjs(b.expiryDate).format('DD/MM/YYYY')})`}
+                    color={dayjs(b.expiryDate).isBefore(dayjs()) ? 'red' : '#faad14'}
+                  />
+                )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Không có lô hàng nào sắp hết hạn" />}
+              </Card>
+            </Col>
+          </Row>
         </>
       ) : null}
     </Flex>

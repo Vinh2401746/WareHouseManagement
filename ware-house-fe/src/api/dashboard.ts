@@ -29,6 +29,17 @@ export type DashboardOverviewResponse = {
     minStock: number;
     currentStock: number;
   }[];
+  expiringBatches: {
+    id: string;
+    batchCode: string;
+    quantity: number;
+    expiryDate: string;
+    product: {
+      id: string;
+      code: string;
+      name: string;
+    } | null;
+  }[];
 };
 
 export const getDashboardOverviewApi = async (params?: { startDate?: string; endDate?: string; branchId?: string; warehouseId?: string }) => {

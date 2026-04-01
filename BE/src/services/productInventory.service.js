@@ -340,7 +340,7 @@ const mergeOverviewRow = (productDoc, stockMeta = {}, saleMeta = {}, manualMeta 
   const lastExportSource = [saleMeta.lastExportAt, manualMeta.lastExportAt].filter(Boolean);
   const lastExportAt =
     lastExportSource.length > 0 ? new Date(Math.max(...lastExportSource.map((date) => date.getTime()))) : null;
-  const isBelowMin = minStock > 0 && totalStock < minStock;
+  const isBelowMin = minStock > 0 && validStock < minStock;
   const missingCostLines = (saleMeta.missingCostLines || 0) + (manualMeta.missingCostLines || 0);
 
   const alerts = [];

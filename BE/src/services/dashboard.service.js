@@ -66,6 +66,15 @@ const getOverview = async (filters = {}, context = {}) => {
   if (filters.branchId) lowStockFilters.branchId = filters.branchId;
   const lowStockPromise = productInventoryService.getInventoryOverview(lowStockFilters, { limit: 5 }, context);
 
+  const thirtyDaysFromNow = new Date();
+  thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+  const expiringBatchesPromise = ProductBatch.find({
+    ...baseMatch,
+    quantity: { $gt: 0 },
+    expiryDate: { $lte: thirtyDaysFromNow }
+  }).sort({ expiryDate: 1 }).limit(10).populate('product', 'name code');
+
   const chartMatch = {
     ...baseMatch,
     status: 'COMPLETED',
@@ -99,7 +108,8 @@ const getOverview = async (filters = {}, context = {}) => {
     totalStockData,
     lowStockData,
     chartDataRaw,
-    recentDbRows
+    recentDbRows,
+    expiringBatchesRaw,
   ] = await Promise.all([
     pendingImportsPromise,
     pendingExportsPromise,
@@ -107,6 +117,7 @@ const getOverview = async (filters = {}, context = {}) => {
     lowStockPromise,
     chartAggregationPromise,
     recentTransactionsPromise,
+    expiringBatchesPromise,
   ]);
 
   const totalStock = totalStockData.length > 0 ? totalStockData[0].totalStock : 0;
@@ -149,6 +160,18 @@ const getOverview = async (filters = {}, context = {}) => {
     currentStock: r.totalStock,
   }));
 
+  const expiringBatches = expiringBatchesRaw.map(batch => ({
+    id: batch._id,
+    batchCode: batch.batchCode,
+    quantity: batch.quantity,
+    expiryDate: batch.expiryDate,
+    product: batch.product ? {
+      id: batch.product._id,
+      code: batch.product.code,
+      name: batch.product.name
+    } : null
+  }));
+
   return {
     kpis: {
       totalStock,
@@ -164,6 +187,7 @@ const getOverview = async (filters = {}, context = {}) => {
     },
     recentTransactions,
     lowStockAlerts,
+    expiringBatches,
   };
 };
 
