@@ -22,6 +22,9 @@ const getProductBatchs = catchAsync(async (req, res) => {
     'expiryDate',
     'quantity',
     'importPrice',
+    'keyword',
+    'status',
+    'stockStatus',
   ]);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const scopeContext = buildScopeContext(req);

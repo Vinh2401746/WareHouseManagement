@@ -4,6 +4,10 @@ const ApiError = require('../utils/ApiError');
 const responseMessages = require('../constants/responseMessages');
 const { applyWarehouseScope } = require('../utils/branchScope');
 
+const escapeRegex = (string) => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
 /**
  * Create a productBatch
  * @param {Object} productBatchBody
@@ -71,7 +75,55 @@ const createProductBatch = async (productBatchBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryProductBatches = async (filter, options, context = {}) => {
-  const scopedFilter = await applyWarehouseScope(filter, context);
+  const customFilter = { ...filter };
+  const _orConditions = [];
+
+  if (customFilter.keyword) {
+    const keywordRegex = new RegExp(escapeRegex(customFilter.keyword), 'i');
+    
+    const matchingProducts = await Product.find({
+      $or: [{ name: keywordRegex }, { code: keywordRegex }],
+    }).select('_id');
+    const productIds = matchingProducts.map((p) => p._id);
+
+    _orConditions.push({
+      $or: [
+        { batchCode: keywordRegex },
+        { product: { $in: productIds } },
+      ],
+    });
+    delete customFilter.keyword;
+  }
+  
+  if (customFilter.status) {
+    const now = new Date();
+    const thirtyDays = new Date();
+    thirtyDays.setDate(now.getDate() + 30);
+    
+    if (customFilter.status === 'EXPIRED') {
+      customFilter.expiryDate = { $lte: now };
+    } else if (customFilter.status === 'EXPIRING') {
+      customFilter.expiryDate = { $gt: now, $lte: thirtyDays };
+    } else if (customFilter.status === 'VALID') {
+      customFilter.expiryDate = { $gt: thirtyDays };
+    }
+    delete customFilter.status;
+  }
+
+  if (customFilter.stockStatus === 'EMPTY') {
+    customFilter.quantity = { $lte: 0 };
+  } else if (customFilter.stockStatus === 'AVAILABLE') {
+    customFilter.quantity = { $gt: 0 };
+  } else if (!customFilter.stockStatus) {
+    customFilter.quantity = { $gt: 0 };
+  }
+  delete customFilter.stockStatus;
+
+  if (_orConditions.length > 0) {
+    customFilter.$and = (customFilter.$and || []).concat(_orConditions);
+  }
+
+  const scopedFilter = await applyWarehouseScope(customFilter, context);
   const queryOptions = { ...options, populate: 'product warehouse' };
   const productBatches = await ProductBatch.paginate(scopedFilter, queryOptions);
   return productBatches;

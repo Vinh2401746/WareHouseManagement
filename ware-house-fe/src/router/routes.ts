@@ -18,6 +18,7 @@ export const AppRoutes = {
   warehouse: {
     list: '/warehouse'
   },
+  inventory_batches: '/inventory_batches',
   store: '/store',
   warehouse_import_export: '/warehouse_import_export',
   warehouse_import_export_detail: '/warehouse_import_export_detail',
