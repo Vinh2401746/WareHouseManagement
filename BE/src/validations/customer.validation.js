@@ -14,8 +14,8 @@ const createCustomer = {
 
 const getCustomers = {
   query: Joi.object().keys({
-    name: Joi.string(),
-    phone: Joi.string(),
+    name: Joi.string().allow('', null),
+    phone: Joi.string().allow('', null),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),

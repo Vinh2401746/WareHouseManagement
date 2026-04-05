@@ -19,25 +19,25 @@ export const getCustomersApi = async (params: any) => {
     totalPages: number;
     totalResults: number;
   }>("/customer", { params });
-  return response.data;
+  return response as any;
 };
 
 export const createCustomerApi = async (payload: Omit<Customer, "id" | "totalDebt">) => {
   const response = await AxiosClient.post<Customer>("/customer", payload);
-  return response.data;
+  return response as any;
 };
 
 export const updateCustomerApi = async (id: string, payload: Partial<Customer>) => {
   const response = await AxiosClient.put<Customer>(`/customer/${id}`, payload);
-  return response.data;
+  return response as any;
 };
 
 export const deleteCustomerApi = async (id: string) => {
   const response = await AxiosClient.delete(`/customer/${id}`);
-  return response.data;
+  return response as any;
 };
 
 export const getCustomerByIdApi = async (id: string) => {
   const response = await AxiosClient.get<Customer>(`/customer/${id}`);
-  return response.data;
+  return response as any;
 };
