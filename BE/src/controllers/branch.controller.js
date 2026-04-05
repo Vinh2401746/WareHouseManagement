@@ -4,6 +4,7 @@ const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { branchService } = require('../services');
 const responseMessages = require('../constants/responseMessages');
+const { buildScopeContext, extractId } = require('../utils/branchScope');
 
 const createBranch = catchAsync(async (req, res) => {
   const branch = await branchService.createBranch(req.body);
@@ -13,6 +14,18 @@ const createBranch = catchAsync(async (req, res) => {
 const getBranchs = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['name', 'address', 'phone']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  
+  const scopeContext = buildScopeContext(req);
+  if (!scopeContext.isGlobalRole) {
+    const branchId = extractId(scopeContext.branch);
+    if (branchId) {
+      filter._id = branchId;
+    } else {
+      // If user is not global and has no branch, they shouldn't see any branches
+      filter._id = '000000000000000000000000';
+    }
+  }
+
   const result = await branchService.queryBranchs(filter, options);
   res.send(result);
 });

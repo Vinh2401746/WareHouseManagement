@@ -1,101 +1,121 @@
-HƯỚNG DẪN HỆ THỐNG END-TO-END (LUỒNG HAPPY CASE)
+HƯỚNG DẪN HỆ THỐNG END-TO-END (LUỒNG HAPPY CASE THỰC TẾ)
 ===================================================
-TÀI LIỆU CHUẨN BỊ VÀ VẬN HÀNH QUY TRÌNH QUẢN LÝ KHO & BÁN HÀNG TỪ A-Z
+TÀI LIỆU CẤU HÌNH VÀ VẬN HÀNH BÁN HÀNG TỪ A-Z (CẬP NHẬT TỪ HỆ THỐNG GIAO DIỆN)
 ===================================================
 
 [!] MỤC ĐÍCH:
-Tài liệu này hướng dẫn người dùng cuối (Chủ cửa hàng / Quản lý) cách thiết lập hệ thống từ khi chưa có dữ liệu gì (trắng tinh), đến khi có thể tự tin bấm "Xuất kho bán hàng" cho một hóa đơn hoàn chỉnh.
-
-Lộ trình chia thành 3 giai đoạn chính với 8 bước liên kết chặt chẽ với nhau:
-- Giai đoạn 1: Nền tảng (Chi nhánh -> Kho -> Nhân sự)
-- Giai đoạn 2: Cấu hình hàng hóa (Đơn vị -> Nhà cung cấp -> Sản phẩm)
-- Giai đoạn 3: Vận hành (Nhập kho -> Bán xuất kho)
+Tài liệu hướng dẫn trực quan từng bước để thiết lập hệ thống từ số 0 cho đến khi xuất hóa đơn bán hàng thành công. Bao gồm thiết lập nhân sự, phân quyền mượt mà và quản trị kho.
 
 ===================================================
-GIAI ĐOẠN 1: KHỞI TẠO NỀN TẢNG (MASTER DATA)
+GIAI ĐOẠN 1: KHỞI TẠO NỀN TẢNG & NHÂN SỰ
 ===================================================
 
---- BƯỚC 1: TẠO CHI NHÁNH (BRANCH) ---
-Mọi hoạt động đều phải được quy về một cơ sở kinh doanh, do đó bạn cần tạo Chi nhánh đầu tiên.
-1. Tại cột Menu trái, chọn danh mục [Chi nhánh].
-2. Bấm nút màu xanh [Thêm mới] hoặc biểu tượng [+].
-3. Điền các trường thông báo:
-   - Tên chi nhánh: (VD: Cơ sở 1 - Hà Nội).
-   - Địa chỉ liên hệ & Điện thoại: Nhập theo thực tế.
-4. Bấm nút [Lưu] / [Xác nhận] để hoàn tất. Hệ thống sẽ báo xanh và hiển thị chi nhánh vừa thêm.
+--- BƯỚC 1: KHỞI TẠO CHI NHÁNH (CỬA HÀNG) ---
+1. Tại thanh Sidebar bên trái, chọn menu [Cửa hàng].
+2. Bấm nút màu xanh [Thêm cửa hàng].
+3. Điền các trường thông báo (có dấu * đỏ):
+   - [*] Tên chi nhánh (VD: Cửa hàng Chi nhánh 1)
+   - [*] Số điện thoại (Yêu cầu nhập chuẩn 10 số - VD: 0987654321)
+   - [*] Địa chỉ
+4. Bấm nút [Tạo] để hoàn tất.
 
---- BƯỚC 2: TẠO KHO HÀNG (WAREHOUSE) ---
-Để lưu trữ hàng, Chi nhánh cần tối thiểu 1 Kho vật lý.
-1. Chuyển sang menu [Kho].
-2. Bấm [Thêm mới].
-3. Tại khung nhập liệu, quan trọng nhất phải chọn đúng "Thuộc Chi nhánh" là Chi nhánh vừa tạo ở Bước 1.
-4. Đặt tên kho (VD: Kho Tổng HN).
-5. Bấm [Lưu]. Vậy là cơ sở hạ tầng đã ghi nhận 1 Điểm Lưu Trữ.
+--- BƯỚC 2: KHỞI TẠO KHO LƯU TRỮ ---
+1. Chọn menu [Kho] trên thanh Sidebar.
+2. Bấm nút [Thêm kho].
+3. Tại khung Điền chi tiết Kho, khai báo:
+   - [*] Tên kho
+   - [*] Chi nhánh: Click chọn tên Chi nhánh (Cửa hàng) bạn vừa tạo thành công ở Bước 1. Kho PHẢI gắn liền với 1 cửa hàng.
+   - [*] Địa chỉ
+4. Bấm nút [Tạo]. 
 
---- BƯỚC 3: TẠO CHỨC VỤ VÀ TÀI KHOẢN NHÂN VIÊN ---
-(Để người khác vào thao tác, nếu bạn là Admin tự làm thì có thể bỏ qua bước này).
-1. Vào menu [Vai trò] (Roles), bấm thêm mới và tích Chọn các quyền được phép (VD: Quyền lập phiếu nhập kho, Quyền xem sản phẩm). Lưu tên Vai trò là "Thủ kho" hoặc "Thu ngân".
-2. Vào menu [Nhân viên] (Users), bấm [Thêm mới].
-3. Cấp Email, Tên, Cài đặt Mật khẩu và Gắn cho nhân viên đó "Vai trò" vừa tạo.
-4. QUAN TRỌNG: Gắn đúng nhân viên đó vào "Chi nhánh" đã tạo ở Bước 1. (Nhân viên ở đâu chỉ được xem tồn kho ở đó).
+--- BƯỚC 3: THIẾT LẬP VAI TRÒ (PHÂN QUYỀN) ---
+Hệ thống cần biết "Ai được phép làm gì" trước khi bạn tạo thư mục nhân viên.
+1. Chọn menu [Vai trò].
+2. Bấm nút [Thêm vai trò mới].
+3. Cấu hình bảng Vai trò mạnh mẽ:
+   - [*] Tên Vai Trò (VD: Thu ngân cửa hàng, Nhân viên kiểm kho)
+   - [*] Mã định danh (Key) (VD: thu_ngan - định dạng viết liền không dấu bằng tiếng Anh)
+   - [*] Phạm Vi (Scope): Chọn "Branch (Chi Nhánh)".
+   - [*] Cấp Phát Quyền Hạn (Permissions): Click sổ ra và tích chọn các quyền cho phép làm (Ví dụ chọn quyền CREATE_INVOICE, CREATE_PRODUCT_INVENTORY).
+4. Bấm [Thêm Mới] để lưu Vai trò vào hệ thống.
 
-===================================================
-GIAI ĐOẠN 2: CẤU HÌNH THÔNG TIN SẢN PHẨM KHỚP VỚI HỆ THỐNG
-===================================================
-
---- BƯỚC 4: TẠO ĐƠN VỊ TÍNH (UNIT) ---
-Phần mềm cần biết bạn bán hàng theo lốc, cái hay hộp.
-1. Tới menu [Quy cách / Đơn vị tính].
-2. Bấm [Thêm mới] và gõ nhanh tên các đơn vị. (VD: "Cái", "Hộp", "Thùng", "Lon").
-3. Bấm [Lưu]. Dữ liệu này sẽ được lấy làm danh sách chọn cho Bước 6.
-
---- BƯỚC 5: TẠO NHÀ CUNG CẤP (SUPPLIER) ---
-Thiếu Nhà cung cấp, bạn sẽ không thể làm Phiếu Nhập Kho.
-1. Tới tab [Nhà cung cấp].
-2. Bấm [Thêm mới] -> Yêu cầu nhập [Tên công ty/Tên người cấp hàng] và [Số điện thoại].
-3. Bấm [Lưu]. Nhà cung cấp sẽ được đưa vào danh bạ nội bộ.
-
---- BƯỚC 6: KHỞI TẠO MÃ SẢN PHẨM (PRODUCT) ---
-Khai báo "Hồn" cho sản phẩm trước khi nhập hàng "Xác" vào kho.
-1. Chọn menu chính [Sản phẩm].
-2. Nhấn [Thêm mới Sản phẩm]. Khung thông tin lớn sẽ mở ra.
-3. Điền trường bắt buộc: 
-   - Tên sản phẩm: (VD: Nước tăng lực Redbull).
-   - Mã SKU: Nếu có mã vạch thì quét, không thì để trống hệ thống tự sinh mã.
-   - Chọn Đơn vị: (Chọn "Lon" đã tạo ở Bước 4).
-   - Chọn Chi nhánh sở hữu.
-   - Định giá: Điền [Giá nhập dự kiến] và [Giá bán lẻ].
-4. Bấm [Lưu]. LÚC NÀY SẢN PHẨM CÓ TRÊN HỆ THỐNG, NHƯNG TỒN KHO LÀ 0. Bạn chưa thể bán!
+--- BƯỚC 4: TẠO TÀI KHOẢN NHÂN VIÊN ---
+Thiết lập Account cho Nhân sự tại Cửa hàng.
+1. Chọn menu [Người dùng] (hoặc Quản lý Người dùng).
+2. Bấm nút [Thêm người dùng].
+3. Khai báo Hồ sơ nhân sự:
+   - [*] Họ và tên 
+   - [*] Email (Sẽ dùng để nhân viên tự đăng nhập)
+   - [*] Mật khẩu (Yêu cầu ít nhất 6 ký tự)
+   - [*] Quyền: Rút thả xuống và chọn đúng "Vai trò" Thu ngân vừa thiết lập ở Bước 3.
+   - [*] Cửa hàng: Chọn Cửa hàng bạn đã tạo ở Bước 1. Điều này đảm bảo Nhân viên này CHỈ truy cập được dữ liệu, kho của chính cửa hàng này.
+4. Bấm [Tạo]. Nhân sự đã có thể lập tức đăng nhập đi làm.
 
 ===================================================
-GIAI ĐOẠN 3: VẬN HÀNH THỰC TẾ (SẴN SÀNG BÁN HÀNG)
+GIAI ĐOẠN 2: THIẾT LẬP DỮ LIỆU HÀNG HÓA CHUYÊN SÂU
 ===================================================
 
---- BƯỚC 7: LẬP PHIẾU NHẬP KHO (WAREHOUSE IMPORT) ---
-Sạc Tồn Kho cho Sản phẩm vừa tạo!
-1. Kích vào menu [Nhập Xuất Kho] -> Chọn tab [Nhập kho].
-2. Bấm [Tạo phiếu nhập / Nhập hàng].
-3. Hệ thống yêu cầu điền Thẻ thông tin:
-   - Chọn Nhà Cung Cấp (mới tạo từ Bước 5).
-   - Chọn Kho nhập vào (Kho vừa tạo từ Bước 2).
-4. Thêm hàng vào phiếu:
-   - Gõ tên "Redbull" vào ô tìm kiếm -> Chọn sản phẩm.
-   - Nhập Số lượng vào kho (VD: 100).
-   - Hệ thống tự nhân với Giá nhập = Thành tiền.
-5. Kiểm tra thông tin -> Bấm [Hoàn thành nhập kho] (hoặc Lưu phiếu).
-6. (!) Kết quả: Nếu mở lại mục Sản phẩm, bạn sẽ thấy Số lượng Tồn tại "Kho Tổng HN" đã nhảy lên 100. Đã cất cánh!
+--- BƯỚC 5: KHỞI TẠO ĐƠN VỊ TÍNH (Quy cách) ---
+1. Chọn menu [Đơn vị].
+2. Bấm nút [Thêm đơn vị].
+3. Khai báo:
+   - [*] Tên đơn vị (VD: Cái, Thùng, Lon, Cuộn)
+   - [*] Mã đơn vị (VD: CAI, THUNG. Viết liền không dấu)
+4. Bấm [Tạo].
 
---- BƯỚC 8: LẬP HÓA ĐƠN XUẤT KHO / BÁN HÀNG (SALES) ---
-SẢN PHẨM ĐÃ SẴN SÀNG RA TIỀN CHỜ THU.
-1. Chọn menu [Bán Hàng] hoặc [Xuất Xuất Bán] trên phần thao tác chính.
-2. (Tùy chọn) Chọn [Khách hàng] mua: Nếu là khách vãng lai để trống, nếu là khách thân thiết có thể chọn thêm nhanh Tên khách (VD: Khách lẻ).
-3. Thêm Sản phẩm vào giỏ (Hóa đơn):
-   - Nhập mã hoặc tên "Redbull", hệ thống sẽ hiển thị "Tồn: 100" để bạn yên tâm là còn hàng.
-   - Chọn số lượng khách mua (VD: Bán 5 Lon). 
-   - Hệ thống sẽ tự xuất giá bán x 5 để báo thành tiền.
-4. Bấm chốt nút [Thanh Toán / Tạo Hóa Đơn].
-   - Một số hệ thống sẽ yêu cầu thêm bước xác nhận tiền khách đưa và tiền thối lại.
-5. [Hoàn thành]: Hệ thống báo xanh Tạo hóa đơn thành công!
-6. (*) Luồng khép kín: Tồn kho Redbull tự động tụt xuống còn 95 Lon. Thu nhập máy POS / Ghi nhận sale tự động chênh lên. Quy trình End-To-End hoàn hảo khép lại!
+--- BƯỚC 6: TẠO NHÀ CUNG CẤP (SUPPLIER) ---
+1. Chọn menu [Nhà cung cấp].
+2. Bấm [Thêm nhà cung cấp].
+3. Kê khai hồ sơ đối tác:
+   - [*] Tên nhà cung cấp
+   - [*] Số điện thoại
+   - [*] Email
+   - [*] Địa chỉ
+4. Bấm nút [Tạo].
 
---- CHÚC MỪNG BẠN — BẠN ĐÃ LÀM CHỦ TOÀN BỘ LUỒNG QUẢN TRỊ KHO & BÁN HÀNG ---
+--- BƯỚC 7: KHỞI TẠO MÃ SẢN PHẨM MỚI ---
+1. Chọn menu [Sản phẩm].
+2. Bấm nút [Thêm sản phẩm].
+3. Định nghĩa sản phẩm chuẩn xác:
+   - [*] Tên sản phẩm
+   - [*] Mã sản phẩm (Bắt buộc phải mã hóa duy nhất)
+   - [*] Đơn vị (Lấy ra Đơn vị từ Bước 5)
+   - [*] Tồn kho tối thiểu (Điểm cảnh báo hết hàng, VD: 1)
+   - [*] Giá bán hàng (VNĐ)
+4. Bấm [Tạo]. Tạm thời lúc này Số lượng tồn kho vẫn là 0.
+
+===================================================
+GIAI ĐOẠN 3: VẬN HÀNH THỰC TẾ (NHẬP KHO & XUẤT BÁN ĐƠN)
+===================================================
+
+--- BƯỚC 8: NHẬP HÀNG - BƠM TỒN KHO ---
+1. Chọn menu [Nhập kho].
+2. Bấm nút [Tạo đơn nhập kho].
+3. Điền Thông tin Phiếu:
+   - [*] Kho: Chọn Kho vật lý thuộc về Cửa hàng đó (Mới tạo ở Bước 2).
+   - [*] Nhà cung cấp: Dò lại từ (Bước 6).
+   - [*] Người vận chuyển
+   - [*] Lý do 
+4. Tại Lưới tìm kiếm hàng, chọn tên Sản phẩm vừa khởi tạo. Bổ sung 3 luồng: gõ [Số lượng nhập], gõ [Giá nhập kho] và chọn lịch [Ngày hết hạn].
+5. Bấm nút [Tạo].
+6. [🛑 BƯỚC QUAN TRỌNG - PHÊ DUYỆT BƠM TỒN]: 
+   - Phiếu sau khi nạp sẽ giữ nguyên ở trạng thái "Đang chờ duyệt" (hàng chưa vào kho vật lý).
+   - Click đúp vào cái nút trạng thái [Đang chờ duyệt] đỏ đó -> Chọn xác nhận [OK] để duyệt chốt phiếu. "Đã duyệt" xanh lên, tức là Tiền và Hàng đã trừ - Tồn kho chính thức nảy số!
+
+--- BƯỚC 9: XUẤT KHO LẬP HÓA ĐƠN BÁN HÀNG ---
+(Tới bước cực kỳ thú vị này, BẠN CÓ THỂ ĐĂNG XUẤT SAU ĐÓ NHẬP EMAIL CỦA BẠN NHÂN VIÊN "THU NGÂN" LÚC ĐẦU BƯỚC 4 ĐỂ VÀO TRẢI NGHIỆM TÍNH NĂNG POS HẠN CHẾ).
+
+1. Chọn menu [Hoá đơn bán hàng] -> Bấm nút xanh to [Tạo đơn].
+2. Khâu Chọn Hàng (Pick up):
+   - Tại vùng "Chọn kho bán hàng": Bạn Mở Dropdown bắt buộc chọn Kho chứa hàng (Kho đã duyệt phiếu nhập ở B8). 
+   - Box Sản phẩm bên dưới sẽ tự động sáng bừng lên -> Tích click vào ô sản phẩm để hệ thống ném nó vào Mâm Giỏ Hàng.
+   - Thêm phần trăm giảm giá vào ô [Chiết khấu %] (nếu Cửa hàng đang khuyến mãi).
+3. Khâu Trả Tiền (Checkout):
+   - Bấm nút xanh lá nổi trội [Tính tiền].
+   - Popup phương thức thanh toán xuất hiện -> Chọn "Tiền mặt" hoặc "Chuyển khoản".
+   - Mắt kiểm tra kỹ [Tiền khách trả] và [Tiền thừa trả khách].
+   - Bấm lệnh cuối: [Thanh toán].
+4. 🎉 KẾT QUẢ ĐẦU CUỐI: Hệ thống kêu nhẹ thông báo "Tạo hoá đơn thành công!" và xóa trắng lưới giỏ hàng. 
+
+Phi vụ thành công tốt đẹp, Tồn kho bị tụt xuống tự động và Dòng tiền chạy vào két công ty!
+===================================================
