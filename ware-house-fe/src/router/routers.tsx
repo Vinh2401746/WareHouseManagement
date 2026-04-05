@@ -22,6 +22,7 @@ const ProductsPage = Loadable(lazy(() => import('../pages/app/products')));
 const CategoryPage = Loadable(lazy(() => import('../pages/app/category')));
 const SuppilerPage = Loadable(lazy(() => import('../pages/app/suppiler')));
 const CustomerPage = Loadable(lazy(() => import('../pages/app/customers')));
+const CustomerDetailPage = Loadable(lazy(() => import('../pages/app/customers/detail')));
 const UnitPage = Loadable(lazy(() => import('../pages/app/unit')));
 const WarehousePage = Loadable(lazy(() => import('../pages/app/warehouse')));
 const BranchPage = Loadable(lazy( async () => import('../pages/app/branch')));
@@ -87,6 +88,11 @@ export const router = createBrowserRouter(
           path: AppRoutes.customer,
           id: AppRoutes.customer,
           element: <CustomerPage />,
+        },
+        {
+          path: AppRoutes.customer_detail,
+          id: AppRoutes.customer_detail,
+          element: <CustomerDetailPage />,
         },
         {
           path: AppRoutes.warehouse.list,

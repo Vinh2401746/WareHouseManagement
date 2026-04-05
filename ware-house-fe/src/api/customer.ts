@@ -6,6 +6,8 @@ export type Customer = {
   phone: string;
   address?: string;
   branch?: string;
+  email?: string;
+  note?: string;
   totalDebt: number;
 };
 
@@ -32,5 +34,10 @@ export const updateCustomerApi = async (id: string, payload: Partial<Customer>) 
 
 export const deleteCustomerApi = async (id: string) => {
   const response = await AxiosClient.delete(`/customer/${id}`);
+  return response.data;
+};
+
+export const getCustomerByIdApi = async (id: string) => {
+  const response = await AxiosClient.get<Customer>(`/customer/${id}`);
   return response.data;
 };

@@ -1,9 +1,12 @@
 import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
-import { Modal, Form, Input } from "antd";
+import { Modal, Form, Input, Select } from "antd";
 import { useMutation } from "@tanstack/react-query";
 import dispatchToast from "../../../../constants/toast";
 import { VIETNAM_PHONE_NUMBER } from "../../../../utils/regex";
+import { useQuery } from "@tanstack/react-query";
 import { createCustomerApi, updateCustomerApi, type Customer } from "../../../../api/customer";
+import { getBranchsApi } from "../../../../api/branch";
+import { usePermission } from "../../../../hooks/usePermission";
 
 export type CustomerFormRef = {
   show: (data?: Partial<Customer>) => void;
@@ -14,6 +17,9 @@ const initForm: Partial<Customer> = {
   phone: "",
   name: "",
   address: '',
+  email: '',
+  branch: undefined,
+  note: '',
   id: "",
 };
 
@@ -26,6 +32,14 @@ const CustomerFormModal = forwardRef<CustomerFormRef, CustomerFormModalProps>(({
   const [open, setOpen] = useState(false);
   const [customer, setCustomer] = useState<Partial<Customer>>(initForm);
   const [form] = Form.useForm<Partial<Customer>>();
+  const { isSuperAdmin } = usePermission("customers");
+
+  // Fetch branch list if superadmin
+  const { data: branchData } = useQuery({
+    queryKey: ["app.branches"],
+    queryFn: () => getBranchsApi({ page: 1, limit: 100 }), // Get all branches
+    enabled: isSuperAdmin,
+  });
 
   const isUpdate = useMemo(() => customer.id, [customer.id]);
 
@@ -66,11 +80,17 @@ const CustomerFormModal = forwardRef<CustomerFormRef, CustomerFormModalProps>(({
   });
 
   const onFinish = (values: Partial<Customer>) => {
-    mutate({
+    const payload: any = {
       name: values.name,
       phone: values.phone,
-      address: values.address
-    });
+      address: values.address,
+      email: values.email,
+      note: values.note,
+    };
+    if (isSuperAdmin && values.branch) {
+      payload.branch = values.branch;
+    }
+    mutate(payload);
   };
 
   return (
@@ -121,7 +141,38 @@ const CustomerFormModal = forwardRef<CustomerFormRef, CustomerFormModalProps>(({
           label="Địa chỉ"
           name="address"
         >
-          <Input.TextArea placeholder="(Tuỳ chọn) Nhập địa chỉ khách hàng..." rows={2} />
+          <Input placeholder="Nhập địa chỉ khách hàng..." />
+        </Form.Item>
+
+        <Form.Item
+          label="Email"
+          name="email"
+          rules={[{ type: 'email', message: 'Vui lòng nhập định dạng email hợp lệ' }]}
+        >
+          <Input placeholder="Ví dụ: example@gmail.com" />
+        </Form.Item>
+
+        {isSuperAdmin && (
+          <Form.Item
+            label="Chi nhánh"
+            name="branch"
+            rules={[{ required: true, message: "Bắt buộc chọn chi nhánh" }]}
+          >
+            <Select 
+              placeholder="Chọn chi nhánh quản lý khách này..." 
+              options={branchData?.results?.map((b: any) => ({
+                label: b.name,
+                value: b.id
+              })) || []}
+            />
+          </Form.Item>
+        )}
+
+        <Form.Item
+          label="Ghi chú thêm"
+          name="note"
+        >
+          <Input.TextArea placeholder="(Tuỳ chọn) Ghi chú..." rows={2} />
         </Form.Item>
       </Form>
     </Modal>

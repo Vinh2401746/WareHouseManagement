@@ -25,7 +25,7 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
   [AppRoutes.role]: "user",
   [AppRoutes.products]: "products",
   [AppRoutes.supplier]: "suppliers",
-  [AppRoutes.customer]: "suppliers", // Temporary reuse
+  [AppRoutes.customer]: "customers", // Cập nhật đúng permission của mình
   [AppRoutes.unit.list]: "units",
   [AppRoutes.warehouse.list]: "warehouses",
   [AppRoutes.branch.list]: "branches",

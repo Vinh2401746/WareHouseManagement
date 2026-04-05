@@ -24,7 +24,8 @@ export const usePermission = (module: keyof permissionType['permissions']) => {
 
     return {
         isManager,
-        canView
+        canView,
+        isSuperAdmin
     }
 
 }

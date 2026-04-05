@@ -46,6 +46,10 @@ const responseMessages = {
   supplier: {
     notFound: 'Không tìm thấy nhà cung cấp',
   },
+  customer: {
+    notFound: 'Không tìm thấy khách hàng',
+    cannotDeleteWithSales: 'Khách hàng đã phát sinh giao dịch bán hàng, không thể xoá',
+  },
   unit: {
     notFound: 'Không tìm thấy đơn vị',
   },

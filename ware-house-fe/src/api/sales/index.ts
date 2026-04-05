@@ -5,6 +5,7 @@ import AxiosClient from "../axiosClient";
 export const getInvoicesApi = async (payload: {
       limit: number;
     page: number;
+    customer?: string;
 }): Promise<CommonListResponse | any> => {
     const queryString = keyQueryFilterString(payload);
     return AxiosClient.get(`sale?${queryString}`);
@@ -33,5 +34,5 @@ export const createInvoiceApi = async (payload: {
 
 
 export const deleteInvoiceApi = async (payload: { id: string }) => {
-    return AxiosClient.delete(`supplier/${payload.id}`);
+    return AxiosClient.delete(`sale/${payload.id}`);
 };

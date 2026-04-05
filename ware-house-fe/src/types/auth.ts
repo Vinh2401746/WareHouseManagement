@@ -56,6 +56,10 @@ export type roles = string | null;
 //             "getSuppliers",
 //             "manageSuppliers"
 //         ],
+//         "customers": [
+//             "getCustomers",
+//             "manageCustomers"
+//         ],
 //         "productBatchs": [
 //             "getProductBatchs",
 //             "manageProductBatchs"
@@ -85,6 +89,7 @@ export type permissionType = {
     "warehouses": string[],
     "products": string[],
     "suppliers": string[],
+    "customers": string[],
     "productBatchs": string[],
     "inventoryTransactions": string[],
     "sales": string[],

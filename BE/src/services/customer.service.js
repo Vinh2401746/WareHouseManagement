@@ -58,7 +58,7 @@ const getCustomerById = async (id, context = {}) => {
 const updateCustomerById = async (customerId, updateBody, context = {}) => {
   const customer = await getCustomerById(customerId, context);
   if (!customer) {
-    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.user.notFound); // Should be customer.notFound ideally, use generic for now
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.customer.notFound);
   }
 
   Object.assign(customer, updateBody);
@@ -75,8 +75,15 @@ const updateCustomerById = async (customerId, updateBody, context = {}) => {
 const deleteCustomerById = async (customerId, context = {}) => {
   const customer = await getCustomerById(customerId, context);
   if (!customer) {
-    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.user.notFound);
+    throw new ApiError(httpStatus.NOT_FOUND, responseMessages.customer.notFound);
   }
+
+  const { Sale } = require('../models');
+  const salesCount = await Sale.countDocuments({ customer: customerId });
+  if (salesCount > 0) {
+    throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.customer.cannotDeleteWithSales);
+  }
+
   await customer.remove();
   return customer;
 };
