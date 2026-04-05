@@ -62,6 +62,13 @@ const verifyEmail = {
   }),
 };
 
+const quickReset = {
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().custom(password),
+  }),
+};
+
 module.exports = {
   register,
   login,
@@ -70,4 +77,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   verifyEmail,
+  quickReset,
 };

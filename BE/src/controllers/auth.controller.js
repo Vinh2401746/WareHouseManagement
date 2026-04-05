@@ -1,5 +1,6 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
+const ApiError = require('../utils/ApiError');
 const { authService, userService, tokenService, emailService } = require('../services');
 
 const register = catchAsync(async (req, res) => {
@@ -47,6 +48,17 @@ const verifyEmail = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const quickReset = catchAsync(async (req, res) => {
+  const { email, password } = req.body;
+  const user = await userService.getUserByEmail(email);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy người dùng với email này');
+  }
+  user.password = password;
+  await user.save();
+  res.status(httpStatus.OK).send({ message: 'Đặt lại mật khẩu thành công!' });
+});
+
 module.exports = {
   register,
   login,
@@ -56,4 +68,5 @@ module.exports = {
   resetPassword,
   sendVerificationEmail,
   verifyEmail,
+  quickReset,
 };
