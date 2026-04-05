@@ -211,7 +211,20 @@ const createSale = async (saleBody, user) => {
         }
 
         if (remainingQty > 0) {
-          throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.sale.notEnoughStock);
+          const allBatches = await ProductBatch.find({ product: item.product, warehouse, quantity: { $gt: 0 } });
+          const totalPhysStock = allBatches.reduce((sum, b) => sum + b.quantity, 0);
+
+          if (totalPhysStock >= item.quantity) {
+            throw new ApiError(
+              httpStatus.BAD_REQUEST,
+              `Sản phẩm này có tồn kho vật lý (Tổng: ${totalPhysStock}) nhưng lượng CÒN HẠN không đủ để xuất bán (Thiếu: ${remainingQty}). Vui lòng kiểm tra lại quá trình loại bỏ lô hết hạn.`
+            );
+          } else {
+            throw new ApiError(
+              httpStatus.BAD_REQUEST,
+              `Sản phẩm này không đủ tồn kho vật lý (Cần: ${item.quantity}, Có: ${totalPhysStock})`
+            );
+          }
         }
       }
     }

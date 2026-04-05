@@ -3,7 +3,7 @@ import { keyQueryFilterString } from "../../utils/helper";
 import AxiosClient from "../axiosClient";
 
 export const getInvoicesApi = async (payload: {
-      limit: number;
+    limit: number;
     page: number;
     customer?: string;
 }): Promise<CommonListResponse | any> => {
@@ -13,7 +13,7 @@ export const getInvoicesApi = async (payload: {
 
 export const createInvoiceApi = async (payload: {
     customerName?: string,
-    customer?: string, 
+    customer?: string,
     branch: string,
     warehouse: string,
     saleDate: Date,
@@ -35,4 +35,12 @@ export const createInvoiceApi = async (payload: {
 
 export const deleteInvoiceApi = async (payload: { id: string }) => {
     return AxiosClient.delete(`sale/${payload.id}`);
+};
+
+export const getInvoiceByIdApi = async (payload: { id: string }) => {
+    return AxiosClient.get(`sale/${payload.id}`);
+};
+
+export const updateInvoiceApi = async (payload: { id: string, data: any }) => {
+    return AxiosClient.patch(`sale/${payload.id}`, payload.data);
 };

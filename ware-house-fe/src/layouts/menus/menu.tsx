@@ -31,6 +31,7 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
   [AppRoutes.branch.list]: "branches",
   [AppRoutes.warehouse_import_export]: "inventoryTransactions",
   [AppRoutes.sales_invoice]: "inventoryTransactions",
+  [AppRoutes.inventory_batches]: "products", // temporary map to products read
 };
 
 const items: ItemType<MenuItemType>[] = [
@@ -59,6 +60,11 @@ const items: ItemType<MenuItemType>[] = [
   //   icon: <UploadOutlined />,
   //   label: "Danh mục sản phẩm",
   // },
+  {
+    key: AppRoutes.inventory_batches,
+    icon: <DatabaseOutlined />,
+    label: "Danh sách Lô hàng",
+  },
    {
     key: AppRoutes.supplier,
     icon: <ContactsOutlined />,

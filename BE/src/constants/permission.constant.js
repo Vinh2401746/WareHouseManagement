@@ -160,6 +160,13 @@ const PERMISSION_DEFINITIONS = [
     group: 'rbac',
     description: 'Tạo và chỉnh sửa vai trò động',
   },
+  {
+    key: 'GET_DASHBOARD',
+    code: 'getDashboard',
+    name: 'Xem Dashboard',
+    group: 'dashboard',
+    description: 'Cho phép truy cập xem dữ liệu phân tích biểu đồ màn hình chính',
+  },
 ];
 
 const PERMISSIONS = PERMISSION_DEFINITIONS.reduce((accumulator, definition) => {

@@ -155,6 +155,11 @@ const aggregateStockMeta = async ({ productIds, warehouseIds }) => {
       $group: {
         _id: { product: '$product', warehouse: '$warehouse' },
         quantity: { $sum: '$quantity' },
+        validQuantity: {
+          $sum: {
+            $cond: [{ $gte: ['$expiryDate', new Date()] }, '$quantity', 0]
+          }
+        },
         value: { $sum: { $multiply: ['$quantity', '$importPrice'] } },
         lastImportAt: { $max: '$updatedAt' },
       },
@@ -163,12 +168,14 @@ const aggregateStockMeta = async ({ productIds, warehouseIds }) => {
       $group: {
         _id: '$_id.product',
         totalQuantity: { $sum: '$quantity' },
+        totalValidQuantity: { $sum: '$validQuantity' },
         totalValue: { $sum: '$value' },
         lastImportAt: { $max: '$lastImportAt' },
         byWarehouse: {
           $push: {
             warehouse: '$_id.warehouse',
             quantity: '$quantity',
+            validQuantity: '$validQuantity',
             value: '$value',
           },
         },
@@ -182,12 +189,14 @@ const aggregateStockMeta = async ({ productIds, warehouseIds }) => {
   docs.forEach((doc) => {
     map.set(doc._id.toString(), {
       totalQuantity: doc.totalQuantity || 0,
+      totalValidQuantity: doc.totalValidQuantity || 0,
       totalValue: doc.totalValue || 0,
       lastImportAt: doc.lastImportAt || null,
       byWarehouse: Array.isArray(doc.byWarehouse)
         ? doc.byWarehouse.map((entry) => ({
             warehouse: entry.warehouse ? entry.warehouse.toString() : null,
             quantity: entry.quantity || 0,
+            validQuantity: entry.validQuantity || 0,
             value: entry.value || 0,
           }))
         : [],
@@ -319,6 +328,7 @@ const mergeOverviewRow = (productDoc, stockMeta = {}, saleMeta = {}, manualMeta 
   const product = mapProductBasics(productDoc);
   const minStock = product.minStock || 0;
   const totalStock = stockMeta.totalQuantity || 0;
+  const validStock = stockMeta.totalValidQuantity || 0;
   const totalStockValue = roundCurrency(stockMeta.totalValue || 0);
   const revenue = saleMeta.revenue || 0;
   const costOfGoods = saleMeta.cost || 0;
@@ -330,7 +340,7 @@ const mergeOverviewRow = (productDoc, stockMeta = {}, saleMeta = {}, manualMeta 
   const lastExportSource = [saleMeta.lastExportAt, manualMeta.lastExportAt].filter(Boolean);
   const lastExportAt =
     lastExportSource.length > 0 ? new Date(Math.max(...lastExportSource.map((date) => date.getTime()))) : null;
-  const isBelowMin = minStock > 0 && totalStock < minStock;
+  const isBelowMin = minStock > 0 && validStock < minStock;
   const missingCostLines = (saleMeta.missingCostLines || 0) + (manualMeta.missingCostLines || 0);
 
   const alerts = [];
@@ -345,6 +355,7 @@ const mergeOverviewRow = (productDoc, stockMeta = {}, saleMeta = {}, manualMeta 
     product,
     stockByWarehouse: stockMeta.byWarehouse || [],
     totalStock,
+    validStock,
     totalStockValue,
     revenue,
     costOfGoods,
@@ -613,6 +624,7 @@ const getInventoryDetail = async (productId, filters = {}, context = {}) => {
     product: mergedRow.product,
     stockSnapshot: {
       totalStock: mergedRow.totalStock,
+      validStock: mergedRow.validStock,
       totalStockValue: mergedRow.totalStockValue,
       lastImportAt: mergedRow.lastImportAt,
       stockByWarehouse: mergedRow.stockByWarehouse,
@@ -669,7 +681,8 @@ const getProductsForPOS = async (filters = {}, options = {}, context = {}) => {
       imageUrl: product.imageUrl,
       unit: product.unit,
       sellingPrice: product.sellingPrice,
-      totalStock: meta.totalQuantity || 0,
+      totalStock: meta.totalValidQuantity || 0,
+      physicalStock: meta.totalQuantity || 0,
     };
   });
 

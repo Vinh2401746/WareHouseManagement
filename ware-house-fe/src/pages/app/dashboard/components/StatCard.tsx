@@ -1,32 +1,36 @@
-import { ArrowDownOutlined, ArrowUpOutlined, UserOutlined } from "@ant-design/icons";
-import { Card, Col, Statistic, Tag } from "antd";
+import { ArrowDownOutlined, ArrowUpOutlined } from "@ant-design/icons";
+import { Card, Statistic, Tag } from "antd";
+import React from "react";
 
 export const StatCard = ({
   title,
   value,
-  up,
-  down,
+  icon,
+  trend,
 }: {
   title: string;
   value: any;
-  up?: boolean;
-  down?: boolean;
+  icon?: React.ReactNode;
+  trend?: {
+    direction: "up" | "down";
+    label: string;
+  };
 }) => (
 
     <Card>
       <Statistic
         title={title}
         value={value}
-        prefix={<UserOutlined />}
+        prefix={icon}
       />
-      {up && (
-        <Tag color="green" icon={<ArrowUpOutlined />}>
-          Tăng 12.5%
+      {trend?.direction === "up" && (
+        <Tag color="green" icon={<ArrowUpOutlined />} style={{ marginTop: 8 }}>
+          {trend.label}
         </Tag>
       )}
-      {down && (
-        <Tag color="red" icon={<ArrowDownOutlined />}>
-          Giảm 10.5%
+      {trend?.direction === "down" && (
+        <Tag color="red" icon={<ArrowDownOutlined />} style={{ marginTop: 8 }}>
+          {trend.label}
         </Tag>
       )}
     </Card>

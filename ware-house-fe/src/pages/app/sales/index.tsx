@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { QueryKeys } from "../../../constants/query-keys";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Button, Flex, Pagination, Popconfirm, Tag } from "antd";
@@ -101,7 +101,7 @@ const SalePage = memo(() => {
         case "update":
           // dispatchToast("warning", "Tính năng đang phát triển")
           // formRef.current?.show(record);
-          navigate(AppRoutes.warehouse_import_export_detail, {
+          navigate(AppRoutes.sales_invoice_detail, {
             state: record
           })
           break;
@@ -319,7 +319,7 @@ const SalePage = memo(() => {
           return {
             onDoubleClick: () => {
               // formRef.current?.show({ ...record });
-              navigate(AppRoutes.warehouse_import_export_detail, {
+              navigate(AppRoutes.sales_invoice_detail, {
                 state: record
               })
             },

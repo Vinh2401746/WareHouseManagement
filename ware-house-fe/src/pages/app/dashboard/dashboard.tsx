@@ -1,115 +1,176 @@
-import { Card, Col, Flex, Row } from "antd";
+import { Card, Col, Flex, Row, Spin, DatePicker, Empty } from "antd";
+import { AppstoreOutlined, ImportOutlined, ExportOutlined, WarningOutlined } from "@ant-design/icons";
+import { Link } from "react-router-dom";
+import { AppRoutes } from "../../../router/routes";
 import {
   LineChart,
   Line,
   XAxis,
   YAxis,
   Tooltip,
-  PieChart,
-  Pie,
-  Cell,
   ResponsiveContainer,
 } from "recharts";
 import { StatCard } from "./components/StatCard";
 import { TransactionItem } from "./components/TransactionItem";
+import { useEffect, useState, useMemo } from "react";
+import { getDashboardOverviewApi, type DashboardOverviewResponse } from "../../../api/dashboard";
+import dayjs from "dayjs";
+import { formatNumber } from "../../../utils/helper";
 
-const lineData = [
-  { time: "00:00", deposit: 800, withdraw: 500, invest: 300 },
-  { time: "06:00", deposit: 600, withdraw: 400, invest: 200 },
-  { time: "12:00", deposit: 700, withdraw: 300, invest: 250 },
-  { time: "18:00", deposit: 900, withdraw: 450, invest: 350 },
-  { time: "23:00", deposit: 850, withdraw: 400, invest: 300 },
-];
-
-const pieData = [
-  { name: "Cá khô L1", value: 35 },
-  { name: "Bánh kem", value: 20 },
-  { name: "Rau cải", value: 15 },
-  { name: "Còn lại", value: 30 },
-];
-
-const COLORS = ["#ff4d4f", "#faad14", "#13c2c2", "#ff7875"];
+const { RangePicker } = DatePicker;
 
 const DashBoardPage = () => {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<DashboardOverviewResponse | null>(null);
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([dayjs().subtract(30, 'day'), dayjs()]);
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      setLoading(true);
+      try {
+        const res = await getDashboardOverviewApi({
+          startDate: dateRange[0].toISOString(),
+          endDate: dateRange[1].toISOString(),
+        });
+        setData(res);
+      } catch (error) {
+        console.error("Failed to fetch dashboard", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboard();
+  }, [dateRange]);
+
+  const chartData = useMemo(() => {
+    if (!data || !dateRange || !dateRange[0] || !dateRange[1]) return [];
+
+    const dataMap = new Map();
+    data.charts.dates.forEach((dateStr, index) => {
+      if (dateStr) {
+        dataMap.set(String(dateStr), {
+          import: data.charts.importData[index] || 0,
+          export: data.charts.exportData[index] || 0,
+        });
+      }
+    });
+
+    const result = [];
+    let current = dayjs(dateRange[0]).startOf('day');
+    const end = dayjs(dateRange[1]).startOf('day');
+
+    while (current.valueOf() <= end.valueOf()) {
+      const dateStr = current.format('YYYY-MM-DD');
+      const timeLabel = current.format('MM-DD');
+      const existing = dataMap.get(dateStr);
+
+      result.push({
+        time: timeLabel,
+        import: existing ? existing.import : 0,
+        export: existing ? existing.export : 0,
+      });
+      
+      current = current.add(1, 'day');
+    }
+
+    return result;
+  }, [data, dateRange]);
+
   return (
-    <Flex vertical gap={24}>
-      <Row gutter={[16, 16]}>
-        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24} >
-          <StatCard title="Tổng cửa hàng" value={1250} up />
-        </Col>
-        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24}>
-          <StatCard title="Đã xuất kho" value={820} />
-        </Col>
-        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24}>
-          <StatCard title="Chưa xuất kho" value={430} />
-        </Col>
-        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24}>
-          <StatCard title="Tổng doanh thu tháng" value="125.000.000 VNĐ" down />
-        </Col>
+    <Flex vertical gap={24} style={{ minHeight: "80vh" }}>
+      <Flex justify="space-between" align="center">
+        <h2 style={{ margin: 0 }}>Tổng quan Kho hàng</h2>
+        <RangePicker 
+          value={dateRange} 
+          onChange={(dates) => dates && setDateRange([dates[0] as dayjs.Dayjs, dates[1] as dayjs.Dayjs])} 
+        />
+      </Flex>
+      {loading && !data ? (
+        <Flex justify="center" align="center" style={{ height: "50vh" }}>
+          <Spin size="large" />
+        </Flex>
+      ) : data ? (
+        <>
+          <Row gutter={[16, 16]}>
+            <Col span={6} xxl={6} xl={6} lg={12} md={12} sm={24} xs={24} >
+              <StatCard title="Tổng số loại mặt hàng" value={formatNumber(data.kpis.totalStock)} icon={<AppstoreOutlined style={{ color: '#1677ff' }} />} />
+            </Col>
+            <Col span={6} xxl={6} xl={6} lg={12} md={12} sm={24} xs={24}>
+              <StatCard title="Phiếu nhập chờ xử lý" value={data.kpis.pendingImports} icon={<ImportOutlined style={{ color: '#52c41a' }} />} />
+            </Col>
+            <Col span={6} xxl={6} xl={6} lg={12} md={12} sm={24} xs={24}>
+              <StatCard title="Phiếu xuất chờ xử lý" value={data.kpis.pendingExports} icon={<ExportOutlined style={{ color: '#ff4d4f' }} />} />
+            </Col>
+            <Col span={6} xxl={6} xl={6} lg={12} md={12} sm={24} xs={24}>
+              <StatCard title="Sản phẩm quá định mức cạn" value={data.kpis.lowStockProductsCount} icon={<WarningOutlined style={{ color: '#faad14' }} />} />
+            </Col>
+          </Row>
 
-        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24}>
-          <StatCard title="Công nợ" value="45.000.000 VNĐ" up />
-        </Col>
-        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24}>
-          <StatCard title="Tổng giá trị tồn kho" value="150.000.000 VNĐ" up />
-        </Col>
-        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24}>
-          <StatCard title="Số dư cuối kỳ" value="250.000.000 VNĐ" down />
-        </Col>
-        <Col span={6} xxl={6} xl={6} lg={8} md={12} sm={24} xs={24}>
-          <StatCard title="Vòng quay tồn kho" value="250" />
-        </Col>
-      </Row>
-      <Row gutter={16}>
-        <Col span={14} xxl={14} xl={14} lg={24} md={24} sm={24} xs={24}>
-          <Card title="Biểu đồ dòng tiền">
-            <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={lineData}>
-                <XAxis dataKey="time" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="deposit" stroke="#52c41a" />
-                <Line type="monotone" dataKey="withdraw" stroke="#ff4d4f" />
-                <Line type="monotone" dataKey="invest" stroke="#1677ff" />
-              </LineChart>
-            </ResponsiveContainer>
-          </Card>
-        </Col>
+          <Row gutter={16}>
+            <Col span={24} xxl={24} xl={24} lg={24} md={24} sm={24} xs={24}>
+              <Card title="Cường độ hoạt động (Nhập/Xuất kho)">
+                <ResponsiveContainer width="100%" height={260}>
+                  <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                    <XAxis dataKey="time" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="import" name="Số lượng Nhập" stroke="#52c41a" strokeWidth={2} />
+                    <Line type="monotone" dataKey="export" name="Số lượng Xuất" stroke="#ff4d4f" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Card>
+            </Col>
+          </Row>
 
-        <Col span={10} xxl={10} xl={10} lg={24} md={24} sm={24} xs={24}>
-          <Card title="Phân bổ sản phẩm">
-            <ResponsiveContainer width="100%" height={260}>
-              <PieChart>
-                <Pie data={pieData} dataKey="value" outerRadius={90} label>
-                  {pieData.map((_, index) => (
-                    <Cell key={index} fill={COLORS[index]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </Card>
-        </Col>
-      </Row>
-      <Row gutter={16}>
-        <Col span={12}>
-          <Card title="Giao dịch mới" extra={<a>Xem tất cả</a>}>
-            <TransactionItem name="Xuất hoá đơn 1" value="-5.000.000" />
-            <TransactionItem name="Xuất hoá đơn 2" value="+5.000.000" />
-            <TransactionItem name="Xuất hoá đơn 3" value="+5.000.000" />
-          </Card>
-        </Col>
+          <Row gutter={16}>
+            <Col span={12} xxl={12} xl={12} lg={24} md={24} sm={24} xs={24}>
+              <Card title="Giao dịch kho gần nhất" extra={<Link to={AppRoutes.warehouse_import_export}>Xem sổ kho</Link>}>
+                {data.recentTransactions.length > 0 ? data.recentTransactions.map((tx) => (
+                  <TransactionItem 
+                    key={tx.id} 
+                    name={`[${tx.type === 'IMPORT' ? 'Nhập' : 'Xuất'}] - Người tạo: ${tx.createdBy}`} 
+                    value={tx.totalAmount ? `Tổng GT: ${formatNumber(tx.totalAmount)}` : (tx.status === 'PENDING' ? "Chờ xử lý" : "0")} 
+                    unit={tx.totalAmount ? "VNĐ" : ""}
+                    color={tx.status === 'PENDING' ? '#faad14' : (tx.type === 'EXPORT' ? 'red' : 'green')}
+                  />
+                )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Không có giao dịch gần đây" />}
+              </Card>
+            </Col>
 
-        <Col span={12}>
-          <Card title="Công nợ" extra={<a>Xem tất cả</a>}>
-            <TransactionItem name="Nhà cung cấp 1" value="1.200.000" red />
-            <TransactionItem name="Nhà cung cấp 2" value="2.400.000" red />
-            <TransactionItem name="Nhà cung cấp 3" value="4.800.000" red />
-          </Card>
-        </Col>
-      </Row>
+            <Col span={12} xxl={12} xl={12} lg={24} md={24} sm={24} xs={24}>
+              <Card title="Cảnh báo sản phẩm Cạn kho" extra={<Link to={AppRoutes.products}>Xem toàn bộ</Link>}>
+                {data.lowStockAlerts.length > 0 ? data.lowStockAlerts.map((p) => (
+                  <TransactionItem 
+                    key={p.id} 
+                    name={`[${p.code}] ${p.name}`} 
+                    value={`${p.currentStock}`} 
+                    unit={` Tồn dư (Mức tối thiểu: ${p.minStock})`}
+                    color="red"
+                  />
+                )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Tồn kho các mặt hàng đang ở mức an toàn" />}
+              </Card>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Card title="Cảnh báo Lô hàng sắp/đã Hết Hạn" extra={<Link to={AppRoutes.products}>Kiểm tra Kho</Link>}>
+                {data.expiringBatches && data.expiringBatches.length > 0 ? data.expiringBatches.map((b) => (
+                  <TransactionItem 
+                    key={b.id} 
+                    name={`[Lô: ${b.batchCode || 'N/A'}] - ${b.product ? b.product.name : 'Sản phẩm không rõ'}`} 
+                    value={`${b.quantity}`} 
+                    unit={` Hộp/Gói (HSD: ${dayjs(b.expiryDate).format('DD/MM/YYYY')})`}
+                    color={dayjs(b.expiryDate).isBefore(dayjs()) ? 'red' : '#faad14'}
+                  />
+                )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Không có lô hàng nào sắp hết hạn" />}
+              </Card>
+            </Col>
+          </Row>
+        </>
+      ) : null}
     </Flex>
   );
 };
 
-export default DashBoardPage
+export default DashBoardPage;

@@ -8,6 +8,7 @@ import NoPermissonPage from "../pages/404-developing/no-permission";
 import WarehouseImportExportDetailPage from "../pages/app/warehouse_import_export/detail";
 import SalePage from "../pages/app/sales";
 import { CreateInvoicePage } from "../pages/app/sales/create_invoice";
+const SaleInvoiceDetailPage = Loadable(lazy(() => import('../pages/app/sales/detail_invoice')));
 
 
 const LoginPage = Loadable(lazy(() => import('../pages/auth/login-page')));
@@ -22,11 +23,12 @@ const ProductsPage = Loadable(lazy(() => import('../pages/app/products')));
 const CategoryPage = Loadable(lazy(() => import('../pages/app/category')));
 const SuppilerPage = Loadable(lazy(() => import('../pages/app/suppiler')));
 const CustomerPage = Loadable(lazy(() => import('../pages/app/customers')));
+const ProductBatchListPage = Loadable(lazy(() => import('../pages/app/product_batch/ProductBatchList')));
 const CustomerDetailPage = Loadable(lazy(() => import('../pages/app/customers/detail')));
 const UnitPage = Loadable(lazy(() => import('../pages/app/unit')));
 const WarehousePage = Loadable(lazy(() => import('../pages/app/warehouse')));
-const BranchPage = Loadable(lazy( async () => import('../pages/app/branch')));
-const WarehouseImportAndExport = Loadable(lazy( async () => import('../pages/app/warehouse_import_export')));
+const BranchPage = Loadable(lazy(async () => import('../pages/app/branch')));
+const WarehouseImportAndExport = Loadable(lazy(async () => import('../pages/app/warehouse_import_export')));
 export const router = createBrowserRouter(
   [
     {
@@ -80,6 +82,11 @@ export const router = createBrowserRouter(
           element: <CategoryPage />,
         },
         {
+          path: AppRoutes.inventory_batches,
+          id: AppRoutes.inventory_batches,
+          element: <ProductBatchListPage />,
+        },
+        {
           path: AppRoutes.supplier,
           id: AppRoutes.supplier,
           element: <SuppilerPage />,
@@ -109,7 +116,7 @@ export const router = createBrowserRouter(
           id: AppRoutes.warehouse_import_export,
           element: <WarehouseImportAndExport />,
         },
-           {
+        {
           path: AppRoutes.warehouse_import_export_detail,
           id: AppRoutes.warehouse_import_export_detail,
           element: <WarehouseImportExportDetailPage />,
@@ -119,7 +126,12 @@ export const router = createBrowserRouter(
           id: AppRoutes.sales_invoice,
           element: <SalePage />,
         },
-         {
+        {
+          path: AppRoutes.sales_invoice_detail,
+          id: AppRoutes.sales_invoice_detail,
+          element: <SaleInvoiceDetailPage />,
+        },
+        {
           path: AppRoutes.create_invoice,
           id: AppRoutes.create_invoice,
           element: <CreateInvoicePage />,
@@ -127,17 +139,17 @@ export const router = createBrowserRouter(
         {
           path: AppRoutes.unit.list,
           id: AppRoutes.unit.list,
-          element : <UnitPage />
+          element: <UnitPage />
         },
-          {
+        {
           path: AppRoutes.branch.list,
           id: AppRoutes.branch.list,
-          element : <BranchPage />
+          element: <BranchPage />
         },
-           {
+        {
           path: AppRoutes.no_permisson,
           id: AppRoutes.no_permisson,
-          element : <NoPermissonPage />
+          element: <NoPermissonPage />
         }
       ],
       errorElement: <NotFoundPage />,
