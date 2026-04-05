@@ -113,12 +113,14 @@ export const AppHeader = () => {
       }}
     >
       <Flex align="center" gap={20}>
-        <img
-          src={IcLogo}
-          alt="powersync"
-          width={ 280}
-          height={40}
-        />
+        {screens.md && (
+          <img
+            src={IcLogo}
+            alt="powersync"
+            width={ 280}
+            height={40}
+          />
+        )}
         <div
           onClick={handleCollape}
         >
@@ -128,14 +130,16 @@ export const AppHeader = () => {
             <FastForwardOutlined className="icon-collaped" />
           )}
         </div>
-        <Input
-          style={{
-            maxWidth: "300px",
-            marginLeft: 16,
-          }}
-          placeholder="Tìm kiếm..."
-          prefix={<SearchOutlined />}
-        />
+        {screens.md && (
+          <Input
+            style={{
+              maxWidth: "300px",
+              marginLeft: 16,
+            }}
+            placeholder="Tìm kiếm..."
+            prefix={<SearchOutlined />}
+          />
+        )}
       </Flex>
 
       <Flex gap={24} align="center" style={{ marginRight: 16 }}>

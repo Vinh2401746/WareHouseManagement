@@ -793,7 +793,7 @@ const WarehouseImportExportDetailPage =
                     initialValues={initForm}
                 >
                     <Row gutter={8}>
-                        <Col span={12}>
+                        <Col xs={24} sm={24} md={12}>
                             <Form.Item
                                 label="Kho"
                                 name="warehouse"
@@ -805,7 +805,7 @@ const WarehouseImportExportDetailPage =
                                 />
                             </Form.Item>
                         </Col>
-                        <Col span={12}>
+                        <Col xs={24} sm={24} md={12}>
                             <Form.Item
                                 label="Nhà cung cấp"
                                 name="supplier"
@@ -822,7 +822,7 @@ const WarehouseImportExportDetailPage =
                     </Row>
 
                     <Row gutter={8}>
-                        <Col span={12}>
+                        <Col xs={24} sm={24} md={12}>
                             <Form.Item
                                 label="Người vận chuyển"
                                 name="deliveryPerson"
@@ -833,7 +833,7 @@ const WarehouseImportExportDetailPage =
                                 <Input maxLength={24} />
                             </Form.Item>
                         </Col>
-                        <Col span={12}>
+                        <Col xs={24} sm={24} md={12}>
                             <Form.Item
                                 label="Lý do"
                                 name="reason"

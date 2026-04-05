@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKeys } from "../../../constants/query-keys";
 import { getProductsForPOS } from "../../../api/products";
 import { getWarehousesApi } from "../../../api/warehouse";
-import { Breadcrumb, Col, Flex, Image, Pagination, Row, Spin, Splitter, Select, Input } from "antd";
+import { Breadcrumb, Col, Flex, Image, Pagination, Row, Spin, Splitter, Select, Input, Grid } from "antd";
 import { ROOT_IMAGE_IMAGE } from "../../../constants/common";
 import {
   ProductInvoiceList,
@@ -31,6 +31,7 @@ export type CreateInvoiceRef = {
 };
 
 export const CreateInvoicePage = () => {
+  const screens = Grid.useBreakpoint();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [keyword, setKeyword] = useState("");
@@ -138,8 +139,8 @@ export const CreateInvoicePage = () => {
           ]}
         />
       </Flex>
-      <Splitter style={{ minHeight: window.screen.height - 400 }}>
-        <Splitter.Panel defaultSize="70%" min="50%" max="70%" style={{ padding: 12, display: 'flex', flexDirection: 'column' }}>
+      <Splitter layout={screens.md ? "horizontal" : "vertical"} style={{ minHeight: window.screen.height - 400 }}>
+        <Splitter.Panel defaultSize={screens.md ? "70%" : "50%"} min={screens.md ? "50%" : "30%"} max={screens.md ? "70%" : "80%"} style={{ padding: 12, display: 'flex', flexDirection: 'column' }}>
           
           <Flex gap={12} style={{ marginBottom: 16 }}>
             <Select 
