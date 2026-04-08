@@ -261,7 +261,7 @@ const ProductsPage = memo(() => {
           },
         ]}
       />
-      <Flex justify="end" gap={8}>
+      <Flex wrap="wrap" justify="end" gap={8}>
         <Button type="primary" onClick={() => utitilesAction("template")}  disabled={!isManager}>
           Tải file mẫu
         </Button>

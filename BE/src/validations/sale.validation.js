@@ -31,6 +31,7 @@ const getSales = {
   query: Joi.object().keys({
     code: Joi.string(),
     customerName: Joi.string(),
+    customer: Joi.string().custom(objectId),
     branch: Joi.string().custom(objectId),
     warehouse: Joi.string().custom(objectId),
     soldBy: Joi.string().custom(objectId),

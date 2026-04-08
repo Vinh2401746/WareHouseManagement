@@ -18,9 +18,14 @@ const getCustomers = catchAsync(async (req, res) => {
   
   if (filter.name) {
     filter.name = { $regex: filter.name, $options: 'i' };
+  } else {
+    delete filter.name;
   }
+  
   if (filter.phone) {
     filter.phone = { $regex: filter.phone, $options: 'i' };
+  } else {
+    delete filter.phone;
   }
 
   const scopeContext = buildScopeContext(req);

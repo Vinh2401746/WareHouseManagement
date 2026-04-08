@@ -24,15 +24,16 @@ const styles: TableProps<any[]>["styles"] = {
 };
 
 export const TableCommon = memo((props: TableCommonProps) => {
+  const { scroll, ...rest } = props;
   return (
     <Table
       pagination={false}
       rowKey={"id"}
       size="middle"
       styles={styles}
-      
+      scroll={{ x: "max-content", ...scroll }}
       // bordered
-      {...props}
+      {...rest}
     />
   );
 });

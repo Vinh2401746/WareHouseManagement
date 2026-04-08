@@ -77,6 +77,20 @@ const PERMISSION_DEFINITIONS = [
     description: 'Tạo hoặc cập nhật thông tin nhà cung cấp',
   },
   {
+    key: 'GET_CUSTOMERS',
+    code: 'getCustomers',
+    name: 'Xem khách hàng',
+    group: 'customers',
+    description: 'Xem danh sách thông tin khách hàng',
+  },
+  {
+    key: 'MANAGE_CUSTOMERS',
+    code: 'manageCustomers',
+    name: 'Quản lý khách hàng',
+    group: 'customers',
+    description: 'Thêm, sửa, thông tin khách hàng',
+  },
+  {
     key: 'GET_PRODUCT_BATCHS',
     code: 'getProductBatchs',
     name: 'Xem lô hàng',

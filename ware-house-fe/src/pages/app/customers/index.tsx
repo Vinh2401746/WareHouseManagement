@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Button, Flex, Pagination, Popconfirm, Tag } from "antd";
+import { Breadcrumb, Button, Flex, Pagination, Popconfirm, Tag, Input } from "antd";
+import { useNavigate } from "react-router-dom";
 import type { ColumnsType } from "antd/es/table";
 import type { CustomerFormRef } from "./components/create-update-customer";
 import CustomerFormModal from "./components/create-update-customer";
@@ -18,12 +19,14 @@ const CustomerPage = memo(() => {
   const [limit, setLimit] = useState(10);
   const formRef = useRef<CustomerFormRef>(null);
   
-  // Reuse permissions from suppliers or define 'customers'
-  const { isManager, canView } = usePermission("suppliers"); // Temporarily use suppliers permission if customers permission isn't set up yet
+  const navigate = useNavigate();
+  const [searchName, setSearchName] = useState("");
+  // Change permissions to 'customers'
+  const { isManager, canView } = usePermission("customers"); 
   
   const { data, refetch, isFetching, error, isError } = useQuery({
-    queryKey: ["customers.list", { page, limit }],
-    queryFn: () => getCustomersApi({ page, limit }),
+    queryKey: ["customers.list", { page, limit, searchName }],
+    queryFn: () => getCustomersApi({ page, limit, name: searchName }),
   });
 
   useEffect(() => {
@@ -49,7 +52,7 @@ const CustomerPage = memo(() => {
   const customers = useMemo(() => data?.results ?? [], [data?.results]);
 
   const onAction = useCallback(
-    (type: "delete" | "update", record: any) => {
+    (type: "delete" | "update" | "view", record: any) => {
       switch (type) {
         case "delete":
           mutate({ id: record.id });
@@ -57,11 +60,14 @@ const CustomerPage = memo(() => {
         case "update":
           formRef.current?.show(record);
           break;
+        case "view":
+          navigate(`/customer/${record.id}`);
+          break;
         default:
           break;
       }
     },
-    [mutate],
+    [mutate, navigate],
   );
 
   const columns: ColumnsType = useMemo(
@@ -115,6 +121,13 @@ const CustomerPage = memo(() => {
               style={{ cursor: "pointer" }}
             >
               <Tag
+                color={"blue"}
+                variant={"outlined"}
+                onClick={() => onAction("view", record)}
+              >
+                Chi tiết
+              </Tag>
+              <Tag
                 color={"green"}
                 variant={"outlined"}
                 onClick={() => onAction("update", record)}
@@ -157,7 +170,13 @@ const CustomerPage = memo(() => {
           },
         ]}
       />
-      <Flex justify="end">
+      <Flex justify="space-between">
+        <Input.Search 
+          placeholder="Tìm kiếm theo tên..." 
+          allowClear 
+          onSearch={(value) => setSearchName(value)}
+          style={{ width: 300 }} 
+        />
         <Button type="primary" onClick={() => formRef.current?.show()} disabled={!isManager}>
           Thêm khách hàng
         </Button>
@@ -172,7 +191,7 @@ const CustomerPage = memo(() => {
         onRow={(record) => {
           return {
             onDoubleClick: () => {
-              if (isManager) formRef.current?.show({ ...record });
+              navigate(`/customer/${record.id}`);
             },
           };
         }}

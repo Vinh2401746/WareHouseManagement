@@ -49,7 +49,7 @@ const createProduct = catchAsync(async (req, res) => {
 });
 
 const getProducts = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['code', 'name', 'unit', 'minStock']);
+  const filter = pick(req.query, ['code', 'name', 'unit', 'minStock', 'branch']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const scopeContext = buildScopeContext(req);
   const result = await productService.queryProducts(filter, options, scopeContext);

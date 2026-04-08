@@ -14,7 +14,7 @@ const createSale = catchAsync(async (req, res) => {
 });
 
 const getSales = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['code', 'branch', 'warehouse', 'soldBy', 'saleDate', 'totalAmount', 'items']);
+  const filter = pick(req.query, ['code', 'branch', 'warehouse', 'soldBy', 'saleDate', 'totalAmount', 'items', 'customer']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const scopeContext = buildScopeContext(req);
   const result = await saleService.querySales(filter, options, scopeContext);

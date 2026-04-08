@@ -6,6 +6,7 @@ export type GetProductsRequestType = {
   code?: string;
   limit: number;
   page: number;
+  branch?: string;
   // sortBy: Joi.string(),
 };
 

@@ -305,7 +305,7 @@ const WarehouseImportAndExport = memo(() => {
           },
         ]}
       />
-      <Flex justify="end" gap={8}>
+      <Flex wrap="wrap" justify="end" gap={8}>
         <Button
           type="primary"
           icon={<DownloadOutlined />}

@@ -1,0 +1,50 @@
+HƯỚNG DẪN PHÂN HỆ HỆ THỐNG: ĐĂNG NHẬP
+
+=========================
+1. TỔNG QUAN
+=========================
+Phân hệ Đăng nhập là cửa ngõ duy nhất để truy cập vào Hệ thống Quản Trị Kho. Phân hệ này cho phép người dùng xác thực danh tính thông qua thông tin Email và Mật khẩu, cung cấp tính năng lưu phiên đăng nhập và định tuyến người dùng về trang Khôi phục mật khẩu khi cần.
+
+=========================
+2. CÁCH TRUY CẬP
+=========================
+- Tự động điều hướng: Khi truy cập bất kỳ đường dẫn nào vào hệ thống nội bộ, nếu hệ thống chưa xác thực bạn, bạn sẽ tự động bị đẩy về màn hình Đăng nhập này.
+- Hoặc truy cập trực tiếp tại đường dẫn mặc định: /login
+
+=========================
+3. GIAO DIỆN & CÁC CHỨC NĂNG CHÍNH
+=========================
+Màn hình hiển thị một bảng điều khiển ở giữa trang với tiêu đề chính là "Quản Trị Kho".
+
+>> Ô nhập [Email]: Nơi để nhập địa chỉ email người dùng (Bắt buộc).
+>> Ô nhập [Password]: Nơi nhập mật khẩu, hiển thị ẩn dấu * (Bắt buộc).
+>> Checkbox [Lưu tài khoản]: Ghi nhớ người dùng, lần sau không cần đăng nhập lại.
+>> Nút [Quên mật khẩu]: Chuyển hướng đến quy trình khôi phục mật khẩu.
+>> Nút [Đăng nhập]: Nút chính đẩy lệnh gửi thông tin lên hệ thống.
+
+=========================
+4. HƯỚNG DẪN CHI TIẾT THEO LUỒNG THAO TÁC
+=========================
+
+--- [KỊCH BẢN 1]: Đăng nhập thành công (Happy Path) ---
+Bước 1: Điền đầy đủ thông tin email vào trường Email và mật khẩu vào Password.
+Bước 2: (Tùy chọn) Chọn ô "Lưu tài khoản" nếu đang dùng máy cá nhân.
+Bước 3: Nhấn nút [Đăng nhập].
+
+* Trạng thái trả về:
+- Nút chuyển sang trạng thái Loading (Chống spam).
+- THÀNH CÔNG: Hiển thị thông báo, tự động cất lưu tài khoản vào Session/localStorage (nếu có chọn Lưu tài khoản).
+- Điều hướng trực tiếp vào màn hình Dashboard.
+
+--- [KỊCH BẢN 2]: Ngoại lệ và Bắt lỗi ---
+1. Lỗi bỏ trống thông tin:
+   - Chưa nhập Email -> Báo chữ đỏ "Vui lòng nhập Email!" và huỷ lệnh.
+   - Chưa nhập Password -> Báo chữ đỏ "Vui lòng nhập mật khẩu!" và huỷ lệnh.
+
+2. Lỗi sai thông tin xác thực:
+   - Nhập sai -> Hệ thống xác nhận lỗi từ Server (401 Unauthorized), hiện bảng thông báo lỗi cho người dùng. 
+   - Thông tin gõ sai bị từ chối lưu để đảm bảo tính an toàn.
+
+--- [KỊCH BẢN 3]: Quên và Khôi phục ---
+Bước 1: Tại màn hình đăng nhập, nhấn "Quên mật khẩu".
+Bước 2: Hệ thống đưa bạn đến màn hình Khôi phục danh tính bằng hòm thư Email (/forgot-pass).

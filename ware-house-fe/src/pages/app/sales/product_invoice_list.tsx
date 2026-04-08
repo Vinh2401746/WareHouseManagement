@@ -18,6 +18,7 @@ import dispatchToast from "../../../constants/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createInvoiceApi } from "../../../api/sales";
 import { getCustomersApi } from "../../../api/customer";
+import { useAppSelector } from "../../../store/hooks";
 
 
 export type InvoiceItem = {
@@ -27,7 +28,7 @@ export type InvoiceItem = {
   imageUrl: string;
   quantity: number;
   price: number;
-  totalStock:number
+  totalStock: number
 };
 
 export type ProductInvoiceListRef = {
@@ -67,12 +68,13 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
     const [customerPaid, setCustomerPaid] = useState<number>(0);
     const [createdAt, setCreatedAt] = useState<string>("");
 
+    const branchId = useAppSelector((state) => state.user.user.branch?.id);
 
     // Customer search state
     const [customerKeyword, setCustomerKeyword] = useState("");
     const { data: customerData, isFetching: fetchingCustomers } = useQuery({
       queryKey: ["customers", customerKeyword],
-      queryFn: () => getCustomersApi({ limit: 20, page: 1, keyword: customerKeyword }),
+      queryFn: () => getCustomersApi({ limit: 20, page: 1, name: customerKeyword }),
     });
 
     const finalMoney = useMemo(() => {
@@ -100,7 +102,7 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
           setItems((prev) => {
             const exists = prev.find((i) => i.id === product.id);
             if (exists) {
-              if (exists.quantity +  1 > exists.totalStock) {
+              if (exists.quantity + 1 > exists.totalStock) {
                 dispatchToast("warning", "Số lượng không được vượt quá tồn kho");
                 return prev;
               }
@@ -166,7 +168,7 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
       setItems((prev) => prev.filter((i) => i.id !== id));
     };
 
-    const validateItems = () => {
+    const validateItems = useCallback(() => {
       if (!warehouseId) {
         dispatchToast("warning", "Vui lòng chọn Kho xuất hàng ở bên trái");
         return false;
@@ -181,9 +183,9 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
         return false;
       }
       return true;
-    }
+    }, [warehouseId, items]);
 
-    const handleOpenCheckout = () => {
+    const handleOpenCheckout = useCallback(() => {
       if (!validateItems()) return;
       if (!finalMoney.totalAmount || (!finalMoney.totalAmountAfterFax && finalMoney.totalAmountAfterFax !== 0)) {
         dispatchToast("warning", "Tổng tiền không hợp lệ");
@@ -192,7 +194,7 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
       setCustomerPaid(finalMoney.totalAmountAfterFax);
       setCreatedAt(dayjs().format("HH:mm:ss DD/M/YYYY"));
       setCheckoutVisible(true);
-    };
+    }, [validateItems, finalMoney]);
 
     const renderTotalMoney = useCallback(() => {
       return (
@@ -247,7 +249,7 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
           <Form.Item name="customerName" style={{ marginBottom: 12 }}>
             <Input placeholder="Hoặc nhập tên khách vãng lai..." />
           </Form.Item>
-          
+
           <Form.Item name="discountPercent" style={{ marginBottom: 12 }}>
             <Input type="number" placeholder="Giảm giá" suffix="%" />
           </Form.Item>
@@ -258,17 +260,17 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
       )
     }, [customerData, fetchingCustomers, form])
 
-    
+
     const { mutate, isPending } = useMutation({
       mutationFn: createInvoiceApi,
-      onSuccess:() =>{
+      onSuccess: () => {
         dispatchToast("success", "Tạo hoá đơn thành công!");
         setCheckoutVisible(false);
         setItems([]);
         onCancel?.();
         form.resetFields();
       },
-      onError:(e: any)=>{
+      onError: (e: any) => {
         dispatchToast("error", e?.message || "Tạo hoá đơn thất bại!");
       }
     })
@@ -289,9 +291,10 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
           quantity: item.quantity,
           price: item.price
         })),
-        warehouse: warehouseId
+        warehouse: warehouseId,
+        branch: branchId
       });
-    }, [form, items, warehouseId, mutate, finalMoney]);
+    }, [validateItems, form, items, warehouseId, branchId, mutate, finalMoney]);
 
     const handleCreateInvoice = useCallback(() => {
       mutate({
@@ -308,189 +311,190 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
           quantity: item.quantity,
           price: item.price
         })),
-        warehouse: warehouseId
+        warehouse: warehouseId,
+        branch: branchId
       });
-    }, [form, items, warehouseId, mutate, finalMoney, customerPaid]);
+    }, [form, items, warehouseId, branchId, mutate, finalMoney, customerPaid]);
 
     return (
       <>
-      <Row gutter={[24, 24]} style={{ flexDirection: "column" }}>
-        {items.length === 0 && (
-          <Col span={24}>
-            <Flex vertical align="center" gap={12} style={{ padding: "32px 0" }}>
-              <div
-                style={{
-                  width: 100, height: 100, borderRadius: "50%",
-                  background: "#e8f0fe", display: "flex", alignItems: "center", justifyContent: "center",
-                }}
-              >
-                <ShoppingCartOutlined style={{ fontSize: 48, color: "#1677ff" }} />
-              </div>
-              <span style={{ fontSize: 18, fontWeight: 600, color: "#222" }}>Giỏ hàng trống</span>
-              <span style={{ fontSize: 14, color: "#888" }}>Chưa có sản phẩm nào được chọn.</span>
-            </Flex>
-          </Col>
-        )}
-        {items.map((item) => (
-          <Col key={item.id}>
-            <Row gutter={8} align="middle">
-              <Col>
-                <Image
-                  width={50} height={50} alt=""
-                  src={item?.imageUrl ? `${ROOT_IMAGE_IMAGE}${item?.imageUrl}` : 'https://images.pexels.com/photos/16211537/pexels-photo-16211537.jpeg'}
-                />
-              </Col>
-              <Col flex={1}>
-                <Flex vertical gap={6}>
-                  <span>{item.name}</span>
-                  <Flex gap={4} align="center">
-                    <Tag
-                      color="red" variant="outlined"
-                      style={{ width: 28, justifyContent: "center", display: "flex", cursor: "pointer" }}
-                      onClick={() => handleDecrease(item.id)}
-                    >
-                      −
-                    </Tag>
-                    <span style={{ minWidth: 20, textAlign: "center" }}>{item.quantity}</span>
-                    <Tag
-                      color="green" variant="outlined"
-                      style={{ width: 28, justifyContent: "center", display: "flex", cursor: "pointer" }}
-                      onClick={() => handleIncrease(item.id)}
-                    >
-                      +
-                    </Tag>
-                    <Input
-                      defaultValue={item.price}
-                      style={{ width: 110 }}
-                      suffix="đ"
-                      onBlur={(e) => handlePriceBlur(item.id, e.target.value)}
-                    />
-                    <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleRemove(item.id)} />
+        <Row gutter={[24, 24]} style={{ flexDirection: "column" }}>
+          {items.length === 0 && (
+            <Col span={24}>
+              <Flex vertical align="center" gap={12} style={{ padding: "32px 0" }}>
+                <div
+                  style={{
+                    width: 100, height: 100, borderRadius: "50%",
+                    background: "#e8f0fe", display: "flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  <ShoppingCartOutlined style={{ fontSize: 48, color: "#1677ff" }} />
+                </div>
+                <span style={{ fontSize: 18, fontWeight: 600, color: "#222" }}>Giỏ hàng trống</span>
+                <span style={{ fontSize: 14, color: "#888" }}>Chưa có sản phẩm nào được chọn.</span>
+              </Flex>
+            </Col>
+          )}
+          {items.map((item) => (
+            <Col key={item.id}>
+              <Row gutter={8} align="middle">
+                <Col>
+                  <Image
+                    width={50} height={50} alt=""
+                    src={item?.imageUrl ? `${ROOT_IMAGE_IMAGE}${item?.imageUrl}` : 'https://images.pexels.com/photos/16211537/pexels-photo-16211537.jpeg'}
+                  />
+                </Col>
+                <Col flex={1}>
+                  <Flex vertical gap={6}>
+                    <span>{item.name}</span>
+                    <Flex gap={4} align="center">
+                      <Tag
+                        color="red" variant="outlined"
+                        style={{ width: 28, justifyContent: "center", display: "flex", cursor: "pointer" }}
+                        onClick={() => handleDecrease(item.id)}
+                      >
+                        −
+                      </Tag>
+                      <span style={{ minWidth: 20, textAlign: "center" }}>{item.quantity}</span>
+                      <Tag
+                        color="green" variant="outlined"
+                        style={{ width: 28, justifyContent: "center", display: "flex", cursor: "pointer" }}
+                        onClick={() => handleIncrease(item.id)}
+                      >
+                        +
+                      </Tag>
+                      <Input
+                        defaultValue={item.price}
+                        style={{ width: 110 }}
+                        suffix="đ"
+                        onBlur={(e) => handlePriceBlur(item.id, e.target.value)}
+                      />
+                      <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleRemove(item.id)} />
+                    </Flex>
                   </Flex>
-                </Flex>
-              </Col>
-            </Row>
-          </Col>
-        ))}
+                </Col>
+              </Row>
+            </Col>
+          ))}
 
-        {renderForm()}
-        {renderTotalMoney()}
+          {renderForm()}
+          {renderTotalMoney()}
 
-        <Flex gap={8} justify="space-between" align="center">
-          <Button
-            danger
-            type="primary"
-            style={{ background: "#e03131" }}
-            onClick={() => {
-              onCancel?.();
-              setItems([]);
-              form.resetFields();
-            }}
-          >
-            Hủy đơn
-          </Button>
-          <Button
-            type="primary"
-            style={{ background: "#e7991bff" }}
-            onClick={handleSaveDraft}
-            loading={isPending}
-          >
-            Lưu tạm
-          </Button>
-          <Button
-            type="primary"
-            style={{ background: "#2f9e44", flex: 1}}
-            onClick={handleOpenCheckout}
-          >
-            Tính tiền
-          </Button>
-        </Flex>
-      </Row>
+          <Flex gap={8} justify="space-between" align="center">
+            <Button
+              danger
+              type="primary"
+              style={{ background: "#e03131" }}
+              onClick={() => {
+                onCancel?.();
+                setItems([]);
+                form.resetFields();
+              }}
+            >
+              Hủy đơn
+            </Button>
+            <Button
+              type="primary"
+              style={{ background: "#e7991bff" }}
+              onClick={handleSaveDraft}
+              loading={isPending}
+            >
+              Lưu tạm
+            </Button>
+            <Button
+              type="primary"
+              style={{ background: "#2f9e44", flex: 1 }}
+              onClick={handleOpenCheckout}
+            >
+              Tính tiền
+            </Button>
+          </Flex>
+        </Row>
 
-      <Modal
-        title="Tính tiền"
-        open={checkoutVisible}
-        onCancel={() => setCheckoutVisible(false)}
-        footer={null}
-        width={700}
-      >
-        <Flex gap={24}>
-          <div style={{ flex: 1, background: "#f5f7fa", borderRadius: 10, padding: 20 }}>
-            <Segmented
-              block
-              options={["Tiền mặt", "Chuyển khoản"]}
-              value={paymentMethod}
-              onChange={(v) => setPaymentMethod(v as "Tiền mặt" | "Chuyển khoản")}
-              style={{ marginBottom: 20 }}
-            />
-            {paymentMethod === "Tiền mặt" ? (
-              <>
-                <div style={{ marginBottom: 12 }}>
-                  <div style={{ marginBottom: 4 }}>
-                    Tiền khách trả <span style={{ color: "red" }}>*</span>
+        <Modal
+          title="Tính tiền"
+          open={checkoutVisible}
+          onCancel={() => setCheckoutVisible(false)}
+          footer={null}
+          width={700}
+        >
+          <Flex gap={24}>
+            <div style={{ flex: 1, background: "#f5f7fa", borderRadius: 10, padding: 20 }}>
+              <Segmented
+                block
+                options={["Tiền mặt", "Chuyển khoản"]}
+                value={paymentMethod}
+                onChange={(v) => setPaymentMethod(v as "Tiền mặt" | "Chuyển khoản")}
+                style={{ marginBottom: 20 }}
+              />
+              {paymentMethod === "Tiền mặt" ? (
+                <>
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ marginBottom: 4 }}>
+                      Tiền khách trả <span style={{ color: "red" }}>*</span>
+                    </div>
+                    <Input
+                      value={customerPaid}
+                      onChange={(e) => setCustomerPaid(Number(e.target.value.replace(/[^0-9]/g, "")))}
+                      suffix="VNĐ"
+                      size="large"
+                    />
                   </div>
+                  <div style={{ marginBottom: 4 }}>Tiền thừa trả khách</div>
                   <Input
-                    value={customerPaid}
-                    onChange={(e) => setCustomerPaid(Number(e.target.value.replace(/[^0-9]/g, "")))}
+                    value={Math.max(0, customerPaid - finalMoney.totalAmountAfterFax)}
+                    readOnly
                     suffix="VNĐ"
                     size="large"
                   />
-                </div>
-                <div style={{ marginBottom: 4 }}>Tiền thừa trả khách</div>
-                <Input
-                  value={Math.max(0, customerPaid - finalMoney.totalAmountAfterFax)}
-                  readOnly
-                  suffix="VNĐ"
-                  size="large"
-                />
-              </>
-            ) : (
-              <Flex vertical align="center" gap={8}>
-                <img
-                  src="https://1pro.vn/wp-content/uploads/2025/03/IMG_7559.jpg"
-                  alt="QR chuyển khoản"
-                  style={{ width: 180, height: 180, borderRadius: 8 }}
-                />
-                <span style={{ color: "#555", fontSize: 13 }}>Quét mã QR để thanh toán</span>
-              </Flex>
-            )}
-          </div>
+                </>
+              ) : (
+                <Flex vertical align="center" gap={8}>
+                  <img
+                    src="https://1pro.vn/wp-content/uploads/2025/03/IMG_7559.jpg"
+                    alt="QR chuyển khoản"
+                    style={{ width: 180, height: 180, borderRadius: 8 }}
+                  />
+                  <span style={{ color: "#555", fontSize: 13 }}>Quét mã QR để thanh toán</span>
+                </Flex>
+              )}
+            </div>
 
-          <div style={{ flex: 1, background: "#f5f7fa", borderRadius: 10, padding: 20 }}>
-            <Flex justify="space-between" style={{ marginBottom: 10 }}>
-              <span style={{ color: "#555" }}>Ngày tạo</span>
-              <span>{createdAt}</span>
-            </Flex>
-            <Flex justify="space-between" style={{ marginBottom: 10 }}>
-              <span style={{ color: "#555" }}>Thành tiền</span>
-              <span>{formatNumber(finalMoney.totalAmount)} đ</span>
-            </Flex>
-            <Flex justify="space-between" style={{ marginBottom: 10 }}>
-              <span style={{ color: "#555" }}>Chiết khấu</span>
-              <span>{formatNumber(finalMoney.discountMoney)} đ</span>
-            </Flex>
-            <Flex justify="space-between" style={{ marginBottom: 10, paddingBottom: 10, borderBottom: "1px solid #e0e0e0" }}>
-              <span style={{ color: "#555" }}>VAT</span>
-              <span>{formatNumber(finalMoney.taxMoney)} đ</span>
-            </Flex>
-            <Flex justify="space-between" style={{ marginBottom: 20 }}>
-              <span style={{ fontWeight: 600, fontSize: 15 }}>Tổng thanh toán</span>
-              <span style={{ fontWeight: 600, fontSize: 15 }}>{formatNumber(finalMoney.totalAmountAfterFax)} đ</span>
-            </Flex>
-            <Flex justify="center" style={{ marginBottom: 20 }}>
-              <Button icon={<PrinterOutlined />} type="text" onClick={() => dispatchToast("warning", "Tính năng đang phát triển")}>
-                In hóa đơn tạm tính
-              </Button>
-            </Flex>
-            <Flex gap={12}>
-              <Button size="large" style={{ flex: 1 }} onClick={() => setCheckoutVisible(false)}>Đóng</Button>
-              <Button size="large" type="primary" style={{ flex: 1 }} onClick={handleCreateInvoice} loading={isPending}>
-                Thanh toán
-              </Button>
-            </Flex>
-          </div>
-        </Flex>
-      </Modal>
+            <div style={{ flex: 1, background: "#f5f7fa", borderRadius: 10, padding: 20 }}>
+              <Flex justify="space-between" style={{ marginBottom: 10 }}>
+                <span style={{ color: "#555" }}>Ngày tạo</span>
+                <span>{createdAt}</span>
+              </Flex>
+              <Flex justify="space-between" style={{ marginBottom: 10 }}>
+                <span style={{ color: "#555" }}>Thành tiền</span>
+                <span>{formatNumber(finalMoney.totalAmount)} đ</span>
+              </Flex>
+              <Flex justify="space-between" style={{ marginBottom: 10 }}>
+                <span style={{ color: "#555" }}>Chiết khấu</span>
+                <span>{formatNumber(finalMoney.discountMoney)} đ</span>
+              </Flex>
+              <Flex justify="space-between" style={{ marginBottom: 10, paddingBottom: 10, borderBottom: "1px solid #e0e0e0" }}>
+                <span style={{ color: "#555" }}>VAT</span>
+                <span>{formatNumber(finalMoney.taxMoney)} đ</span>
+              </Flex>
+              <Flex justify="space-between" style={{ marginBottom: 20 }}>
+                <span style={{ fontWeight: 600, fontSize: 15 }}>Tổng thanh toán</span>
+                <span style={{ fontWeight: 600, fontSize: 15 }}>{formatNumber(finalMoney.totalAmountAfterFax)} đ</span>
+              </Flex>
+              <Flex justify="center" style={{ marginBottom: 20 }}>
+                <Button icon={<PrinterOutlined />} type="text" onClick={() => dispatchToast("warning", "Tính năng đang phát triển")}>
+                  In hóa đơn tạm tính
+                </Button>
+              </Flex>
+              <Flex gap={12}>
+                <Button size="large" style={{ flex: 1 }} onClick={() => setCheckoutVisible(false)}>Đóng</Button>
+                <Button size="large" type="primary" style={{ flex: 1 }} onClick={handleCreateInvoice} loading={isPending}>
+                  Thanh toán
+                </Button>
+              </Flex>
+            </div>
+          </Flex>
+        </Modal>
       </>
     );
   },

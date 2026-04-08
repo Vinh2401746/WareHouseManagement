@@ -4,7 +4,7 @@ const { Product, ProductBatch, InventoryTransaction, Sale } = require('../models
 const ApiError = require('../utils/ApiError');
 const responseMessages = require('../constants/responseMessages');
 const { INVENTORY_TRANSACTION_TYPES, INVENTORY_TRANSACTION_REASONS } = require('../constants/inventoryTransaction.constant');
-const { resolveScopedWarehouseIds } = require('../utils/branchScope');
+const { resolveScopedWarehouseIds, applyBranchScope } = require('../utils/branchScope');
 
 const DEFAULT_DATE_RANGE_DAYS = 30;
 const MAX_PAGE_LIMIT = 100;
@@ -384,7 +384,8 @@ const buildOverviewWarnings = (rows) => {
 };
 
 const getInventoryOverview = async (filters = {}, options = {}, context = {}) => {
-  const productFilter = buildProductFilter(filters);
+  let productFilter = buildProductFilter(filters);
+  productFilter = applyBranchScope(productFilter, context);
   const paginationOptions = buildPaginationOptions(options);
   const [productsPage, dateRange] = await Promise.all([
     Product.paginate(productFilter, paginationOptions),
@@ -651,7 +652,8 @@ const getInventoryDetail = async (productId, filters = {}, context = {}) => {
 };
 
 const getProductsForPOS = async (filters = {}, options = {}, context = {}) => {
-  const productFilter = buildProductFilter({ keyword: filters.keyword });
+  let productFilter = buildProductFilter({ keyword: filters.keyword });
+  productFilter = applyBranchScope(productFilter, context);
   const paginationOptions = buildPaginationOptions(options);
 
   const productsPage = await Product.paginate(productFilter, paginationOptions);
