@@ -5,7 +5,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { Button, Col, Flex, Form, Image, Input, Modal, Row, Segmented, Tag, Select, Spin } from "antd";
+import { Button, Col, Flex, Form, Image, Input, InputNumber, Modal, Row, Segmented, Tag, Select, Spin } from "antd";
 import { DeleteOutlined, PrinterOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import {
   TAX_PERCENT,
@@ -355,7 +355,22 @@ export const ProductInvoiceList = forwardRef<ProductInvoiceListRef, Props>(
                       >
                         −
                       </Tag>
-                      <span style={{ minWidth: 20, textAlign: "center" }}>{item.quantity}</span>
+                      <InputNumber
+                        min={1}
+                        max={item.totalStock}
+                        value={item.quantity}
+                        onChange={(val) => {
+                           const num = Number(val) || 1;
+                           if (num > item.totalStock) {
+                               dispatchToast("warning", "Số lượng không được vượt quá tồn kho");
+                               setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, quantity: item.totalStock } : i)));
+                           } else {
+                               setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, quantity: num } : i)));
+                           }
+                        }}
+                        style={{ width: 60, textAlign: "center" }}
+                        controls={false}
+                      />
                       <Tag
                         color="green" variant="outlined"
                         style={{ width: 28, justifyContent: "center", display: "flex", cursor: "pointer" }}
