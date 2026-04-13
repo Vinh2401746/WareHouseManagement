@@ -22,7 +22,8 @@ const getSales = catchAsync(async (req, res) => {
 });
 
 const getSale = catchAsync(async (req, res) => {
-  const sale = await saleService.getSaleById(req.params.saleId);
+  const scopeContext = buildScopeContext(req);
+  const sale = await saleService.getSaleDetailById(req.params.saleId, scopeContext);
   if (!sale) {
     throw new ApiError(httpStatus.NOT_FOUND, responseMessages.sale.notFound);
   }

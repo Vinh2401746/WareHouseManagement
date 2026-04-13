@@ -30,7 +30,7 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
   [AppRoutes.warehouse.list]: "warehouses",
   [AppRoutes.branch.list]: "branches",
   [AppRoutes.warehouse_import_export]: "inventoryTransactions",
-  [AppRoutes.sales_invoice]: "inventoryTransactions",
+  [AppRoutes.sales_invoice]: "sales",
   [AppRoutes.inventory_batches]: "products", // temporary map to products read
 };
 

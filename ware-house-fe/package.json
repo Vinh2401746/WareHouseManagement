@@ -17,6 +17,8 @@
     "axios": "^1.13.2",
     "dayjs": "^1.11.19",
     "immer": "^11.1.4",
+    "html2pdf.js": "^0.10.3",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-redux": "^9.2.0",

@@ -1,0 +1,134 @@
+.invoice-a4 {
+  position: relative;
+  width: 210mm;
+  min-height: 297mm;
+  padding: 12mm;
+  background: #fff;
+  color: #000;
+  box-sizing: border-box;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.invoice-a4__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.invoice-a4__logo {
+  width: 120px;
+  height: auto;
+}
+
+.invoice-a4__title {
+  text-align: right;
+}
+
+.invoice-a4__title h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.invoice-a4__meta {
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+.invoice-a4__sections {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.invoice-a4__box {
+  flex: 1;
+}
+
+.invoice-a4__box h3 {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+}
+
+.invoice-a4__row {
+  display: flex;
+  gap: 6px;
+}
+
+.invoice-a4__row-label {
+  min-width: 90px;
+  color: #444;
+}
+
+.invoice-a4__table-wrap {
+  margin-top: 12px;
+}
+
+.invoice-a4__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoice-a4__table th,
+.invoice-a4__table td {
+  border: 1px solid #e5e5e5;
+  padding: 6px;
+  vertical-align: top;
+}
+
+.invoice-a4__table th {
+  background: #fafafa;
+}
+
+.invoice-a4__table tr {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.invoice-a4__cell-wrap {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.invoice-a4__totals {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.invoice-a4__totals table {
+  border-collapse: collapse;
+  min-width: 260px;
+}
+
+.invoice-a4__totals td {
+  padding: 4px 0;
+}
+
+.invoice-a4__totals td:last-child {
+  text-align: right;
+}
+
+.invoice-a4__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.invoice-a4__watermark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  font-size: 64px;
+  font-weight: 700;
+  color: rgba(255, 0, 0, 0.14);
+  transform: rotate(-30deg);
+  text-align: center;
+}

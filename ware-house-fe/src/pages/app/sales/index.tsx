@@ -1,11 +1,12 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QueryKeys } from "../../../constants/query-keys";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Button, Flex, Pagination, Popconfirm, Tag } from "antd";
+import { Breadcrumb, Button, Flex, Modal, Pagination, Popconfirm, Spin, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dispatchToast from "../../../constants/toast";
 import {
   DownloadOutlined,
+  EyeOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 
@@ -21,7 +22,9 @@ import { formatDate, formatNumber } from "../../../utils/helper";
 import NoPermissonPage from "../../404-developing/no-permission";
 import { usePermission } from "../../../hooks/usePermission";
 import { useNavigate } from "react-router-dom";
-import { getInvoicesApi } from "../../../api/sales";
+import { getInvoiceByIdApi, getInvoicesApi } from "../../../api/sales";
+import { InvoiceA4 } from "./components/invoice_a4";
+import { exportInvoicePdf } from "./utils/export_invoice_pdf";
 //['PENDING', 'COMPLETED', 'CANCELED']
 const renderStatus = (status: string) => {
   switch (status) {
@@ -31,6 +34,7 @@ const renderStatus = (status: string) => {
       return 'Đang chờ duyệt';
     case "COMPLETED":
       return 'Hoàn thành';
+    case "CANCELLED":
     case "CANCELED":
       return 'Đã huỷ';
     default:
@@ -51,8 +55,28 @@ const SalePage = memo(() => {
     // enabled:false
   });
 
-  console.log("data",data)
-  const { isManager, canView } = usePermission("inventoryTransactions")
+  const { isManager, canView } = usePermission("sales")
+
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewSaleId, setPreviewSaleId] = useState<string | null>(null);
+  const [exportingSaleId, setExportingSaleId] = useState<string | null>(null);
+  const [exportSaleDetail, setExportSaleDetail] = useState<any | null>(null);
+  const exportRef = useRef<HTMLDivElement | null>(null);
+
+  const { data: saleDetail, isFetching: isFetchingSaleDetail } = useQuery({
+    queryKey: [QueryKeys.sales.detail, previewSaleId],
+    queryFn: () => getInvoiceByIdApi({ id: previewSaleId || "" }),
+    enabled: Boolean(isPreviewOpen && previewSaleId),
+    gcTime: 15 * 60 * 1000,
+  });
+
+  const saleDetailQrText = useMemo(() => {
+    if (!saleDetail) return "";
+    const code = saleDetail?.code || saleDetail?.id || "";
+    const total = formatNumber(saleDetail?.totalAmountAfterFax ?? 0);
+    const date = saleDetail?.saleDate ? formatDate(saleDetail.saleDate) : "";
+    return `Mã HĐ: ${code} | Tổng phải thu: ${total} | Ngày bán: ${date}`;
+  }, [saleDetail]);
 
 
   useEffect(() => {
@@ -91,6 +115,46 @@ const SalePage = memo(() => {
 
 
   const units = useMemo(() => data?.results ?? [], [data?.results]);
+
+  const runExport = useCallback(
+    async (detail: any) => {
+      const filename = `HoaDon_${detail?.code || detail?.id || "invoice"}.pdf`;
+      setExportSaleDetail(detail);
+
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+      if (!exportRef.current) {
+        setExportSaleDetail(null);
+        throw new Error("Không tìm thấy DOM để export PDF");
+      }
+
+      await exportInvoicePdf({ element: exportRef.current, filename });
+      setExportSaleDetail(null);
+    },
+    [],
+  );
+
+  const onPreview = useCallback((record: any) => {
+    setPreviewSaleId(record?.id);
+    setIsPreviewOpen(true);
+  }, []);
+
+  const onDownloadPdf = useCallback(
+    async (record: any) => {
+      try {
+        const saleId = record?.id;
+        if (!saleId) return;
+        setExportingSaleId(saleId);
+        const detail = await getInvoiceByIdApi({ id: saleId });
+        await runExport(detail);
+      } catch (err: any) {
+        dispatchToast("error", err?.message || "Tải PDF thất bại");
+      } finally {
+        setExportingSaleId(null);
+      }
+    },
+    [runExport],
+  );
 
   const onAction = useCallback(
     (type: "delete" | "update" | "reset-pass" | "approval" | "cancel", record: any) => {
@@ -228,6 +292,26 @@ const SalePage = memo(() => {
                 Chi Tiết Đơn
               </Tag>
 
+              <Tag
+                color={"cyan"}
+                variant={"outlined"}
+                onClick={() => onPreview(record)}
+                disabled={!canView}
+                icon={<EyeOutlined />}
+              >
+                Xem trước
+              </Tag>
+
+              <Tag
+                color={"geekblue"}
+                variant={"outlined"}
+                onClick={() => onDownloadPdf(record)}
+                disabled={!canView || exportingSaleId === record?.id}
+                icon={<DownloadOutlined />}
+              >
+                {exportingSaleId === record?.id ? "Đang xử lý..." : "Tải PDF"}
+              </Tag>
+
               {
                 record.status == "PENDING" &&
                 <>
@@ -270,7 +354,7 @@ const SalePage = memo(() => {
         },
       },
     ],
-    [onAction],
+    [canView, exportingSaleId, isManager, onAction, onDownloadPdf, onPreview],
   );
   if (!canView) return <NoPermissonPage />
   return (
@@ -338,6 +422,73 @@ const SalePage = memo(() => {
           onChange={(page) => setPage(page)}
         />
       </Flex>
+
+      <Modal
+        open={isPreviewOpen}
+        onCancel={() => {
+          setIsPreviewOpen(false);
+          setPreviewSaleId(null);
+        }}
+        width={900}
+        title="Xem trước hóa đơn (A4)"
+        footer={
+          <Flex justify="end" gap={8}>
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              onClick={async () => {
+                try {
+                  if (!saleDetail) return;
+                  setExportingSaleId(saleDetail?.id || previewSaleId);
+                  await runExport(saleDetail);
+                } catch (err: any) {
+                  dispatchToast("error", err?.message || "Tải PDF thất bại");
+                } finally {
+                  setExportingSaleId(null);
+                }
+              }}
+              disabled={!saleDetail || isFetchingSaleDetail}
+              loading={Boolean(exportingSaleId && exportingSaleId === (saleDetail?.id || previewSaleId))}
+            >
+              Tải xuống (PDF)
+            </Button>
+            <Button
+              onClick={() => {
+                setIsPreviewOpen(false);
+                setPreviewSaleId(null);
+              }}
+            >
+              Đóng
+            </Button>
+          </Flex>
+        }
+      >
+        <Spin spinning={isFetchingSaleDetail}>
+          {saleDetail ? (
+            <div style={{ overflow: "auto" }}>
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <InvoiceA4
+                  saleDetail={saleDetail}
+                  qrText={saleDetailQrText}
+                  showWatermark={saleDetail?.status === "CANCELLED"}
+                />
+              </div>
+            </div>
+          ) : null}
+        </Spin>
+      </Modal>
+
+      {/* Offscreen render for PDF export (unscaled) */}
+      {exportSaleDetail ? (
+        <div style={{ position: "fixed", left: -100000, top: 0 }}>
+          <InvoiceA4
+            ref={exportRef}
+            saleDetail={exportSaleDetail}
+            qrText={`Mã HĐ: ${exportSaleDetail?.code || exportSaleDetail?.id || ""} | Tổng phải thu: ${formatNumber(exportSaleDetail?.totalAmountAfterFax ?? 0)} | Ngày bán: ${exportSaleDetail?.saleDate ? formatDate(exportSaleDetail.saleDate) : ""}`}
+            showWatermark={exportSaleDetail?.status === "CANCELLED"}
+          />
+        </div>
+      ) : null}
     </div>
   );
 });

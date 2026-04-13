@@ -291,6 +291,28 @@ const getSaleById = async (id) => {
 };
 
 /**
+ * Get sale detail by id with branch/warehouse scope + populate
+ * @param {ObjectId} saleId
+ * @param {Object} context
+ * @returns {Promise<Sale>}
+ */
+const getSaleDetailById = async (saleId, context = {}) => {
+  const branchScopedFilter = applyBranchScope({ _id: saleId }, context);
+  const scopedFilter = await applyWarehouseScope(branchScopedFilter, context);
+
+  return Sale.findOne(scopedFilter)
+    .populate({ path: 'branch', select: 'name address phone' })
+    .populate({ path: 'warehouse', select: 'name branch' })
+    .populate({ path: 'customer', select: 'name phone address' })
+    .populate({ path: 'soldBy', select: 'name email' })
+    .populate({
+      path: 'items.product',
+      select: 'name code unit sellingPrice',
+      populate: { path: 'unit', select: 'name' },
+    });
+};
+
+/**
  * Update sale by id
  * Xử lý tuần tự (không dùng MongoDB transaction).
  * @param {ObjectId} saleId
@@ -392,6 +414,7 @@ module.exports = {
   createSale,
   querySales,
   getSaleById,
+  getSaleDetailById,
   updateSaleById,
   deleteSaleById,
 };
