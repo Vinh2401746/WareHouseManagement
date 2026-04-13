@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QueryKeys } from "../../../constants/query-keys";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Button, Flex, Pagination, Popconfirm, Tag } from "antd";
+import { Breadcrumb, Button, Flex, Pagination, Popconfirm, Tag, Modal, Spin, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dispatchToast from "../../../constants/toast";
 import {
@@ -16,8 +16,10 @@ import type { GetInventoriesRequest } from "../../../types/inventory";
 
 import { deleteWarehouseApi } from "../../../api/warehouse";
 import type { DeleteWarehouseRequestType } from "../../../types/warehouse";
-import { comfirmInventoryApi, getInventoriesApi } from "../../../api/inventory/inventory";
+import { comfirmInventoryApi, getAnInventoryApi, getInventoriesApi } from "../../../api/inventory/inventory";
 import { formatDate, formatNumber } from "../../../utils/helper";
+import { InventoryA4 } from "./components/inventory_a4";
+import { exportInventoryPdf } from "./utils/export_inventory_pdf";
 import type { CancelFormRef } from "./components/cancel-import";
 import CancelImport from "./components/cancel-import";
 import NoPermissonPage from "../../404-developing/no-permission";
@@ -44,11 +46,17 @@ const renderStatus = (status: string) => {
 const WarehouseImportAndExport = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [type, setType] = useState<"IMPORT" | "EXPORT">("IMPORT");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [pendingExportId, setPendingExportId] = useState<string | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const exportRef = useRef<HTMLDivElement | null>(null);
   const cancelRef= useRef<CancelFormRef>(null)
 
   const navigate = useNavigate()
   const { data, isLoading, refetch, error, isError } = useQuery({
-    queryKey: [QueryKeys.category.list, { page, limit }],
+    queryKey: [QueryKeys.inventory.list, { page, limit, type }],
     queryFn: ({ queryKey }) => {
       const [, payload] = queryKey as [string, GetInventoriesRequest];
       return getInventoriesApi(payload);
@@ -57,6 +65,12 @@ const WarehouseImportAndExport = memo(() => {
     // enabled:false
   });
       const {isManager,canView} = usePermission("inventoryTransactions")
+
+  const { data: detailData, isLoading: isDetailLoading } = useQuery({
+    queryKey: [QueryKeys.inventory.detail, selectedId],
+    queryFn: () => getAnInventoryApi({ id: selectedId || "" }),
+    enabled: Boolean(selectedId),
+  });
 
 
   useEffect(() => {
@@ -97,8 +111,8 @@ const WarehouseImportAndExport = memo(() => {
   const units = useMemo(() => data?.results ?? [], [data?.results]);
 
   const onAction = useCallback(
-    (type: "delete" | "update" | "reset-pass" | "approval" | "cancel", record: any) => {
-      switch (type) {
+    (actionType: "delete" | "update" | "reset-pass" | "approval" | "cancel" | "preview" | "download", record: any) => {
+      switch (actionType) {
         case "delete":
           mutate({ warehouseId: record.id } as DeleteWarehouseRequestType);
           break;
@@ -130,12 +144,50 @@ const WarehouseImportAndExport = memo(() => {
           }
            dispatchToast("info", "Không thể huỷ đơn này do đã duyệt.")
           break;
+        case "preview":
+          setSelectedId(record.id || null);
+          setIsPreviewOpen(true);
+          break;
+        case "download":
+          setSelectedId(record.id || null);
+          setPendingExportId(record.id || null);
+          break;
         default:
           break;
       }
     },
     [mutate, mutateConfirm, navigate],
   );
+
+  const buildFilename = useCallback((detail: any) => {
+    const dateValue = detail?.transactionDate ? new Date(detail.transactionDate) : new Date();
+    const dd = String(dateValue.getDate()).padStart(2, "0");
+    const mm = String(dateValue.getMonth() + 1).padStart(2, "0");
+    const yyyy = String(dateValue.getFullYear());
+    const dateText = `${dd}${mm}${yyyy}`;
+    const idText = detail?.id || detail?._id || "";
+    const prefix = detail?.type === "EXPORT" ? "Phieu_Xuat" : "Phieu_Nhap";
+    return `${prefix}_${dateText}_${idText}.pdf`;
+  }, []);
+
+  const handleExport = useCallback(async () => {
+    if (!detailData || !exportRef.current) return;
+    try {
+      setIsExporting(true);
+      const filename = buildFilename(detailData);
+      await exportInventoryPdf({ element: exportRef.current, filename });
+    } finally {
+      setIsExporting(false);
+    }
+  }, [buildFilename, detailData]);
+
+  useEffect(() => {
+    if (!pendingExportId || !detailData || isDetailLoading) return;
+    const detailId = detailData?.id || detailData?._id || "";
+    if (String(detailId) !== String(pendingExportId)) return;
+    handleExport();
+    setPendingExportId(null);
+  }, [detailData, handleExport, isDetailLoading, pendingExportId]);
 
   const columns: ColumnsType = useMemo(
     () => [
@@ -147,13 +199,13 @@ const WarehouseImportAndExport = memo(() => {
         align: "center",
         width: 80,
       },
-      // {
-      //   title: "Loại",
-      //   dataIndex: "type",
-      //   key: "type",
-      //   align: "center",
-      //   render: (record) => record  == "IMPORT" ? "Nhập" : "Xuất",
-      // },
+      {
+        title: "Loại",
+        dataIndex: "type",
+        key: "type",
+        align: "center",
+        render: (record) => (record === "IMPORT" ? "Nhập" : "Xuất"),
+      },
       {
         title: "Tên Kho",
         dataIndex: "warehouse",
@@ -227,7 +279,7 @@ const WarehouseImportAndExport = memo(() => {
         dataIndex: "",
         key: "",
         align: "center",
-        width: 350,
+        width: 420,
         render(_, record) {
           return (
             <Flex
@@ -243,6 +295,20 @@ const WarehouseImportAndExport = memo(() => {
                    disabled={!isManager}
               >
                 Chi Tiết Đơn
+              </Tag>
+              <Tag
+                color={"geekblue"}
+                variant={"outlined"}
+                onClick={() => onAction("preview", record)}
+              >
+                Xem PDF
+              </Tag>
+              <Tag
+                color={"cyan"}
+                variant={"outlined"}
+                onClick={() => onAction("download", record)}
+              >
+                Tải PDF
               </Tag>
            
               {
@@ -305,7 +371,16 @@ const WarehouseImportAndExport = memo(() => {
           },
         ]}
       />
-      <Flex wrap="wrap" justify="end" gap={8}>
+      <Flex wrap="wrap" justify="space-between" gap={8}>
+        <Select
+          value={type}
+          onChange={(value) => setType(value)}
+          options={[
+            { value: "IMPORT", label: "Nhập kho" },
+            { value: "EXPORT", label: "Xuất kho" },
+          ]}
+          style={{ minWidth: 160 }}
+        />
         <Button
           type="primary"
           icon={<DownloadOutlined />}
@@ -315,7 +390,7 @@ const WarehouseImportAndExport = memo(() => {
         }}
              disabled={!isManager}
         >
-          Tạo đơn nhập kho
+          {type === "IMPORT" ? "Tạo đơn nhập kho" : "Tạo đơn xuất kho"}
         </Button>
         {/* <Button
           type="primary"
@@ -344,6 +419,16 @@ const WarehouseImportAndExport = memo(() => {
         }}
         scroll={{ y: 1000 }}
       />
+      <div style={{ position: "absolute", left: -10000, top: -10000 }}>
+        {detailData ? (
+          <InventoryA4
+            ref={exportRef}
+            transactionDetail={detailData}
+            qrText={window.location.origin}
+            showWatermark={detailData?.status === "CANCELED"}
+          />
+        ) : null}
+      </div>
       <Flex justify="end">
         <Pagination
           onShowSizeChange={(current, size) => {
@@ -356,6 +441,33 @@ const WarehouseImportAndExport = memo(() => {
         />
       </Flex>
       <CancelImport ref={cancelRef} onSuccessModal={() => { refetch() }} />
+      <Modal
+        title="Xem phieu"
+        open={isPreviewOpen}
+        onCancel={() => setIsPreviewOpen(false)}
+        footer={null}
+        width={920}
+      >
+        {isDetailLoading ? (
+          <Spin />
+        ) : detailData ? (
+          <>
+            <div style={{ maxHeight: 600, overflow: "auto" }}>
+              <InventoryA4
+                transactionDetail={detailData}
+                qrText={window.location.origin}
+                showWatermark={detailData?.status === "CANCELED"}
+              />
+            </div>
+            <Flex justify="end" gap={12} style={{ marginTop: 12 }}>
+              <Button onClick={() => setIsPreviewOpen(false)}>Dong</Button>
+              <Button type="primary" loading={isExporting} onClick={handleExport}>
+                Tai PDF
+              </Button>
+            </Flex>
+          </>
+        ) : null}
+      </Modal>
     </div>
   );
 });

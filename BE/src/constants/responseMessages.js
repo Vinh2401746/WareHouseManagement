@@ -76,6 +76,7 @@ const responseMessages = {
     cannotUpdateNonPending: 'Chỉ có thể cập nhật phiếu nhập đang chờ xác nhận',
     cannotDeleteNonPending: 'Chỉ có thể xóa phiếu nhập đang chờ xác nhận',
     invalidStatusTransition: 'Không thể chuyển trạng thái từ {from} sang {to}',
+    duplicateCode: 'Không thể tạo mã phiếu. Vui lòng thử lại',
   },
   sale: {
     notFound: 'Không tìm thấy đơn bán hàng',

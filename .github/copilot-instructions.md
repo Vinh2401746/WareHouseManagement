@@ -1,28 +1,61 @@
-# Warehouse Management AI Coding Instructions
+# Warehouse Management (WMS) – Copilot Workspace Instructions
 
-## Architecture Overview
+Use these instructions as the *bootstrap* for working effectively in this repo.
 
-**Stack**: Node.js + Express (BE), React 19 + TypeScript (FE), MongoDB, JWT auth
+## Project Layout
 
-**Structure**: 
-- `BE/` - Express API server with MongoDB
-- `ware-house-fe/` - React frontend (Vite + TypeScript)
+This workspace contains two separate Node projects (no root-level app runner):
 
-### Backend Architecture Pattern
+- `BE/` – Express + MongoDB REST API
+- `ware-house-fe/` – React 19 + Vite frontend
 
-The BE follows a strict **3-layer service architecture**:
+When in doubt, make changes inside `BE/` or `ware-house-fe/` only.
 
-1. **Routes** (`src/routes/v1/`) - Define endpoints with auth & validation
-   - Example: [product.route.js](../BE/src/routes/v1/product.route.js) - routes define middleware chain
+## Quick Commands
+
+Backend (from `BE/package.json`):
+
+```bash
+cd BE
+npm install
+cp .env.example .env
+npm run seed:rbac
+npm run dev
+```
+
+Frontend (from `ware-house-fe/package.json`):
+
+```bash
+cd ware-house-fe
+npm install
+npm run dev
+```
+
+Testing/linting (backend):
+
+```bash
+cd BE
+npm test
+npm run lint
+npm run prettier:fix
+```
+
+## Backend Architecture Pattern (BE)
+
+The BE follows a strict **route → controller → service** architecture:
+
+1. **Routes** (`src/routes/v1/`) – Define endpoints with auth + validation middleware
+   - Example: [product.route.js](../BE/src/routes/v1/product.route.js)
    
-2. **Controllers** (`src/controllers/`) - HTTP request handlers, wrapped with `catchAsync()`
+2. **Controllers** (`src/controllers/`) – HTTP handlers
    - Always wrap in `catchAsync()` to auto-forward errors
-   - Use `pick()` to extract query/body fields, `ApiError` to throw errors
+   - Use `pick()` to extract allowed query/body fields
+   - Throw `ApiError(httpStatus.CODE, message)` for expected errors
    - Example: [product.controller.js](../BE/src/controllers/product.controller.js)
 
-3. **Services** (`src/services/`) - Business logic, database queries
+3. **Services** (`src/services/`) – Business logic + DB queries (no separate repository layer)
    - All async CRUD operations live here
-   - Throw `ApiError` for domain errors (not found, validation, etc.)
+   - Check existence before update/delete; throw `ApiError` on not found / invalid domain state
    - Example: [product.service.js](../BE/src/services/product.service.js)
 
 **Data flow**: Route → validate middleware → controller → service → response
@@ -55,6 +88,14 @@ router.get('/', auth('getProducts'), validate(...), controller)  // checks user.
 ```javascript
 const products = await Product.paginate(filter, { page, limit, sortBy });
 ```
+
+**Branch scoping / multi-tenant isolation**:
+- Prefer using existing scoping helpers instead of hand-rolling branch filters.
+- See: [branchScope.js](../BE/src/utils/branchScope.js)
+
+**Uploads & static URLs**:
+- Upload base config: [config.js](../BE/src/config/config.js)
+- Product uploads: `BE/uploads/products/`
 
 **Model Schema Plugins**: Auto-apply in models:
 - `toJSON` - serialization plugin
@@ -104,6 +145,25 @@ npm run build            # production build
 
 **API Integration**: [src/api/](../ware-house-fe/src/api/) - each resource has dedicated API module
 
+## Common Pitfalls
+
+- RBAC must be seeded before testing auth/permissions: `cd BE && npm run seed:rbac` (see [seedRbac.js](../BE/scripts/seeds/seedRbac.js)).
+- Backend lint/parser quirk: if you hit parsing errors around nullish coalescing, avoid `??` and use a ternary fallback.
+- Windows FE install issue (Rollup optional native module missing): delete `ware-house-fe/node_modules` and `ware-house-fe/package-lock.json`, then rerun `npm install`.
+- FE typecheck: consider running `npx tsc -p ware-house-fe/tsconfig.json --noEmit` (Vite build may not catch all TS errors).
+
+## Where To Look (Examples)
+
+- Route/controller/service example: [product.route.js](../BE/src/routes/v1/product.route.js), [product.controller.js](../BE/src/controllers/product.controller.js), [product.service.js](../BE/src/services/product.service.js)
+- Auth & role rights: [auth middleware](../BE/src/middlewares/auth.js), [roles config](../BE/src/config/roles.js), [permission constants](../BE/src/constants/permission.constant.js)
+
+## Additional Documentation (Link, Don’t Duplicate)
+
+- User manual: [USER_MANUAL.md](../.agent/docs/USER_MANUAL.md)
+- Feature specs (BA): see `/.agent/docs/feature_*_spec.md`
+- Agent profiles (optional): `/.github/agents/*.md`
+- Scoped Copilot instructions (applyTo): `/.github/instructions/*.instructions.md`
+
 ## Critical Files & Conventions
 
 ### Models
@@ -132,13 +192,13 @@ See [config.js](../BE/src/config/config.js) for schema with Joi validation
 
 ## Common Task Patterns
 
-**Adding a new resource** (e.g., Category):
-1. Create model: [models/category.model.js](../BE/src/models/category.model.js)
-2. Create service: [services/category.service.js](../BE/src/services/category.service.js) - CRUD operations
-3. Create controller: [controllers/category.controller.js](../BE/src/controllers/category.controller.js) - wrap service calls with `catchAsync()`
-4. Create validation: [validations/category.validation.js](../BE/src/validations/category.validation.js) - Joi schemas for xceach endpoint
-5. Create route: [routes/v1/category.route.js](../BE/src/routes/v1/category.route.js) - mount in [routes/v1/index.js](../BE/src/routes/v1/index.js)
-6. Add permissions to [config/roles.js](../BE/src/config/roles.js)
+**Adding a new resource** (example pattern – see `Unit`):
+1. Model: [unit.model.js](../BE/src/models/unit.model.js)
+2. Service: [unit.service.js](../BE/src/services/unit.service.js)
+3. Controller: [unit.controller.js](../BE/src/controllers/unit.controller.js)
+4. Validation: [unit.validation.js](../BE/src/validations/unit.validation.js)
+5. Route: [unit.route.js](../BE/src/routes/v1/unit.route.js) (mounted via [v1/index.js](../BE/src/routes/v1/index.js))
+6. RBAC rights: update [roles.js](../BE/src/config/roles.js) + permission constants if needed
 
 **Modifying validation rules**:
 - Edit corresponding file in [validations/](../BE/src/validations/) 

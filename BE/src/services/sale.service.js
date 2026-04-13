@@ -234,6 +234,23 @@ const createSale = async (saleBody, user) => {
     const sale = await Sale.create(salePayload);
 
     // Bước 3: Tạo phiếu xuất kho
+    const exportCode = await (async () => {
+      const dateObj = sale.saleDate ? new Date(sale.saleDate) : new Date();
+      const yyyy = dateObj.getFullYear();
+      const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const dd = String(dateObj.getDate()).padStart(2, '0');
+      const dateText = `${yyyy}${mm}${dd}`;
+
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        const rand = Math.floor(1000 + Math.random() * 9000);
+        const code = `PX-${dateText}-${rand}`;
+        const exists = await InventoryTransaction.findOne({ code }).select('_id').lean();
+        if (!exists) return code;
+      }
+
+      throw new ApiError(httpStatus.CONFLICT, responseMessages.inventory.duplicateCode || 'Không thể tạo mã phiếu.');
+    })();
+
     await InventoryTransaction.create({
       type: 'EXPORT',
       reason: 'SALE',
@@ -241,6 +258,8 @@ const createSale = async (saleBody, user) => {
       sale: sale._id,
       createdBy: user && user.id,
       status: 'COMPLETED',
+      transactionDate: sale.saleDate || new Date(),
+      code: exportCode,
       totalAmount,
       discountMoney,
       taxMoney,
@@ -300,7 +319,7 @@ const getSaleDetailById = async (saleId, context = {}) => {
   const branchScopedFilter = applyBranchScope({ _id: saleId }, context);
   const scopedFilter = await applyWarehouseScope(branchScopedFilter, context);
 
-  return Sale.findOne(scopedFilter)
+  const sale = await Sale.findOne(scopedFilter)
     .populate({ path: 'branch', select: 'name address phone' })
     .populate({ path: 'warehouse', select: 'name branch' })
     .populate({ path: 'customer', select: 'name phone address' })
@@ -310,6 +329,17 @@ const getSaleDetailById = async (saleId, context = {}) => {
       select: 'name code unit sellingPrice',
       populate: { path: 'unit', select: 'name' },
     });
+
+  if (!sale) return null;
+
+  const exportTransaction = await InventoryTransaction.findOne({ sale: sale._id })
+    .select('code transactionDate warehouse status')
+    .populate({ path: 'warehouse', select: 'name' })
+    .lean();
+
+  const saleObj = sale.toObject();
+  saleObj.exportTransaction = exportTransaction || null;
+  return saleObj;
 };
 
 /**

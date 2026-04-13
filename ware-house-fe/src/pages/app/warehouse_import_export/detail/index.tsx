@@ -17,6 +17,7 @@ import {
     Flex,
     Spin,
     Breadcrumb,
+    Modal,
 } from "antd";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import dispatchToast from "../../../../constants/toast";
@@ -44,6 +45,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import type { ProductFormRef } from "../../products/components/create-update-product";
 import ProductFormModal from "../../products/components/create-update-product";
 import { AppRoutes } from "../../../../router/routes";
+import { InventoryA4 } from "../components/inventory_a4";
+import { exportInventoryPdf } from "../utils/export_inventory_pdf";
 export type WarehouseImExFormData = {
     warehouse: string;
     supplier: string;
@@ -138,7 +141,10 @@ const WarehouseImportExportDetailPage =
             totalAmountAfterFax: 0,
         });
         const [loading, setLoading] = useState(false)
+        const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+        const [isExporting, setIsExporting] = useState(false)
         const formRef = useRef<ProductFormRef>(null);
+        const exportRef = useRef<HTMLDivElement | null>(null);
         useEffect(() => {
             //   Thành tiền = (SL × Đơn giá) × (1 − CK%) × (1 + Thuế%)
             //  A:tổng tiền = Sum ( thành tiền )
@@ -502,6 +508,28 @@ const WarehouseImportExportDetailPage =
 
         };
 
+        const buildFilename = useCallback((detail: any) => {
+            const dateValue = detail?.transactionDate ? new Date(detail.transactionDate) : new Date();
+            const dd = String(dateValue.getDate()).padStart(2, "0");
+            const mm = String(dateValue.getMonth() + 1).padStart(2, "0");
+            const yyyy = String(dateValue.getFullYear());
+            const dateText = `${dd}${mm}${yyyy}`;
+            const idText = detail?.id || detail?._id || "";
+            const prefix = detail?.type === "EXPORT" ? "Phieu_Xuat" : "Phieu_Nhap";
+            return `${prefix}_${dateText}_${idText}.pdf`;
+        }, []);
+
+        const handleExport = useCallback(async () => {
+            if (!dataImport?.id || !exportRef.current) return;
+            try {
+                setIsExporting(true);
+                const filename = buildFilename(dataImport);
+                await exportInventoryPdf({ element: exportRef.current, filename });
+            } finally {
+                setIsExporting(false);
+            }
+        }, [buildFilename, dataImport]);
+
         const columns: ColumnsType = useMemo(
             () => [
                 {
@@ -786,6 +814,22 @@ const WarehouseImportExportDetailPage =
                         },
                     ]}
                 />
+                <Flex justify="end" gap={12} style={{ marginBottom: 12 }}>
+                    <Button
+                        onClick={() => setIsPreviewOpen(true)}
+                        disabled={!dataImport?.id}
+                    >
+                        Xem PDF
+                    </Button>
+                    <Button
+                        type="primary"
+                        loading={isExporting}
+                        onClick={handleExport}
+                        disabled={!dataImport?.id}
+                    >
+                        Tai PDF
+                    </Button>
+                </Flex>
                 <Form
                     form={form}
                     layout="vertical"
@@ -891,6 +935,43 @@ const WarehouseImportExportDetailPage =
                     }}
                     ref={formRef}
                 />
+                <div style={{ position: "absolute", left: -10000, top: -10000 }}>
+                    {dataImport?.id ? (
+                        <InventoryA4
+                            ref={exportRef}
+                            transactionDetail={dataImport}
+                            qrText={window.location.origin}
+                            showWatermark={dataImport?.status === "CANCELED"}
+                        />
+                    ) : null}
+                </div>
+                <Modal
+                    title="Xem phieu"
+                    open={isPreviewOpen}
+                    onCancel={() => setIsPreviewOpen(false)}
+                    footer={null}
+                    width={920}
+                >
+                    {dataImport?.id ? (
+                        <>
+                            <div style={{ maxHeight: 600, overflow: "auto" }}>
+                                <InventoryA4
+                                    transactionDetail={dataImport}
+                                    qrText={window.location.origin}
+                                    showWatermark={dataImport?.status === "CANCELED"}
+                                />
+                            </div>
+                            <Flex justify="end" gap={12} style={{ marginTop: 12 }}>
+                                <Button onClick={() => setIsPreviewOpen(false)}>Dong</Button>
+                                <Button type="primary" loading={isExporting} onClick={handleExport}>
+                                    Tai PDF
+                                </Button>
+                            </Flex>
+                        </>
+                    ) : (
+                        <Spin />
+                    )}
+                </Modal>
             </div>
         );
     }

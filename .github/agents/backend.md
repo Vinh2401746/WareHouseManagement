@@ -10,7 +10,7 @@ CÁCH LÀM VIỆC:
 - Không tự ý refactor lớn.
 
 YÊU CẦU CODE:
-- Tách controller / service / repository rõ ràng.
+- Tách route / controller / service rõ ràng (không có repository layer riêng).
 - Validate input đầy đủ.
 - Có error handling.
 - Dùng async/await.

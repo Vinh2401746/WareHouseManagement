@@ -33,6 +33,14 @@ const inventoryTransactionSchema = mongoose.Schema(
       ref: 'User',
       comment: 'Người tạo phiếu',
     },
+    code: {
+      type: String,
+      required: true,
+      unique: true,
+      sparse: true,
+      trim: true,
+      comment: 'Mã phiếu nhập/xuất kho',
+    },
     transactionDate: {
       type: Date,
       default: Date.now,

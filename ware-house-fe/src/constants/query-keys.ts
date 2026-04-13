@@ -19,7 +19,8 @@ export const QueryKeys = {
     list:'branch'
   },
   inventory:{
-    list: 'inventory'
+    list: 'inventory',
+    detail: 'inventory-detail'
   },
   warehouse: {
     list: 'warehouse'

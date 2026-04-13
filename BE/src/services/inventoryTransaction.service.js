@@ -5,6 +5,24 @@ const { INVENTORY_TRANSACTION_TYPES, INVENTORY_TRANSACTION_REASONS } = require('
 const responseMessages = require('../constants/responseMessages');
 const { applyWarehouseScope } = require('../utils/branchScope');
 
+const buildInventoryCode = async (type, transactionDate) => {
+  const prefix = type === INVENTORY_TRANSACTION_TYPES.EXPORT ? 'PX' : 'PN';
+  const dateObj = transactionDate ? new Date(transactionDate) : new Date();
+  const yyyy = dateObj.getFullYear();
+  const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const dd = String(dateObj.getDate()).padStart(2, '0');
+  const dateText = `${yyyy}${mm}${dd}`;
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const rand = Math.floor(1000 + Math.random() * 9000);
+    const code = `${prefix}-${dateText}-${rand}`;
+    const exists = await InventoryTransaction.findOne({ code }).select('_id').lean();
+    if (!exists) return code;
+  }
+
+  throw new ApiError(httpStatus.CONFLICT, responseMessages.inventory.duplicateCode || 'Không thể tạo mã phiếu.');
+};
+
 const populateInventoryTransactionQuery = (query) =>
   query
     .populate('warehouse', 'name code address')
@@ -143,7 +161,13 @@ const buildImportTransactionItems = async (items, warehouse) =>
  * @returns {Promise<InventoryTransaction>}
  */
 const createInventoryTransaction = async (inventoryTransactionBody) => {
-  const inventoryTransaction = await InventoryTransaction.create(inventoryTransactionBody);
+  const transactionDate = inventoryTransactionBody.transactionDate || new Date();
+  const code = await buildInventoryCode(inventoryTransactionBody.type, transactionDate);
+  const inventoryTransaction = await InventoryTransaction.create({
+    ...inventoryTransactionBody,
+    transactionDate,
+    code,
+  });
   return mapInventoryTransactionForClient(await getPopulatedInventoryTransactionById(inventoryTransaction.id));
 };
 
@@ -212,6 +236,13 @@ const updateInventoryTransactionById = async (inventoryTransactionId, updateBody
   const inventoryTransaction = await InventoryTransaction.findById(inventoryTransactionId);
   if (!inventoryTransaction) {
     throw new ApiError(httpStatus.NOT_FOUND, responseMessages.inventory.notFound);
+  }
+
+  if (!inventoryTransaction.code) {
+    inventoryTransaction.code = await buildInventoryCode(
+      inventoryTransaction.type,
+      inventoryTransaction.transactionDate || new Date()
+    );
   }
 
   if (inventoryTransaction.type === INVENTORY_TRANSACTION_TYPES.IMPORT) {
@@ -293,9 +324,20 @@ const deleteInventoryTransactionById = async (inventoryTransactionId) => {
  * @returns {Promise<InventoryTransaction>}
  */
 const importInventory = async (importInventoryBody, req) => {
-  const { warehouse, supplier, items, reason, deliveryPerson, totalAmount, totalAmountAfterFax, discountMoney, taxMoney } =
-    importInventoryBody;
+  const {
+    warehouse,
+    supplier,
+    items,
+    reason,
+    deliveryPerson,
+    totalAmount,
+    totalAmountAfterFax,
+    discountMoney,
+    taxMoney,
+    transactionDate,
+  } = importInventoryBody;
   const batches = await buildImportTransactionItems(items, warehouse);
+  const code = await buildInventoryCode(INVENTORY_TRANSACTION_TYPES.IMPORT, transactionDate);
 
   const transaction = await InventoryTransaction.create({
     type: INVENTORY_TRANSACTION_TYPES.IMPORT,
@@ -305,6 +347,8 @@ const importInventory = async (importInventoryBody, req) => {
     createdBy: req.user.id,
     items: batches,
     deliveryPerson,
+    transactionDate: transactionDate || new Date(),
+    code,
     totalAmountAfterFax: totalAmountAfterFax || 0,
     discountMoney: discountMoney || 0,
     taxMoney: taxMoney || 0,

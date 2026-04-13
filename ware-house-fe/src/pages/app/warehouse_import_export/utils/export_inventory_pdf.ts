@@ -1,9 +1,9 @@
-export type ExportInvoicePdfArgs = {
+export type ExportInventoryPdfArgs = {
   element: HTMLElement;
   filename: string;
 };
 
-export const exportInvoicePdf = async ({ element, filename }: ExportInvoicePdfArgs) => {
+export const exportInventoryPdf = async ({ element, filename }: ExportInventoryPdfArgs) => {
   if (!element) return;
 
   const html2pdf = (await import("html2pdf.js")).default as any;

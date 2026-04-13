@@ -1,4 +1,4 @@
-.invoice-a4 {
+.inventory-a4 {
   position: relative;
   width: 210mm;
   height: 297mm;
@@ -12,11 +12,11 @@
   line-height: 1.35;
 }
 
-.invoice-a4::before {
+.inventory-a4::before {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: var(--invoice-bg);
+  background-image: var(--inventory-bg);
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -24,7 +24,7 @@
   z-index: 0;
 }
 
-.invoice-a4__content {
+.inventory-a4__content {
   position: relative;
   z-index: 1;
 }
@@ -34,191 +34,191 @@
   margin: 0;
 }
 
-.invoice-a4__header {
+.inventory-a4__header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
 }
 
-.invoice-a4__supplier {
+.inventory-a4__supplier {
   display: flex;
   flex-direction: column;
   gap: 6px;
   width: 52%;
 }
 
-.invoice-a4__logo {
+.inventory-a4__logo {
   width: 120px;
   height: auto;
 }
 
-.invoice-a4__company {
+.inventory-a4__company {
   font-size: 11px;
   color: #333;
 }
 
-.invoice-a4__branch {
+.inventory-a4__branch {
   font-size: 11px;
   color: #333;
 }
 
-.invoice-a4__title {
+.inventory-a4__title {
   text-align: center;
   width: 46%;
 }
 
-.invoice-a4__title h1 {
+.inventory-a4__title h1 {
   margin: 0;
   font-size: 18px;
 }
 
-.invoice-a4__meta {
+.inventory-a4__meta {
   margin-top: 2px;
   font-size: 12px;
   line-height: 1.4;
 }
 
-.invoice-a4__sections {
+.inventory-a4__sections {
   display: flex;
   justify-content: space-between;
   gap: 12px;
   margin-top: 12px;
 }
 
-.invoice-a4__box {
+.inventory-a4__box {
   flex: 1;
 }
 
-.invoice-a4__box h3 {
+.inventory-a4__box h3 {
   margin: 0 0 6px 0;
   font-size: 13px;
 }
 
-.invoice-a4__row {
+.inventory-a4__row {
   display: flex;
   gap: 6px;
 }
 
-.invoice-a4__row-label {
+.inventory-a4__row-label {
   min-width: 140px;
   color: #444;
 }
 
-.invoice-a4__table-wrap {
+.inventory-a4__table-wrap {
   margin-top: 12px;
 }
 
-.invoice-a4__table {
+.inventory-a4__table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.invoice-a4__table th,
-.invoice-a4__table td {
+.inventory-a4__table th,
+.inventory-a4__table td {
   border: 1px solid #e5e5e5;
   padding: 6px;
   vertical-align: top;
 }
 
-.invoice-a4__table th {
+.inventory-a4__table th {
   font-size: 11px;
 }
 
-.invoice-a4__table tr {
+.inventory-a4__table tr {
   break-inside: avoid;
   page-break-inside: avoid;
 }
 
-.invoice-a4__cell-wrap {
+.inventory-a4__cell-wrap {
   word-break: break-word;
   overflow-wrap: anywhere;
 }
 
-.invoice-a4__subcode {
+.inventory-a4__subcode {
   color: #666;
   margin-top: 2px;
 }
 
-.invoice-a4__totals {
+.inventory-a4__totals {
   display: flex;
   justify-content: flex-end;
   margin-top: 12px;
 }
 
-.invoice-a4__tax-summary {
+.inventory-a4__tax-summary {
   margin-top: 10px;
   border: 1px solid #e5e5e5;
   padding: 6px;
 }
 
-.invoice-a4__tax-header,
-.invoice-a4__tax-row {
+.inventory-a4__tax-header,
+.inventory-a4__tax-row {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
   gap: 8px;
   font-size: 11px;
 }
 
-.invoice-a4__tax-header {
+.inventory-a4__tax-header {
   font-weight: 600;
   color: #333;
   margin-bottom: 4px;
 }
 
-.invoice-a4__tax-values {
+.inventory-a4__tax-values {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
   text-align: right;
 }
 
-.invoice-a4__amount-in-words {
+.inventory-a4__amount-in-words {
   margin-top: 8px;
   font-style: italic;
 }
 
-.invoice-a4__signatures {
+.inventory-a4__signatures {
   display: flex;
   justify-content: space-between;
   margin-top: 14px;
   text-align: center;
 }
 
-.invoice-a4__signature-col {
+.inventory-a4__signature-col {
   width: 45%;
 }
 
-.invoice-a4__signature-title {
+.inventory-a4__signature-title {
   font-weight: 600;
 }
 
-.invoice-a4__signature-note {
+.inventory-a4__signature-note {
   font-size: 11px;
   color: #555;
 }
 
-.invoice-a4__lookup {
+.inventory-a4__lookup {
   margin-top: 10px;
   font-size: 11px;
   color: #444;
   text-align: center;
 }
 
-.invoice-a4__totals table {
+.inventory-a4__totals table {
   border-collapse: collapse;
   min-width: 260px;
 }
 
-.invoice-a4__totals td {
+.inventory-a4__totals td {
   padding: 4px 0;
 }
 
-.invoice-a4__totals td:last-child {
+.inventory-a4__totals td:last-child {
   text-align: right;
 }
 
-.invoice-a4__footer {
+.inventory-a4__footer {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
@@ -226,14 +226,14 @@
   margin-top: 10px;
 }
 
-.invoice-a4__software {
+.inventory-a4__software {
   font-size: 10.5px;
   line-height: 1.35;
   color: #444;
   max-width: 70%;
 }
 
-.invoice-a4__watermark {
+.inventory-a4__watermark {
   position: absolute;
   inset: 0;
   display: flex;
