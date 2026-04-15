@@ -442,7 +442,7 @@ const WarehouseImportAndExport = memo(() => {
       </Flex>
       <CancelImport ref={cancelRef} onSuccessModal={() => { refetch() }} />
       <Modal
-        title="Xem phieu"
+        title="Xem phiếu"
         open={isPreviewOpen}
         onCancel={() => setIsPreviewOpen(false)}
         footer={null}
@@ -460,9 +460,9 @@ const WarehouseImportAndExport = memo(() => {
               />
             </div>
             <Flex justify="end" gap={12} style={{ marginTop: 12 }}>
-              <Button onClick={() => setIsPreviewOpen(false)}>Dong</Button>
+              <Button onClick={() => setIsPreviewOpen(false)}>Đóng</Button>
               <Button type="primary" loading={isExporting} onClick={handleExport}>
-                Tai PDF
+                Tải PDF
               </Button>
             </Flex>
           </>

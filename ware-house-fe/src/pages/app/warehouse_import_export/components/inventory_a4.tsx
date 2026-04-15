@@ -1,4 +1,5 @@
-import { CSSProperties, forwardRef, memo, useMemo } from "react";
+import type { CSSProperties } from "react";
+import { forwardRef, memo, useMemo } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { formatDate, formatNumber } from "../../../../utils/helper";
 import { formatNumberToWords } from "../../../../utils/numberToWords";
@@ -33,6 +34,15 @@ export const InventoryA4 = memo(
         ],
         [],
       );
+
+      const issuedByText = useMemo(() => {
+        const softwareName = "Phần mềm quản lý kho bán hàng";
+        const companyName = "CÔNG TY CỔ PHẦN THIÊN TRIỀU";
+        const website = "quanlykho.sanghh.space";
+        const taxCode = "0312345678";
+        return `Phát hành bởi ${softwareName} - ${companyName} (${website}) - MST ${taxCode}`;
+      }, []);
+
       const isImport = transactionDetail?.type === "IMPORT";
       const titleText = isImport ? "PHIẾU NHẬP KHO" : "PHIẾU XUẤT KHO";
       const dateText = transactionDetail?.transactionDate
@@ -62,9 +72,9 @@ export const InventoryA4 = memo(
           {showWatermark ? <div className="inventory-a4__watermark">ĐÃ HỦY</div> : null}
 
           <div className="inventory-a4__content">
-            <div className="inventory-a4__header">
+            <div className="inventory-a4__header inventory-a4__header--company">
+              <img className="inventory-a4__logo" src={logoUrl} alt="Logo" />
               <div className="inventory-a4__supplier">
-                <img className="inventory-a4__logo" src={logoUrl} alt="Logo" />
                 <div className="inventory-a4__company">
                   {companyInfo.map((line) => (
                     <div key={line}>{line}</div>
@@ -76,7 +86,10 @@ export const InventoryA4 = memo(
                   <div>Mã kho: {transactionDetail?.warehouse?.code || "-"}</div>
                 </div>
               </div>
-
+            </div>
+            <br />
+            <div className="inventory-a4__header inventory-a4__header--title">
+              <div style={{ width: "16%" }}></div>
               <div className="inventory-a4__title">
                 <h1>{titleText}</h1>
                 <div className="inventory-a4__meta">
@@ -84,7 +97,9 @@ export const InventoryA4 = memo(
                   <div>Ngày lập: {dateText || "-"}</div>
                 </div>
               </div>
+              <QRCodeCanvas value={qrText || ""} size={96} includeMargin />
             </div>
+            <br />
 
             <div className="inventory-a4__sections">
               <div className="inventory-a4__box">
@@ -177,19 +192,24 @@ export const InventoryA4 = memo(
             </div>
 
             <div className="inventory-a4__tax-summary">
-              <div className="inventory-a4__tax-header">
-                <span>Thành tiền trước thuế GTGT</span>
-                <span>Tiền thuế GTGT</span>
-                <span>Cộng tiền thanh toán</span>
-              </div>
-              <div className="inventory-a4__tax-row">
-                <div>Thuế suất {taxRateLabel}:</div>
-                <div className="inventory-a4__tax-values">
-                  <span>{formatNumber(totalAmount)} đ</span>
-                  <span>{formatNumber(taxMoney)} đ</span>
-                  <span>{formatNumber(totalAmountAfterFax)} đ</span>
-                </div>
-              </div>
+              <table className="inventory-a4__table inventory-a4__tax-table">
+                <thead>
+                  <tr>
+                    <th />
+                    <th>Thành tiền trước thuế GTGT</th>
+                    <th>Tiền thuế GTGT</th>
+                    <th>Cộng tiền thanh toán</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Thuế suất {taxRateLabel}:</td>
+                    <td>{formatNumber(totalAmount)} đ</td>
+                    <td>{formatNumber(taxMoney)} đ</td>
+                    <td>{formatNumber(totalAmountAfterFax)} đ</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
 
             <div className="inventory-a4__amount-in-words">
@@ -207,18 +227,12 @@ export const InventoryA4 = memo(
               </div>
             </div>
 
-            <div className="inventory-a4__lookup">
-              Tra cứu tại Website: quanlykho.sanghh.space - Mã tra cứu: {codeText || "-"}
-            </div>
-
-            <div className="inventory-a4__footer">
-              <div className="inventory-a4__software">
-                {companyInfo.map((line) => (
-                  <div key={line}>{line}</div>
-                ))}
-                {showWatermark ? <div>Phiếu đã bị hủy</div> : null}
+            <div className="inventory-a4__bottom">
+              <div className="inventory-a4__issued-by">{issuedByText}</div>
+              <div className="inventory-a4__lookup">
+                Tra cứu tại Website: quanlykho.sanghh.space - Mã tra cứu: {codeText || "-"}
               </div>
-              <QRCodeCanvas value={qrText || ""} size={96} includeMargin />
+              {showWatermark ? <div className="inventory-a4__cancelled">Phiếu đã bị hủy</div> : null}
             </div>
           </div>
         </div>

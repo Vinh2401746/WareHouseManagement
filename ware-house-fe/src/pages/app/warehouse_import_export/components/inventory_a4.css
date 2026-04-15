@@ -27,6 +27,9 @@
 .inventory-a4__content {
   position: relative;
   z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 @page {
@@ -41,11 +44,16 @@
   gap: 12px;
 }
 
+.inventory-a4__header--company {
+  justify-content: flex-start;
+  align-items: center;
+}
+
 .inventory-a4__supplier {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  width: 52%;
+  flex: 1;
 }
 
 .inventory-a4__logo {
@@ -150,26 +158,22 @@
   margin-top: 10px;
   border: 1px solid #e5e5e5;
   padding: 6px;
+  background: transparent;
 }
 
-.inventory-a4__tax-header,
-.inventory-a4__tax-row {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 8px;
-  font-size: 11px;
+.inventory-a4__tax-table th,
+.inventory-a4__tax-table td {
+  background: transparent;
 }
 
-.inventory-a4__tax-header {
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 4px;
+.inventory-a4__tax-table th:first-child,
+.inventory-a4__tax-table td:first-child {
+  text-align: left;
+  width: 34%;
 }
 
-.inventory-a4__tax-values {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+.inventory-a4__tax-table th:not(:first-child),
+.inventory-a4__tax-table td:not(:first-child) {
   text-align: right;
 }
 
@@ -200,6 +204,30 @@
 
 .inventory-a4__lookup {
   margin-top: 10px;
+  font-size: 11px;
+  color: #444;
+  text-align: center;
+}
+
+.inventory-a4__bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-top: auto;
+  padding-top: 10px;
+  width: 100%;
+}
+
+.inventory-a4__issued-by {
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: #444;
+  max-width: 100%;
+}
+
+.inventory-a4__cancelled {
+  margin-top: 4px;
   font-size: 11px;
   color: #444;
   text-align: center;

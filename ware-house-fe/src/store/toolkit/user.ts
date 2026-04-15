@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { AuthResponseLoginType } from "../../types/auth";
+
 const initUserType: AuthResponseLoginType = {
   user: {
     role: "",
@@ -19,21 +20,25 @@ const initUserType: AuthResponseLoginType = {
     },
   },
 };
+
 export const userSlice = createSlice({
   name: "user",
   initialState: initUserType,
   reducers: {
     setInforUser: (state, active: PayloadAction<AuthResponseLoginType>) => {
-      state = active.payload
+      state = active.payload;
       return state;
     },
-    removeCurrentUser :(state)=>{
+    setTokens: (state, active: PayloadAction<AuthResponseLoginType["tokens"]>) => {
+      state.tokens = active.payload;
+    },
+    removeCurrentUser: (state) => {
       return {
         ...state,
-        ...initUserType
-      }
-    }
+        ...initUserType,
+      };
+    },
   },
 });
 
-export const { setInforUser,removeCurrentUser } = userSlice.actions;
+export const { setInforUser, setTokens, removeCurrentUser } = userSlice.actions;

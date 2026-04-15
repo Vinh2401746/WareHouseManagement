@@ -827,7 +827,7 @@ const WarehouseImportExportDetailPage =
                         onClick={handleExport}
                         disabled={!dataImport?.id}
                     >
-                        Tai PDF
+                        Tải PDF
                     </Button>
                 </Flex>
                 <Form
@@ -946,7 +946,7 @@ const WarehouseImportExportDetailPage =
                     ) : null}
                 </div>
                 <Modal
-                    title="Xem phieu"
+                    title="Xem phiếu"
                     open={isPreviewOpen}
                     onCancel={() => setIsPreviewOpen(false)}
                     footer={null}
@@ -962,9 +962,9 @@ const WarehouseImportExportDetailPage =
                                 />
                             </div>
                             <Flex justify="end" gap={12} style={{ marginTop: 12 }}>
-                                <Button onClick={() => setIsPreviewOpen(false)}>Dong</Button>
+                                <Button onClick={() => setIsPreviewOpen(false)}>Đóng</Button>
                                 <Button type="primary" loading={isExporting} onClick={handleExport}>
-                                    Tai PDF
+                                    Tải PDF
                                 </Button>
                             </Flex>
                         </>
