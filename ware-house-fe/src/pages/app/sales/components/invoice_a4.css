@@ -27,6 +27,9 @@
 .invoice-a4__content {
   position: relative;
   z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 @page {
@@ -150,20 +153,44 @@
   margin-top: 10px;
   border: 1px solid #e5e5e5;
   padding: 6px;
+  background: transparent;
 }
 
-.invoice-a4__tax-header,
+.invoice-a4__tax-table th,
+.invoice-a4__tax-table td {
+  background: transparent;
+}
+
+.invoice-a4__tax-table th:first-child,
+.invoice-a4__tax-table td:first-child {
+  text-align: left;
+  width: 34%;
+}
+
+.invoice-a4__tax-table th:not(:first-child),
+.invoice-a4__tax-table td:not(:first-child) {
+  text-align: right;
+}
+
 .invoice-a4__tax-row {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: 1fr 3fr;
   gap: 8px;
   font-size: 11px;
 }
 
 .invoice-a4__tax-header {
+  display: grid;
+  grid-template-columns: 1fr repeat(3, 1fr);
+  gap: 8px;
   font-weight: 600;
   color: #333;
   margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.invoice-a4__tax-header span:nth-child(n + 2) {
+  text-align: right;
 }
 
 .invoice-a4__tax-values {
@@ -205,6 +232,24 @@
   text-align: center;
 }
 
+.invoice-a4__bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  /* gap: 12px; */
+  margin-top: auto;
+  padding-top: 10px;
+  width: 100%;
+}
+
+.invoice-a4__issued-by {
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: #444;
+  max-width: 100%;
+}
+
 .invoice-a4__totals table {
   border-collapse: collapse;
   min-width: 260px;
@@ -216,21 +261,6 @@
 
 .invoice-a4__totals td:last-child {
   text-align: right;
-}
-
-.invoice-a4__footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-.invoice-a4__software {
-  font-size: 10.5px;
-  line-height: 1.35;
-  color: #444;
-  max-width: 70%;
 }
 
 .invoice-a4__watermark {
@@ -246,4 +276,10 @@
   transform: rotate(-30deg);
   text-align: center;
   z-index: 2;
+}
+
+.header-flex-center {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }

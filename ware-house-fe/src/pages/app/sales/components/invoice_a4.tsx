@@ -1,4 +1,5 @@
-import { CSSProperties, forwardRef, memo, useMemo } from "react";
+import type { CSSProperties } from "react";
+import { forwardRef, memo, useMemo } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { formatDate, formatNumber } from "../../../../utils/helper";
 import { formatNumberToWords } from "../../../../utils/numberToWords";
@@ -17,7 +18,8 @@ export const InvoiceA4 = memo(
     ({ saleDetail, qrText, showWatermark }, ref) => {
       const items = useMemo(() => saleDetail?.items ?? [], [saleDetail?.items]);
       const backgroundStyle = useMemo(
-        () => ({ "--invoice-bg": `url(${Images.invoice_bg})` }) as CSSProperties,
+        () =>
+          ({ "--invoice-bg": `url(${Images.invoice_bg})` }) as CSSProperties,
         [],
       );
 
@@ -35,15 +37,28 @@ export const InvoiceA4 = memo(
         [],
       );
 
+      const issuedByText = useMemo(() => {
+        const softwareName = "Phần mềm quản lý kho bán hàng";
+        const companyName = "CÔNG TY CỔ PHẦN THIÊN TRIỀU";
+        const website = "quanlykho.sanghh.space";
+        const taxCode = "0312345678";
+        return `Phát hành bởi ${softwareName} - ${companyName} (${website}) - MST ${taxCode}`;
+      }, []);
+
       const customerDisplayName =
-        saleDetail?.customer?.name || saleDetail?.customerName || "Khách vãng lai";
+        saleDetail?.customer?.name ||
+        saleDetail?.customerName ||
+        "Khách vãng lai";
 
       const saleCode = saleDetail?.code || saleDetail?.id || "";
-      const saleDateText = saleDetail?.saleDate ? formatDate(saleDetail.saleDate) : "";
+      const saleDateText = saleDetail?.saleDate
+        ? formatDate(saleDetail.saleDate)
+        : "";
       const totalAmount = saleDetail?.totalAmount ?? 0;
       const taxMoney = saleDetail?.taxMoney ?? 0;
       const totalAmountAfterFax = saleDetail?.totalAmountAfterFax ?? 0;
-      const taxRatePercent = totalAmount > 0 ? Math.round((taxMoney / totalAmount) * 100) : 0;
+      const taxRatePercent =
+        totalAmount > 0 ? Math.round((taxMoney / totalAmount) * 100) : 0;
       const taxRateLabel = taxRatePercent > 0 ? `${taxRatePercent}%` : "-";
       const amountInWords = totalAmountAfterFax
         ? formatNumberToWords(totalAmountAfterFax)
@@ -55,17 +70,22 @@ export const InvoiceA4 = memo(
         ? formatDate(exportTransaction.transactionDate)
         : "-";
       const exportWarehouseName =
-        exportTransaction?.warehouse?.name || saleDetail?.warehouse?.name || "-";
-      const soldBy = saleDetail?.soldBy?.name || saleDetail?.soldBy?.email || "-";
+        exportTransaction?.warehouse?.name ||
+        saleDetail?.warehouse?.name ||
+        "-";
+      const soldBy =
+        saleDetail?.soldBy?.name || saleDetail?.soldBy?.email || "-";
 
       return (
         <div className="invoice-a4" ref={ref} style={backgroundStyle}>
-          {showWatermark ? <div className="invoice-a4__watermark">ĐÃ HỦY</div> : null}
+          {showWatermark ? (
+            <div className="invoice-a4__watermark">ĐÃ HỦY</div>
+          ) : null}
 
           <div className="invoice-a4__content">
-            <div className="invoice-a4__header">
+            <div className="invoice-a4__header header-flex-center">
+              <img className="invoice-a4__logo" src={logoUrl} alt="Logo" />
               <div className="invoice-a4__supplier">
-                <img className="invoice-a4__logo" src={logoUrl} alt="Logo" />
                 <div className="invoice-a4__company">
                   {companyInfo.map((line) => (
                     <div key={line}>{line}</div>
@@ -77,7 +97,10 @@ export const InvoiceA4 = memo(
                   <div>Số điện thoại: {saleDetail?.branch?.phone || "-"}</div>
                 </div>
               </div>
-
+            </div>
+            <br />
+            <div className="invoice-a4__header">
+              <div style={{ width: "16%" }}></div>
               <div className="invoice-a4__title">
                 <h1>HÓA ĐƠN GIÁ TRỊ GIA TĂNG</h1>
                 <div className="invoice-a4__meta">
@@ -87,22 +110,32 @@ export const InvoiceA4 = memo(
                   <div>Số: -</div>
                 </div>
               </div>
+              <QRCodeCanvas value={qrText || ""} size={96} includeMargin />
             </div>
+            <br />
 
             <div className="invoice-a4__sections">
               <div className="invoice-a4__box">
                 <h3>Thông tin hóa đơn</h3>
                 <div className="invoice-a4__row">
-                  <div className="invoice-a4__row-label">Họ tên người mua hàng:</div>
-                  <div className="invoice-a4__cell-wrap">{customerDisplayName}</div>
+                  <div className="invoice-a4__row-label">
+                    Họ tên người mua hàng:
+                  </div>
+                  <div className="invoice-a4__cell-wrap">
+                    {customerDisplayName}
+                  </div>
                 </div>
                 <div className="invoice-a4__row">
                   <div className="invoice-a4__row-label">Tên đơn vị:</div>
-                  <div className="invoice-a4__cell-wrap">{customerDisplayName}</div>
+                  <div className="invoice-a4__cell-wrap">
+                    {customerDisplayName}
+                  </div>
                 </div>
                 <div className="invoice-a4__row">
                   <div className="invoice-a4__row-label">Mã số thuế:</div>
-                  <div className="invoice-a4__cell-wrap">{saleDetail?.customer?.taxCode || "-"}</div>
+                  <div className="invoice-a4__cell-wrap">
+                    {saleDetail?.customer?.taxCode || "-"}
+                  </div>
                 </div>
                 <div className="invoice-a4__row">
                   <div className="invoice-a4__row-label">Địa chỉ:</div>
@@ -117,7 +150,9 @@ export const InvoiceA4 = memo(
                   </div>
                 </div>
                 <div className="invoice-a4__row">
-                  <div className="invoice-a4__row-label">Căn cước công dân:</div>
+                  <div className="invoice-a4__row-label">
+                    Căn cước công dân:
+                  </div>
                   <div className="invoice-a4__cell-wrap">
                     {saleDetail?.customer?.idNumber || "-"}
                   </div>
@@ -142,7 +177,9 @@ export const InvoiceA4 = memo(
                 </div>
                 <div className="invoice-a4__row">
                   <div className="invoice-a4__row-label">Kho xuất:</div>
-                  <div className="invoice-a4__cell-wrap">{exportWarehouseName}</div>
+                  <div className="invoice-a4__cell-wrap">
+                    {exportWarehouseName}
+                  </div>
                 </div>
                 <div className="invoice-a4__row">
                   <div className="invoice-a4__row-label">Nhân viên:</div>
@@ -150,7 +187,9 @@ export const InvoiceA4 = memo(
                 </div>
                 <div className="invoice-a4__row">
                   <div className="invoice-a4__row-label">Ghi chú:</div>
-                  <div className="invoice-a4__cell-wrap">{saleDetail?.note || "-"}</div>
+                  <div className="invoice-a4__cell-wrap">
+                    {saleDetail?.note || "-"}
+                  </div>
                 </div>
               </div>
             </div>
@@ -165,9 +204,15 @@ export const InvoiceA4 = memo(
                     <th style={{ width: 80 }}>ĐVT</th>
                     <th style={{ width: 70, textAlign: "right" }}>Số lượng</th>
                     <th style={{ width: 110, textAlign: "right" }}>Đơn giá</th>
-                    <th style={{ width: 120, textAlign: "right" }}>Thành tiền</th>
-                    <th style={{ width: 90, textAlign: "center" }}>Thuế suất</th>
-                    <th style={{ width: 120, textAlign: "right" }}>Tiền thuế</th>
+                    <th style={{ width: 120, textAlign: "right" }}>
+                      Thành tiền
+                    </th>
+                    <th style={{ width: 90, textAlign: "center" }}>
+                      Thuế suất
+                    </th>
+                    <th style={{ width: 120, textAlign: "right" }}>
+                      Tiền thuế
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -176,7 +221,8 @@ export const InvoiceA4 = memo(
                     const productCode = item?.product?.code || "";
                     const unitName = item?.product?.unit?.name || "";
                     const quantity = item?.quantity ?? 0;
-                    const price = item?.price ?? item?.product?.sellingPrice ?? 0;
+                    const price =
+                      item?.price ?? item?.product?.sellingPrice ?? 0;
                     const lineTotal = item?.lineTotal ?? quantity * price;
                     const lineTax = taxRatePercent
                       ? Math.round((lineTotal * taxRatePercent) / 100)
@@ -187,12 +233,20 @@ export const InvoiceA4 = memo(
                         <td style={{ textAlign: "center" }}>{index + 1}</td>
                         <td>{productCode || "-"}</td>
                         <td>
-                          <div className="invoice-a4__cell-wrap">{productName}</div>
+                          <div className="invoice-a4__cell-wrap">
+                            {productName}
+                          </div>
                         </td>
                         <td>{unitName || "-"}</td>
-                        <td style={{ textAlign: "right" }}>{formatNumber(quantity)}</td>
-                        <td style={{ textAlign: "right" }}>{formatNumber(price)} đ</td>
-                        <td style={{ textAlign: "right" }}>{formatNumber(lineTotal)} đ</td>
+                        <td style={{ textAlign: "right" }}>
+                          {formatNumber(quantity)}
+                        </td>
+                        <td style={{ textAlign: "right" }}>
+                          {formatNumber(price)} đ
+                        </td>
+                        <td style={{ textAlign: "right" }}>
+                          {formatNumber(lineTotal)} đ
+                        </td>
                         <td style={{ textAlign: "center" }}>{taxRateLabel}</td>
                         <td style={{ textAlign: "right" }}>
                           {lineTax ? `${formatNumber(lineTax)} đ` : "-"}
@@ -205,19 +259,24 @@ export const InvoiceA4 = memo(
             </div>
 
             <div className="invoice-a4__tax-summary">
-              <div className="invoice-a4__tax-header">
-                <span>Thành tiền trước thuế GTGT</span>
-                <span>Tiền thuế GTGT</span>
-                <span>Cộng tiền thanh toán</span>
-              </div>
-              <div className="invoice-a4__tax-row">
-                <div>Thuế suất {taxRateLabel}:</div>
-                <div className="invoice-a4__tax-values">
-                  <span>{formatNumber(totalAmount)} đ</span>
-                  <span>{formatNumber(taxMoney)} đ</span>
-                  <span>{formatNumber(totalAmountAfterFax)} đ</span>
-                </div>
-              </div>
+              <table className="invoice-a4__table invoice-a4__tax-table">
+                <thead>
+                  <tr>
+                    <th />
+                    <th>Thành tiền trước thuế GTGT</th>
+                    <th>Tiền thuế GTGT</th>
+                    <th>Cộng tiền thanh toán</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Thuế suất {taxRateLabel}:</td>
+                    <td>{formatNumber(totalAmount)} đ</td>
+                    <td>{formatNumber(taxMoney)} đ</td>
+                    <td>{formatNumber(totalAmountAfterFax)} đ</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
 
             <div className="invoice-a4__amount-in-words">
@@ -226,27 +285,29 @@ export const InvoiceA4 = memo(
 
             <div className="invoice-a4__signatures">
               <div className="invoice-a4__signature-col">
-                <div className="invoice-a4__signature-title">Người mua hàng</div>
-                <div className="invoice-a4__signature-note">(Chữ ký số nếu có)</div>
+                <div className="invoice-a4__signature-title">
+                  Người mua hàng
+                </div>
+                <div className="invoice-a4__signature-note">
+                  (Chữ ký số nếu có)
+                </div>
               </div>
               <div className="invoice-a4__signature-col">
-                <div className="invoice-a4__signature-title">Người bán hàng</div>
-                <div className="invoice-a4__signature-note">(Chữ ký điện tử, chữ ký số)</div>
+                <div className="invoice-a4__signature-title">
+                  Người bán hàng
+                </div>
+                <div className="invoice-a4__signature-note">
+                  (Chữ ký điện tử, chữ ký số)
+                </div>
               </div>
             </div>
 
-            <div className="invoice-a4__lookup">
-              Tra cứu tại Website: quanlykho.sanghh.space - Mã tra cứu: {saleCode || "-"}
-            </div>
-
-            <div className="invoice-a4__footer">
-              <div className="invoice-a4__software">
-                {companyInfo.map((line) => (
-                  <div key={line}>{line}</div>
-                ))}
-                {showWatermark ? <div>Hóa đơn đã bị hủy</div> : null}
+            <div className="invoice-a4__bottom">
+              <div className="invoice-a4__issued-by">{issuedByText}</div>
+              <div className="invoice-a4__lookup">
+                Tra cứu tại Website: quanlykho.sanghh.space - Mã tra cứu:{" "}
+                {saleCode || "-"}
               </div>
-              <QRCodeCanvas value={qrText || ""} size={96} includeMargin />
             </div>
           </div>
         </div>
