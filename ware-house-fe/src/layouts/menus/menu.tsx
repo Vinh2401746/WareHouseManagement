@@ -22,7 +22,7 @@ const { Sider } = Layout;
 
 const ROUTE_PERMISSIONS: Record<string, string> = {
   [AppRoutes.user.list]: "user",
-  [AppRoutes.role]: "user",
+  [AppRoutes.role]: "rbac",
   [AppRoutes.products]: "products",
   [AppRoutes.supplier]: "suppliers",
   [AppRoutes.customer]: "customers", // Cập nhật đúng permission của mình
@@ -30,6 +30,7 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
   [AppRoutes.warehouse.list]: "warehouses",
   [AppRoutes.branch.list]: "branches",
   [AppRoutes.warehouse_import_export]: "inventoryTransactions",
+  [AppRoutes.warehouse_transfer]: "warehouseTransfers",
   [AppRoutes.sales_invoice]: "sales",
   [AppRoutes.inventory_batches]: "products", // temporary map to products read
 };
@@ -100,6 +101,11 @@ const items: ItemType<MenuItemType>[] = [
     icon: <ImportOutlined />,
     label: "Nhập kho",
   },
+  {
+    key: AppRoutes.warehouse_transfer,
+    icon: <ImportOutlined />,
+    label: "Luân chuyển kho",
+  },
    {
     key: AppRoutes.sales_invoice,
     icon: <FileDoneOutlined />,
@@ -121,29 +127,24 @@ export const MenusApp = () => {
     [navigate],
   );
 
-  const currentPermisson = useAppSelector((state: any) => state.auth.permission?.permissions);
-  const user = useAppSelector((state: any) => state.auth.user);
-  const permissionInfo = useAppSelector((state: any) => state.auth.permission);
+  const currentPermisson = useAppSelector((state: any) => state.auth.permission?.permissionsByGroup);
+  const roleKey = useAppSelector((state: any) => state.user?.user?.roleKey);
+  const isSuperAdmin = String(roleKey || "").trim().toLowerCase() === "superadmin";
 
   const filteredItems = items.filter(item => {
     const key = item?.key as string;
     if (key === AppRoutes.home.dashboard) return true; 
-    
-    const roleName = user?.role?.name?.toLowerCase();
-    const roleKeyUser = user?.roleKey?.toLowerCase();
-    const permRole = permissionInfo?.role?.toLowerCase();
-    const permRoleKey = permissionInfo?.roleKey?.toLowerCase();
 
-    const isSuperAdmin = [roleName, roleKeyUser, permRole, permRoleKey].some(r => 
-        r === 'admin' || r === 'superadmin' || r === 'super admin'
-    );
-    
+    // RBAC UI: chỉ Superadmin được thấy
+    if (key === AppRoutes.role) return isSuperAdmin;
+
     if (isSuperAdmin) return true;
     
     const module = ROUTE_PERMISSIONS[key];
     if (!module) return true;
     
-    const canView = currentPermisson?.[module as keyof typeof currentPermisson]?.join('')?.includes("get") || false;
+    const modulePermissions: string[] = currentPermisson?.[module] || [];
+    const canView = modulePermissions.some((code) => String(code).startsWith("get"));
     return canView;
   });
 

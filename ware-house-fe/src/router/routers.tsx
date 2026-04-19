@@ -3,7 +3,7 @@ import { lazy } from "react";
 
 import { createBrowserRouter } from "react-router-dom";
 import { AppRoutes } from "./routes";
-import { GuestRoute, PrivateRoute } from "../components/protect-route";
+import { GuestRoute, PrivateRoute, SuperAdminRoute } from "../components/protect-route";
 import NoPermissonPage from "../pages/404-developing/no-permission";
 import WarehouseImportExportDetailPage from "../pages/app/warehouse_import_export/detail";
 import SalePage from "../pages/app/sales";
@@ -29,6 +29,8 @@ const UnitPage = Loadable(lazy(() => import('../pages/app/unit')));
 const WarehousePage = Loadable(lazy(() => import('../pages/app/warehouse')));
 const BranchPage = Loadable(lazy(async () => import('../pages/app/branch')));
 const WarehouseImportAndExport = Loadable(lazy(async () => import('../pages/app/warehouse_import_export')));
+const WarehouseTransferPage = Loadable(lazy(async () => import('../pages/app/warehouse_transfer')));
+const WarehouseTransferDetailPage = Loadable(lazy(async () => import('../pages/app/warehouse_transfer/detail')));
 export const router = createBrowserRouter(
   [
     {
@@ -69,7 +71,11 @@ export const router = createBrowserRouter(
         {
           path: AppRoutes.role,
           id: AppRoutes.role,
-          element: <RolePage />,
+          element: (
+            <SuperAdminRoute>
+              <RolePage />
+            </SuperAdminRoute>
+          ),
         },
         {
           path: AppRoutes.products,
@@ -120,6 +126,16 @@ export const router = createBrowserRouter(
           path: AppRoutes.warehouse_import_export_detail,
           id: AppRoutes.warehouse_import_export_detail,
           element: <WarehouseImportExportDetailPage />,
+        },
+        {
+          path: AppRoutes.warehouse_transfer,
+          id: AppRoutes.warehouse_transfer,
+          element: <WarehouseTransferPage />,
+        },
+        {
+          path: AppRoutes.warehouse_transfer_detail,
+          id: AppRoutes.warehouse_transfer_detail,
+          element: <WarehouseTransferDetailPage />,
         },
         {
           path: AppRoutes.sales_invoice,

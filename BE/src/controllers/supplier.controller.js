@@ -35,10 +35,45 @@ const deleteSupplier = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const getImportTemplate = catchAsync(async (req, res) => {
+  const buffer = await supplierService.getSupplierImportTemplate();
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename="supplier_import_template.xlsx"');
+  res.send(Buffer.from(buffer));
+});
+
+const importSuppliers = catchAsync(async (req, res) => {
+  const { file } = req;
+  if (!file || !file.buffer) {
+    throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.supplier.excel.invalidFile);
+  }
+
+  // Chỉ chấp nhận .xlsx theo quyết định MVP
+  if (file.mimetype !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+    throw new ApiError(httpStatus.BAD_REQUEST, responseMessages.supplier.excel.invalidFile);
+  }
+
+  const result = await supplierService.importSuppliersFromExcel(file.buffer);
+  res.send(result);
+});
+
+const exportSuppliers = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['name', 'phone', 'email', 'address']);
+  const buffer = await supplierService.exportSuppliersToExcel(filter);
+
+  const filename = `suppliers_${Date.now()}.xlsx`;
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.send(Buffer.from(buffer));
+});
+
 module.exports = {
   createSupplier,
   getSuppliers,
   getSupplier,
   updateSupplier,
   deleteSupplier,
+  getImportTemplate,
+  importSuppliers,
+  exportSuppliers,
 };

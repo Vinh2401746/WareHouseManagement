@@ -1,7 +1,9 @@
 const faker = require('faker');
+const mongoose = require('mongoose');
 const Supplier = require('../../src/models/supplier.model');
 
 const supplierOne = {
+  _id: mongoose.Types.ObjectId(),
   name: faker.random.word(),
   phone: faker.random.word(),
   email: faker.random.word(),
@@ -9,6 +11,7 @@ const supplierOne = {
 };
 
 const supplierTwo = {
+  _id: mongoose.Types.ObjectId(),
   name: faker.random.word(),
   phone: faker.random.word(),
   email: faker.random.word(),
@@ -16,6 +19,7 @@ const supplierTwo = {
 };
 
 const supplierThree = {
+  _id: mongoose.Types.ObjectId(),
   name: faker.random.word(),
   phone: faker.random.word(),
   email: faker.random.word(),

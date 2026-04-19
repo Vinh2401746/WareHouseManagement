@@ -81,19 +81,9 @@ export type roles = string | null;
 
 
 export type permissionType = {
-  "userId": string,
-  "role": string,
-  "permissions": {
-    "user": string[],
-    "branches": string[],
-    "warehouses": string[],
-    "products": string[],
-    "suppliers": string[],
-    "customers": string[],
-    "productBatchs": string[],
-    "inventoryTransactions": string[],
-    "sales": string[],
-    "units": string[]
-  }
-
-}
+  userId: string;
+  roleId?: string;
+  roleKey?: string;
+  roleName?: string;
+  permissionsByGroup: Record<string, string[]>;
+};

@@ -11,7 +11,7 @@ import "./index.css";
 import { TableCommon } from "../../../components/table/table";
 import { AppRoutes } from "../../../router/routes";
 import type { GetSuppliersRequestType } from "../../../types/supplier";
-import { getSuppliersApi,deleteSuplierApi } from "../../../api/supplier";
+import { deleteSuplierApi, exportCurrentSuppliers, getSuppliersApi, getTemplateSupplier, importTemplateSupplier } from "../../../api/supplier";
 import { usePermission } from "../../../hooks/usePermission";
 import NoPermissonPage from "../../404-developing/no-permission";
 const SuppilerPage = memo(() => {
@@ -131,7 +131,7 @@ const SuppilerPage = memo(() => {
                 okText="Xác nhận"
                 onConfirm={() => onAction("delete", record)}
               >
-                <Tag color={"red"} variant={"outlined"}    disabled={!isManager}>
+                <Tag color={"red"} variant={"outlined"} disabled={!isManager}>
                   Xoá
                 </Tag>
               </Popconfirm>
@@ -140,8 +140,78 @@ const SuppilerPage = memo(() => {
         },
       },
     ],
-    [onAction],
+    [isManager, onAction],
   );
+
+  const { mutate: downloadTemplate } = useMutation({
+    mutationFn: getTemplateSupplier,
+    onSuccess: (res) => {
+      const url = URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "supplier_import_template.xlsx";
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    onError: () => {
+      dispatchToast("error", "Tải file mẫu thất bại!");
+    },
+  });
+
+  const { mutate: importSupplier } = useMutation({
+    mutationFn: importTemplateSupplier,
+    onSuccess: (res: any) => {
+      if (res?.errors?.length === 0) {
+        dispatchToast("success", "Nhập nhà cung cấp thành công!");
+        refetch();
+        return;
+      }
+      dispatchToast("error", res?.errors?.[0]?.errors?.[0] || "Mẫu đẩy lên không đúng quy định!");
+    },
+    onError: () => {
+      dispatchToast("error", "Nhập file thất bại!");
+    },
+  });
+
+  const { mutate: exportSuppliers } = useMutation({
+    mutationFn: exportCurrentSuppliers,
+    onSuccess: (res) => {
+      const url = URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "suppliers.xlsx";
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    onError: () => {
+      dispatchToast("error", "Xuất nhà cung cấp thất bại!");
+    },
+  });
+
+  const utitilesAction = (action: "template" | "import" | "export") => {
+    switch (action) {
+      case "template":
+        downloadTemplate();
+        break;
+      case "import": {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".xlsx";
+        input.onchange = (e) => {
+          const file = (e.target as HTMLInputElement).files?.[0];
+          if (file) importSupplier(file);
+        };
+        input.click();
+        break;
+      }
+      case "export":
+        exportSuppliers();
+        break;
+      default:
+        break;
+    }
+  };
+
   if(!canView) return <NoPermissonPage />
   return (
     <div style={{ rowGap: 24, display: "flex", flexDirection: "column" }}>
@@ -158,7 +228,16 @@ const SuppilerPage = memo(() => {
           },
         ]}
       />
-      <Flex justify="end">
+        <Flex wrap="wrap" justify="end" gap={8}>
+          <Button type="primary" onClick={() => utitilesAction("template")}  disabled={!isManager}>
+            Tải file mẫu
+          </Button>
+          <Button type="primary" onClick={() => utitilesAction("import")}  disabled={!isManager}>
+            Tải danh sách nhà cung cấp
+          </Button>
+          <Button type="primary" onClick={() => utitilesAction("export")}  disabled={!isManager}>
+            Xuất nhà cung cấp hiện có
+          </Button>
         <Button type="primary" onClick={() => formRef.current?.show()}    disabled={!isManager}>
           Thêm nhà cung cấp
         </Button>

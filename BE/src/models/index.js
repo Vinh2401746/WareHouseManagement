@@ -13,3 +13,4 @@ module.exports.Product = require('./product.model');
 module.exports.Supplier = require('./supplier.model');
 module.exports.Unit = require('./unit.model');
 module.exports.Customer = require('./customer.model');
+module.exports.WarehouseTransfer = require('./warehouseTransfer.model');

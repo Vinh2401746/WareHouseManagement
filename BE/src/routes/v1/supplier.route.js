@@ -1,10 +1,20 @@
 const express = require('express');
 const auth = require('../../middlewares/auth');
+const upload = require('../../middlewares/upload');
 const validate = require('../../middlewares/validate');
 const supplierValidation = require('../../validations/supplier.validation');
 const supplierController = require('../../controllers/supplier.controller');
 
 const router = express.Router();
+
+router.get('/import-template', auth('getSuppliers'), supplierController.getImportTemplate);
+router.post('/import', auth('manageSuppliers'), upload.single('file'), supplierController.importSuppliers);
+router.get(
+  '/export',
+  auth('getSuppliers'),
+  validate(supplierValidation.exportSuppliers),
+  supplierController.exportSuppliers
+);
 
 router
   .route('/')

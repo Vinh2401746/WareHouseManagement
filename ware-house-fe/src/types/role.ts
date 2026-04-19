@@ -6,7 +6,8 @@ export type RoleType = {
   key: string;
   description?: string;
   scope: 'branch' | 'global';
-  permissionIds: string[];
+  permissionIds?: string[];
+  permissions?: Array<{ id?: string; _id?: string; code?: string; name?: string }>;
   isSystem?: boolean;
   createdAt?: string;
   updatedAt?: string;

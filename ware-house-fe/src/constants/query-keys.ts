@@ -22,6 +22,11 @@ export const QueryKeys = {
     list: 'inventory',
     detail: 'inventory-detail'
   },
+  warehouseTransfer: {
+    list: 'warehouse-transfer',
+    detail: 'warehouse-transfer-detail',
+    batches: 'warehouse-transfer-batches',
+  },
   warehouse: {
     list: 'warehouse'
   },

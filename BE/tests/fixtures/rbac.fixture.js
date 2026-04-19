@@ -24,10 +24,17 @@ const buildRolePayloads = (permissionMap) =>
     isImmutable: Boolean(definition.isImmutable),
   }));
 
+const isDuplicateKeyError = (error) => Boolean(error && error.code === 11000);
+
 const ensurePermissionsSeeded = async () => {
   let permissions = await Permission.find({});
   if (permissions.length === 0) {
-    permissions = await Permission.insertMany(buildPermissionPayloads());
+    try {
+      await Permission.insertMany(buildPermissionPayloads(), { ordered: false });
+    } catch (error) {
+      if (!isDuplicateKeyError(error)) throw error;
+    }
+    permissions = await Permission.find({});
   }
   return permissions.reduce((accumulator, permission) => {
     accumulator[permission.code] = permission;
@@ -39,7 +46,12 @@ const ensureRolesSeeded = async () => {
   const permissionMap = await ensurePermissionsSeeded();
   let roles = await Role.find({});
   if (roles.length === 0) {
-    roles = await Role.insertMany(buildRolePayloads(permissionMap));
+    try {
+      await Role.insertMany(buildRolePayloads(permissionMap), { ordered: false });
+    } catch (error) {
+      if (!isDuplicateKeyError(error)) throw error;
+    }
+    roles = await Role.find({});
   }
   return roles.reduce((accumulator, role) => {
     accumulator[role.key] = role;

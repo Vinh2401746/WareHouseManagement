@@ -45,6 +45,11 @@ const responseMessages = {
   },
   supplier: {
     notFound: 'Không tìm thấy nhà cung cấp',
+    excel: {
+      invalidFile: 'File không hợp lệ. Vui lòng tải lên file Excel (.xlsx)',
+      noData: 'File Excel không có dữ liệu (chỉ có header hoặc rỗng)',
+      importSuccess: 'Nhập nhà cung cấp thành công',
+    },
   },
   customer: {
     notFound: 'Không tìm thấy khách hàng',

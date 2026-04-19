@@ -9,14 +9,15 @@ import RoleFormModal from "./components/creat-update-role";
 import dispatchToast from "../../../constants/toast";
 import { SafetyOutlined } from "@ant-design/icons";
 import { TableCommon } from "../../../components/table/table";
-import { usePermission } from "../../../hooks/usePermission";
 import NoPermissonPage from "../../404-developing/no-permission";
+import { useAppSelector } from "../../../store/hooks";
 
 const RolePage = memo(() => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const formRef = useRef<RoleFormRef>(null);
-  const { isManager, canView } = usePermission("user");
+  const roleKey = useAppSelector((state: any) => state.user?.user?.roleKey);
+  const isSuperAdmin = String(roleKey || "").trim().toLowerCase() === "superadmin";
 
   const { data, isFetching, isError, error, refetch } = useQuery({
     queryKey: [QueryKeys.role.list, page, limit],
@@ -104,7 +105,7 @@ const RolePage = memo(() => {
             <Tag
               color="green"
               onClick={() => {
-                if(isManager) onAction("update", record)
+                onAction("update", record)
               }}
             >
               Cập nhật
@@ -114,7 +115,7 @@ const RolePage = memo(() => {
               cancelText="Huỷ"
               okText="Xác nhận"
               onConfirm={() => onAction("delete", record)}
-              disabled={!isManager}
+              disabled={false}
             >
               <Tag color="red">
                 Xoá
@@ -126,7 +127,7 @@ const RolePage = memo(() => {
     },
   ], [page, limit, onAction]);
 
-  if (!canView) return <NoPermissonPage />;
+  if (!isSuperAdmin) return <NoPermissonPage />;
   return (
     <div style={{ rowGap: 12, display: "flex", flexDirection: 'column' }}>
       <Breadcrumb

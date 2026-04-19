@@ -57,13 +57,18 @@ const RoleFormModal = forwardRef<RoleFormRef, Props>(({ onRecall }, ref) => {
       modalRef.current?.show();
       setCurrentRecord(data || null);
       if (data) {
+        const permissionIdsFromRole = Array.isArray((data as any).permissions)
+          ? (data as any).permissions.map((p: any) => p?.id || p?._id).filter(Boolean)
+          : Array.isArray((data as any).permissionIds)
+            ? (data as any).permissionIds.map((p: any) => p?.id || p).filter(Boolean)
+            : [];
+
         form.setFieldsValue({
           name: data.name,
           key: data.key,
           description: data.description,
           scope: data.scope,
-          // Extract array string permissionIds từ data get
-          permissionIds: data.permissionIds ? data.permissionIds.map((p: any) => p.id || p) : [],
+          permissionIds: permissionIdsFromRole,
         });
       } else {
         form.resetFields();

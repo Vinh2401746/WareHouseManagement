@@ -9,6 +9,7 @@ module.exports.productInventoryService = require('./productInventory.service');
 module.exports.supplierService = require('./supplier.service');
 module.exports.productBatchService = require('./productBatch.service');
 module.exports.inventoryTransactionService = require('./inventoryTransaction.service');
+module.exports.warehouseTransferService = require('./warehouseTransfer.service');
 module.exports.saleService = require('./sale.service');
 module.exports.unitService = require('./unit.service');
 module.exports.permissionService = require('./permission.service');

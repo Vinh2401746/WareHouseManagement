@@ -4,7 +4,6 @@ const httpStatus = require('http-status');
 const app = require('../../src/app');
 const setupTestDB = require('../utils/setupTestDB');
 const { Supplier } = require('../../src/models');
-const { userOne, userTwo, insertUsers } = require('../fixtures/user.fixture');
 const { userOneAccessToken, userTwoAccessToken } = require('../fixtures/token.fixture');
 const { supplierOne, supplierTwo, supplierThree, insertSuppliers } = require('../fixtures/supplier.fixture');
 
@@ -24,7 +23,6 @@ describe('Supplier routes', () => {
     });
 
     test('should return 201 and successfully create new supplier if data is ok', async () => {
-      await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
 
       const res = await request(app)
@@ -33,11 +31,24 @@ describe('Supplier routes', () => {
         .send(newSupplier)
         .expect(httpStatus.CREATED);
 
-      expect(res.body).toEqual({ id: expect.anything(), type: newSupplier.type });
+      expect(res.body).toEqual(
+        expect.objectContaining({
+          id: expect.anything(),
+          name: newSupplier.name,
+          phone: newSupplier.phone,
+          email: newSupplier.email,
+          address: newSupplier.address,
+        })
+      );
 
       const dbSupplier = await Supplier.findById(res.body.id);
       expect(dbSupplier).toBeDefined();
-      expect(dbSupplier).toMatchObject({ type: newSupplier.type });
+      expect(dbSupplier).toMatchObject({
+        name: newSupplier.name,
+        phone: newSupplier.phone,
+        email: newSupplier.email,
+        address: newSupplier.address,
+      });
     });
 
     test('should return 401 error if access token is missing', async () => {
@@ -63,9 +74,7 @@ describe('Supplier routes', () => {
         totalResults: 2,
       });
       expect(res.body.results).toHaveLength(2);
-      expect(res.body.results[0]).toEqual({
-        id: supplierOne._id.toHexString(),
-      });
+      expect(res.body.results[0]).toEqual(expect.objectContaining({ id: expect.anything() }));
     });
 
     test('should return 401 if access token is missing', async () => {
@@ -74,14 +83,14 @@ describe('Supplier routes', () => {
       await request(app).get('/v1/supplier').send().expect(httpStatus.UNAUTHORIZED);
     });
 
-    test('should return 403 if a non-admin is trying to access all suppliers', async () => {
+    test('should return 200 if user has getSuppliers permission', async () => {
       await insertSuppliers([supplierOne, supplierTwo]);
 
       await request(app)
         .get('/v1/supplier')
         .set('Authorization', `Bearer ${userTwoAccessToken}`)
         .send()
-        .expect(httpStatus.FORBIDDEN);
+        .expect(httpStatus.OK);
     });
 
     test('should limit returned array if limit param is specified', async () => {
@@ -99,7 +108,7 @@ describe('Supplier routes', () => {
         page: 1,
         limit: 2,
         totalPages: 2,
-        totalResults: 2,
+        totalResults: 3,
       });
       expect(res.body.results).toHaveLength(2);
       expect(res.body.results[0].id).toBe(supplierOne._id.toHexString());
@@ -124,13 +133,12 @@ describe('Supplier routes', () => {
         totalResults: 3,
       });
       expect(res.body.results).toHaveLength(1);
-      expect(res.body.results[0].id).toBe(userOne._id.toHexString());
+      expect(res.body.results[0].id).toBe(supplierThree._id.toHexString());
     });
   });
 
   describe('GET /v1/supplier/:supplierId', () => {
     test('should return 200 and the supplier object if data is ok', async () => {
-      await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
 
       const res = await request(app)
@@ -140,20 +148,24 @@ describe('Supplier routes', () => {
         .expect(httpStatus.OK);
 
       expect(res.body).not.toHaveProperty('password');
-      expect(res.body).toEqual({
-        id: supplierOne._id.toHexString(),
-      });
+      expect(res.body).toEqual(
+        expect.objectContaining({
+          id: supplierOne._id.toHexString(),
+          name: supplierOne.name,
+          phone: supplierOne.phone,
+          email: supplierOne.email,
+          address: supplierOne.address,
+        })
+      );
     });
 
     test('should return 401 error if access token is missing', async () => {
-      await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
 
       await request(app).get(`/v1/supplier/${supplierOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if supplierId is not a valid mongo id', async () => {
-      await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
 
       await request(app)
@@ -176,7 +188,6 @@ describe('Supplier routes', () => {
 
   describe('DELETE /v1/supplier/:supplierId', () => {
     test('should return 204 if data is ok', async () => {
-      await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
 
       await request(app)
@@ -190,14 +201,12 @@ describe('Supplier routes', () => {
     });
 
     test('should return 401 error if access token is missing', async () => {
-      await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
 
       await request(app).delete(`/v1/supplier/${supplierOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if supplierId is not a valid mongo id', async () => {
-      await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
 
       await request(app)
@@ -218,9 +227,8 @@ describe('Supplier routes', () => {
     });
   });
 
-  describe('PATCH /v1/supplier/:supplierId', () => {
+  describe('PUT /v1/supplier/:supplierId', () => {
     test('should return 200 and successfully update supplier if data is ok', async () => {
-      await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
       const updateBody = {
         name: faker.random.word(),
@@ -230,27 +238,25 @@ describe('Supplier routes', () => {
       };
 
       const res = await request(app)
-        .patch(`/v1/supplier/${supplierOne._id}`)
+        .put(`/v1/supplier/${supplierOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.OK);
 
-      const validationData = {
-        id: supplierOne._id.toHexString(),
-      };
-      validationData.merge(updateBody);
-
       expect(res.body).not.toHaveProperty('password');
-      expect(res.body).toEqual(validationData);
+      expect(res.body).toEqual(
+        expect.objectContaining({
+          id: supplierOne._id.toHexString(),
+          ...updateBody,
+        })
+      );
 
       const dbSupplier = await Supplier.findById(supplierOne._id);
       expect(dbSupplier).toBeDefined();
-      expect(dbSupplier.password).not.toBe(updateBody.password);
-      expect(dbSupplier).toMatchObject({ type: updateBody.type });
+      expect(dbSupplier).toMatchObject(updateBody);
     });
 
     test('should return 401 error if access token is missing', async () => {
-      await insertUsers([userOne, userTwo]);
       await insertSuppliers([supplierOne]);
       const updateBody = {
         name: faker.random.word(),
@@ -258,7 +264,7 @@ describe('Supplier routes', () => {
         email: faker.random.word(),
         address: faker.random.word(),
       };
-      await request(app).patch(`/v1/supplier/${supplierOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
+      await request(app).put(`/v1/supplier/${supplierOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should return 400 error if supplierId is not a valid mongo id', async () => {
@@ -270,7 +276,7 @@ describe('Supplier routes', () => {
         address: faker.random.word(),
       };
       await request(app)
-        .patch(`/v1/supplier/invalidId`)
+        .put(`/v1/supplier/invalidId`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
         .expect(httpStatus.BAD_REQUEST);

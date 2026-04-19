@@ -34,3 +34,17 @@ export const updateSupplierApi = async (payload: UpdateSupplierRequestType) => {
 export const deleteSuplierApi = async (payload: { id: string }) => {
   return AxiosClient.delete(`supplier/${payload.id}`);
 };
+
+export const getTemplateSupplier = () => {
+  return AxiosClient.get(`supplier/import-template`, { responseType: 'blob' });
+};
+
+export const importTemplateSupplier = (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return AxiosClient.post(`supplier/import`, formData);
+};
+
+export const exportCurrentSuppliers = () => {
+  return AxiosClient.get(`supplier/export`, { responseType: 'blob' });
+};

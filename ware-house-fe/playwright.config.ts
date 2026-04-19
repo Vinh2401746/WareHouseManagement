@@ -1,0 +1,34 @@
+import { defineConfig, devices } from '@playwright/test';
+
+const baseURL = process.env.E2E_BASE_URL || 'http://localhost:5173';
+
+export default defineConfig({
+  testDir: './e2e',
+  timeout: 30_000,
+  expect: {
+    timeout: 10_000,
+  },
+  fullyParallel: true,
+  retries: process.env.CI ? 2 : 0,
+  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : [['list'], ['html', { open: 'never' }]],
+  use: {
+    baseURL,
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    storageState: 'e2e/.auth/admin.json',
+  },
+  globalSetup: './e2e/global-setup',
+  webServer: {
+    command: 'npm run dev -- --host 127.0.0.1 --port 5173',
+    url: baseURL,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+});

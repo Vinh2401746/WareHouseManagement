@@ -28,6 +28,15 @@ const getSupplier = {
   }),
 };
 
+const exportSuppliers = {
+  query: Joi.object().keys({
+    name: Joi.string(),
+    phone: Joi.string(),
+    email: Joi.string(),
+    address: Joi.string(),
+  }),
+};
+
 const updateSupplier = {
   params: Joi.object().keys({
     supplierId: Joi.required().custom(objectId),
@@ -51,6 +60,7 @@ const deleteSupplier = {
 module.exports = {
   createSupplier,
   getSuppliers,
+  exportSuppliers,
   getSupplier,
   updateSupplier,
   deleteSupplier,

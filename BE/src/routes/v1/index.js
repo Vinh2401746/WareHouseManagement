@@ -12,6 +12,7 @@ const docsRoute = require('./docs.route');
 const productBatchRoute = require('./productBatch.route');
 const unitRoute = require('./unit.route');
 const inventoryTransactionRoute = require('./inventoryTransaction.route');
+const warehouseTransferRoute = require('./warehouseTransfer.route');
 const saleRoute = require('./sale.route');
 const customerRoute = require('./customer.route');
 const dashboardRoute = require('./dashboard.route');
@@ -55,6 +56,10 @@ const defaultRoutes = [
   {
     path: '/inventory',
     route: inventoryTransactionRoute,
+  },
+  {
+    path: '/warehouseTransfer',
+    route: warehouseTransferRoute,
   },
   {
     path: '/sale',

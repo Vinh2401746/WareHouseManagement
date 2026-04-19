@@ -23,6 +23,8 @@ export const AppRoutes = {
   store: '/store',
   warehouse_import_export: '/warehouse_import_export',
   warehouse_import_export_detail: '/warehouse_import_export_detail',
+  warehouse_transfer: '/warehouse_transfer',
+  warehouse_transfer_detail: '/warehouse_transfer_detail',
   sales_invoice: '/sales_invoice',
   sales_invoice_detail: '/sales_invoice_detail',
   create_invoice:'/create_invoice',

@@ -119,6 +119,27 @@ const PERMISSION_DEFINITIONS = [
     description: 'Tạo mới, duyệt, chỉnh sửa phiếu kho',
   },
   {
+    key: 'GET_WAREHOUSE_TRANSFERS',
+    code: 'getWarehouseTransfers',
+    name: 'Xem phiếu luân chuyển kho',
+    group: 'warehouseTransfers',
+    description: 'Xem danh sách và chi tiết phiếu luân chuyển kho',
+  },
+  {
+    key: 'CREATE_WAREHOUSE_TRANSFERS',
+    code: 'createWarehouseTransfers',
+    name: 'Tạo phiếu luân chuyển kho',
+    group: 'warehouseTransfers',
+    description: 'Tạo phiếu luân chuyển kho (chờ quản lý kho duyệt)',
+  },
+  {
+    key: 'MANAGE_WAREHOUSE_TRANSFERS',
+    code: 'manageWarehouseTransfers',
+    name: 'Duyệt phiếu luân chuyển kho',
+    group: 'warehouseTransfers',
+    description: 'Duyệt/hủy phiếu luân chuyển kho',
+  },
+  {
     key: 'GET_SALES',
     code: 'getSales',
     name: 'Xem đơn bán',
