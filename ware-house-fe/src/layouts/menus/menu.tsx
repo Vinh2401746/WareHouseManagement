@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   HomeOutlined,
   UserOutlined,
@@ -42,76 +42,137 @@ const items: ItemType<MenuItemType>[] = [
     label: "Tổng quan",
   },
   {
-    key: AppRoutes.user.list,
-    icon: <UserOutlined />,
-    label: "Người dùng",
+    key: "sub-business",
+    label: "Nghiệp vụ",
+    children: [
+      {
+        key: AppRoutes.sales_invoice,
+        icon: <FileDoneOutlined />,
+        label: "Hoá đơn bán hàng",
+      },
+      {
+        key: AppRoutes.warehouse_import_export,
+        icon: <ImportOutlined />,
+        label: "Nhập/Xuất kho",
+      },
+      {
+        key: AppRoutes.warehouse_transfer,
+        icon: <ImportOutlined />,
+        label: "Luân chuyển kho",
+      },
+    ],
   },
   {
-    key: AppRoutes.role,
-    icon: <SafetyOutlined />,
-    label: "Vai trò & Phân quyền",
+    key: "sub-master-data",
+    label: "Danh mục",
+    children: [
+      {
+        key: AppRoutes.products,
+        icon: <AppstoreOutlined />,
+        label: "Sản phẩm",
+      },
+      {
+        key: AppRoutes.inventory_batches,
+        icon: <DatabaseOutlined />,
+        label: "Danh sách Lô hàng",
+      },
+      {
+        key: AppRoutes.customer,
+        icon: <UserOutlined />,
+        label: "Khách hàng",
+      },
+      {
+        key: AppRoutes.supplier,
+        icon: <ContactsOutlined />,
+        label: "Nhà cung cấp",
+      },
+      {
+        key: AppRoutes.unit.list,
+        icon: <FunctionOutlined />,
+        label: "Đơn vị",
+      },
+    ],
   },
   {
-    key: AppRoutes.products,
-    icon: <AppstoreOutlined />,
-    label: "Sản phẩm",
-  },
-  // {
-  //   key: AppRoutes.category,
-  //   icon: <UploadOutlined />,
-  //   label: "Danh mục sản phẩm",
-  // },
-  {
-    key: AppRoutes.inventory_batches,
-    icon: <DatabaseOutlined />,
-    label: "Danh sách Lô hàng",
-  },
-   {
-    key: AppRoutes.supplier,
-    icon: <ContactsOutlined />,
-    label: "Nhà cung cấp",
-  },
-   {
-    key: AppRoutes.customer,
-    icon: <UserOutlined />,
-    label: "Khách hàng",
-  },
-  //    {
-  //   key: AppRoutes.branch.list,
-  //   icon: <UploadOutlined />,
-  //   label: "Chi nhánh",
-  // },
-   {
-    key: AppRoutes.unit.list,
-    icon: <FunctionOutlined />,
-    label: "Đơn vị",
-  },
-   {
-    key: AppRoutes.warehouse.list,
-    icon: <DatabaseOutlined />,
-    label: "Kho",
-  },
-   {
-    key: AppRoutes.branch.list,
-    icon: <ShopOutlined />,
-    label: "Cửa hàng",
-  },
-   {
-    key: AppRoutes.warehouse_import_export,
-    icon: <ImportOutlined />,
-    label: "Nhập kho",
+    key: "sub-organization",
+    label: "Tổ chức",
+    children: [
+      {
+        key: AppRoutes.branch.list,
+        icon: <ShopOutlined />,
+        label: "Cửa hàng",
+      },
+      {
+        key: AppRoutes.warehouse.list,
+        icon: <DatabaseOutlined />,
+        label: "Kho",
+      },
+    ],
   },
   {
-    key: AppRoutes.warehouse_transfer,
-    icon: <ImportOutlined />,
-    label: "Luân chuyển kho",
-  },
-   {
-    key: AppRoutes.sales_invoice,
-    icon: <FileDoneOutlined />,
-    label: "Hoá đơn bán hàng",
+    key: "sub-system",
+    label: "Hệ thống",
+    children: [
+      {
+        key: AppRoutes.user.list,
+        icon: <UserOutlined />,
+        label: "Người dùng",
+      },
+      {
+        key: AppRoutes.role,
+        icon: <SafetyOutlined />,
+        label: "Vai trò & Phân quyền",
+      },
+    ],
   },
 ];
+
+const filterMenuItemsByPermission = (
+  menuItems: ItemType<MenuItemType>[],
+  opts: {
+    isSuperAdmin: boolean;
+    currentPermisson: Record<string, string[]> | undefined;
+  },
+): ItemType<MenuItemType>[] => {
+  const canSeeRoute = (routeKey: string) => {
+    if (routeKey === AppRoutes.home.dashboard) return true;
+
+    // RBAC UI: chỉ Superadmin được thấy
+    if (routeKey === AppRoutes.role) return opts.isSuperAdmin;
+    if (opts.isSuperAdmin) return true;
+
+    const module = ROUTE_PERMISSIONS[routeKey];
+    if (!module) return true;
+
+    const modulePermissions: string[] = opts.currentPermisson?.[module] || [];
+    return modulePermissions.some((code) => String(code).startsWith("get"));
+  };
+
+  const walk = (list: ItemType<MenuItemType>[]): ItemType<MenuItemType>[] => {
+    return (list || [])
+      .map((item) => {
+        if (!item) return null;
+
+        // Leaf route item
+        if ((item as any).key && !(item as any).children) {
+          const key = String((item as any).key);
+          return canSeeRoute(key) ? item : null;
+        }
+
+        // Group/submenu item
+        const children = walk(((item as any).children || []) as ItemType<MenuItemType>[]);
+        if (!children.length) return null;
+
+        return {
+          ...(item as any),
+          children,
+        } as ItemType<MenuItemType>;
+      })
+      .filter(Boolean) as ItemType<MenuItemType>[];
+  };
+
+  return walk(menuItems);
+};
 
 export const MenusApp = () => {
   const { collapsed } = useAppSelector((state) => state.auth);
@@ -131,22 +192,94 @@ export const MenusApp = () => {
   const roleKey = useAppSelector((state: any) => state.user?.user?.roleKey);
   const isSuperAdmin = String(roleKey || "").trim().toLowerCase() === "superadmin";
 
-  const filteredItems = items.filter(item => {
-    const key = item?.key as string;
-    if (key === AppRoutes.home.dashboard) return true; 
+  const filteredItems = filterMenuItemsByPermission(items, { isSuperAdmin, currentPermisson });
 
-    // RBAC UI: chỉ Superadmin được thấy
-    if (key === AppRoutes.role) return isSuperAdmin;
+  const allVisibleSubmenuKeys = useMemo(() => {
+    return filteredItems
+      .filter((item) => Boolean((item as any)?.children?.length))
+      .map((item) => String((item as any).key));
+  }, [filteredItems]);
 
-    if (isSuperAdmin) return true;
-    
-    const module = ROUTE_PERMISSIONS[key];
-    if (!module) return true;
-    
-    const modulePermissions: string[] = currentPermisson?.[module] || [];
-    const canView = modulePermissions.some((code) => String(code).startsWith("get"));
-    return canView;
-  });
+  const routeToSubmenuKey = useMemo(() => {
+    return {
+      [AppRoutes.sales_invoice]: "sub-business",
+      [AppRoutes.warehouse_import_export]: "sub-business",
+      [AppRoutes.warehouse_transfer]: "sub-business",
+
+      [AppRoutes.products]: "sub-master-data",
+      [AppRoutes.inventory_batches]: "sub-master-data",
+      [AppRoutes.customer]: "sub-master-data",
+      [AppRoutes.supplier]: "sub-master-data",
+      [AppRoutes.unit.list]: "sub-master-data",
+
+      [AppRoutes.branch.list]: "sub-organization",
+      [AppRoutes.warehouse.list]: "sub-organization",
+
+      [AppRoutes.user.list]: "sub-system",
+      [AppRoutes.role]: "sub-system",
+    } as Record<string, string>;
+  }, []);
+
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
+  const lastOpenKeysRef = useRef<string[]>([]);
+  const didInitOpenKeysRef = useRef(false);
+
+  useEffect(() => {
+    if (collapsed) {
+      lastOpenKeysRef.current = openKeys;
+      setOpenKeys([]);
+      return;
+    }
+
+    // Restore the previous open submenu (if any); otherwise open the submenu
+    // that contains the current route.
+    const parentKey = routeToSubmenuKey[location.pathname];
+    const restored = lastOpenKeysRef.current;
+    const nextOpenKeys = restored?.length
+      ? restored
+      : allVisibleSubmenuKeys.length
+        ? allVisibleSubmenuKeys
+        : parentKey
+          ? [parentKey]
+          : [];
+    setOpenKeys(nextOpenKeys);
+    lastOpenKeysRef.current = nextOpenKeys;
+  }, [collapsed]);
+
+  useEffect(() => {
+    // Default behavior: when user first lands (permissions loaded), expand all groups.
+    if (collapsed) return;
+    if (didInitOpenKeysRef.current) return;
+    if (!allVisibleSubmenuKeys.length) return;
+
+    setOpenKeys(allVisibleSubmenuKeys);
+    lastOpenKeysRef.current = allVisibleSubmenuKeys;
+    didInitOpenKeysRef.current = true;
+  }, [collapsed, allVisibleSubmenuKeys]);
+
+  useEffect(() => {
+    if (collapsed) {
+      // When sidebar is collapsed, close all submenus.
+      return;
+    }
+
+    const parentKey = routeToSubmenuKey[location.pathname];
+    if (!parentKey) return;
+
+    setOpenKeys((prev) => {
+      if (prev.includes(parentKey)) return prev;
+      const next = [...prev, parentKey];
+      lastOpenKeysRef.current = next;
+      return next;
+    });
+  }, [collapsed, location.pathname, routeToSubmenuKey]);
+
+  const onOpenChange: MenuProps["onOpenChange"] = (keys) => {
+    const nextOpenKeys = (keys || []).map((k) => String(k));
+    setOpenKeys(nextOpenKeys);
+    lastOpenKeysRef.current = nextOpenKeys;
+    didInitOpenKeysRef.current = true;
+  };
 
   return (
     <Sider
@@ -170,6 +303,8 @@ export const MenusApp = () => {
         defaultSelectedKeys={[AppRoutes.home.dashboard]}
         items={filteredItems}
         selectedKeys={[location.pathname]}
+        openKeys={collapsed ? [] : openKeys}
+        onOpenChange={onOpenChange}
         
       />
     </Sider>
