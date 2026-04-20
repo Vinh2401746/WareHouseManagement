@@ -1,0 +1,248 @@
+TÀI LIỆU HƯỚNG DẪN SỬ DỤNG
+Màn hình: HÓA ĐƠN BÁN HÀNG (XUẤT KHO)
+Phiên bản: WMS (WareHouseManagement)
+Cập nhật: 2026-04-21
+
+====================================================================
+1) Mục đích tài liệu
+====================================================================
+Tài liệu này hướng dẫn người dùng mới cách:
+- Tạo hóa đơn bán hàng và xuất kho (Hoàn thành/Thanh toán)
+- Lưu hóa đơn nháp (Lưu tạm)
+- Xem danh sách hóa đơn, xem trước và tải PDF hóa đơn
+
+Phạm vi: Chỉ tập trung vào các màn hình liên quan đến “Hoá đơn bán hàng” và luồng tạo đơn.
+Ngoài phạm vi: cấu hình kho/chi nhánh, quản trị người dùng, cấu hình quyền, các nghiệp vụ khác.
+
+====================================================================
+2) Điều kiện trước khi thao tác
+====================================================================
+2.1. Điều kiện dữ liệu
+- Kho bán hàng phải có sản phẩm còn tồn (tồn kho) để có thể bán.
+- Nếu hệ thống quản lý theo lô (batch): sản phẩm phải còn hạn sử dụng thì mới xuất bán được.
+
+2.2. Điều kiện quyền (RBAC)
+Tùy theo phân quyền, một số nút có thể bị vô hiệu hóa:
+- Xem danh sách / xem trước / tải PDF: cần quyền xem module bán hàng.
+- Tạo đơn / thao tác quản lý: thường cần quyền quản lý (manager).
+
+Nếu không có quyền, hệ thống có thể hiển thị trang “No permission”.
+
+====================================================================
+3) Tổng quan màn hình
+====================================================================
+3.1. Menu
+- Menu bên trái: “Hoá đơn bán hàng”
+
+3.2. Các màn hình chính
+A) Danh sách hóa đơn bán hàng
+- Hiển thị các hóa đơn theo trang (pagination).
+- Có thao tác: Chi tiết đơn, Xem trước, Tải PDF, Xoá.
+- Có nút: “Tạo đơn”.
+
+B) Tạo đơn (POS)
+- Chọn kho bán hàng.
+- Danh sách sản phẩm (bên trái) + Giỏ hàng (bên phải).
+- Nhập thông tin khách hàng / giảm giá / ghi chú.
+- Nút: Hủy đơn, Lưu tạm, Tính tiền → Thanh toán.
+
+====================================================================
+4) HOW-TO: Tạo hóa đơn bán hàng (xuất kho) – quy trình chuẩn
+====================================================================
+Mục tiêu: Tạo hóa đơn ở trạng thái HOÀN THÀNH (COMPLETED), hệ thống tự động trừ kho và tạo phiếu xuất kho.
+
+Bước 1 — Vào danh sách hóa đơn
+1) Mở menu: “Hoá đơn bán hàng”.
+2) Bấm nút: “Tạo đơn”.
+
+Bước 2 — Chọn kho bán hàng
+1) Ở màn hình tạo đơn, chọn “Chọn kho bán hàng”.
+2) Sau khi chọn kho, hệ thống mới hiển thị danh sách sản phẩm.
+
+Lưu ý quan trọng:
+- Nếu bạn đổi kho khi đang có sản phẩm trong giỏ, hệ thống sẽ làm mới giỏ hàng và thông báo: “Giỏ hàng đã được làm mới do đổi kho”.
+
+Bước 3 — Thêm sản phẩm vào giỏ
+1) (Tuỳ chọn) Dùng ô “Tìm kiếm sản phẩm…” để lọc theo từ khoá.
+2) Click vào một sản phẩm để thêm vào giỏ.
+
+Quy tắc:
+- Nếu tồn kho của sản phẩm ở kho hiện tại = 0: hệ thống cảnh báo “Sản phẩm đã hết trong kho hiện tại!” và không thêm vào giỏ.
+- Số lượng trong giỏ không được vượt quá tồn kho (hệ thống sẽ cảnh báo).
+
+Bước 4 — Chỉnh số lượng và giá bán
+Trong giỏ hàng:
+- Dùng nút “+” / “−” hoặc nhập trực tiếp số lượng.
+- Nhập “Giá” cho từng sản phẩm (đơn giá phải > 0).
+
+Nếu nhập số lượng vượt tồn kho: hệ thống cảnh báo “Số lượng không được vượt quá tồn kho” và tự đưa về mức tối đa.
+Nếu giá <= 0: hệ thống cảnh báo khi tính tiền/ghi đơn.
+
+Bước 5 — Nhập thông tin khách hàng, giảm giá, ghi chú
+Phần thông tin đơn:
+- Chọn khách hàng từ danh sách (có tìm kiếm).
+- Hoặc nhập “tên khách vãng lai” nếu không chọn.
+- Nhập “Giảm giá” (%).
+- Nhập “Ghi chú” (nếu cần).
+
+Gợi ý:
+- Nếu không chọn khách hàng và cũng không nhập tên: hệ thống sẽ dùng mặc định “Khách vãng lai”.
+
+Bước 6 — Tính tiền
+1) Bấm nút: “Tính tiền”.
+2) Chọn phương thức thanh toán:
+   - “Tiền mặt”: nhập “Tiền khách trả” (VNĐ), hệ thống tự tính “Tiền thừa trả khách”.
+   - “Chuyển khoản”: hiển thị QR để quét.
+3) Kiểm tra lại các khoản: Thành tiền, Chiết khấu, VAT, Tổng thanh toán.
+
+Bước 7 — Thanh toán (hoàn tất)
+1) Bấm nút: “Thanh toán”.
+2) Hệ thống tạo hóa đơn trạng thái COMPLETED.
+3) Hệ thống tự động:
+   - Trừ tồn kho theo lô (ưu tiên lô gần hết hạn trước nếu không chỉ định lô)
+   - Tạo phiếu xuất kho tương ứng (mã dạng PX-YYYYMMDD-xxxx)
+
+====================================================================
+5) HOW-TO: Lưu nháp (Lưu tạm)
+====================================================================
+Mục tiêu: Lưu hóa đơn ở trạng thái NHÁP (DRAFT) để xử lý sau.
+
+Các bước:
+1) Tạo giỏ hàng và nhập thông tin đơn tương tự mục (4).
+2) Bấm nút: “Lưu tạm”.
+3) Hệ thống tạo hóa đơn trạng thái DRAFT.
+
+Lưu ý:
+- DRAFT không trừ kho.
+- Khi cần hoàn tất, hiện tại luồng “chuyển nháp → hoàn thành” có thể bị giới hạn theo thiết kế; trong nhiều trường hợp nên tạo đơn mới để thanh toán.
+
+====================================================================
+6) REFERENCE: Các trường và nút trên màn hình Tạo đơn (POS)
+====================================================================
+6.1. Trường chọn kho
+- “Chọn kho bán hàng” (bắt buộc): kho sẽ xuất hàng khi thanh toán.
+
+6.2. Tìm kiếm sản phẩm
+- “Tìm kiếm sản phẩm…”: lọc danh sách sản phẩm trong kho.
+
+6.3. Giỏ hàng
+Mỗi sản phẩm trong giỏ gồm:
+- Tên sản phẩm
+- Số lượng
+- Giá (VNĐ)
+- Nút xoá dòng
+
+Ràng buộc:
+- Số lượng: tối thiểu 1, tối đa = tồn kho tại kho đang chọn.
+- Giá: phải > 0.
+
+6.4. Thông tin khách hàng
+- “Chọn khách hàng…”: chọn từ danh sách (có thể tìm kiếm theo tên/sđt).
+- “Hoặc nhập tên khách vãng lai…”: nhập tay nếu không chọn.
+
+6.5. Giảm giá
+- Trường “Giảm giá” nhập theo % (phần trăm).
+
+6.6. Ghi chú
+- Trường “Ghi chú”: nội dung tự do.
+
+6.7. Tổng tiền (hệ thống tự tính)
+Các chỉ số:
+- Tạm tính
+- Tổng chiết khấu
+- Tổng thuế (VAT)
+- Tổng cộng
+
+Công thức (làm tròn theo VNĐ):
+- Tạm tính = SUM(số lượng * giá)
+- Chiết khấu = ROUND(Tạm tính * (Giảm giá% / 100))
+- VAT = ROUND(Tạm tính * (VAT% / 100))
+- Tổng cộng = Tạm tính - Chiết khấu + VAT
+
+VAT% hiện tại của hệ thống: 5%
+
+6.8. Nút thao tác
+- “Hủy đơn”: xoá giỏ hiện tại và làm lại từ đầu.
+- “Lưu tạm”: tạo hóa đơn trạng thái DRAFT.
+- “Tính tiền”: mở popup tính tiền.
+- “Thanh toán”: hoàn tất tạo hóa đơn (COMPLETED) và xuất kho.
+
+====================================================================
+7) REFERENCE: Trạng thái hóa đơn
+====================================================================
+- DRAFT (Lưu nháp): lưu tạm, chưa trừ kho.
+- COMPLETED (Hoàn thành): đã thanh toán/hoàn tất; hệ thống đã trừ kho và tạo phiếu xuất kho.
+- CANCELLED (Đã huỷ): đơn bị huỷ (tuỳ quyền và luồng thao tác được hệ thống cho phép).
+
+Ghi chú:
+- Khi đơn đã COMPLETED, thường không cho sửa danh sách sản phẩm (để đảm bảo đúng tồn kho).
+
+====================================================================
+8) HOW-TO/REFERENCE: Danh sách hóa đơn bán hàng
+====================================================================
+8.1. Các cột thông tin thường gặp
+- Kho
+- Khách hàng
+- Trạng thái
+- Người tạo
+- Tạm tính / Chiết khấu / Thuế / Tổng phải thu
+- Ngày tạo
+
+8.2. Thao tác trên từng dòng
+- “Chi Tiết Đơn”: xem thông tin chi tiết (tùy quyền, có thể bị vô hiệu).
+- “Xem trước”: mở bản xem trước hóa đơn A4.
+- “Tải PDF”: tải file PDF hóa đơn.
+- “Xoá”: xoá hóa đơn (cần quyền; lưu ý xoá có thể ảnh hưởng tồn kho tuỳ trạng thái).
+
+8.3. Xem trước và tải PDF
+- Khi bấm “Xem trước”: hệ thống hiển thị “Xem trước hóa đơn (A4)”.
+- Tại popup, bạn có thể bấm “Tải xuống (PDF)”.
+
+====================================================================
+9) Xử lý lỗi & tình huống thường gặp (Troubleshooting)
+====================================================================
+9.1. Không thấy sản phẩm để chọn
+Nguyên nhân thường gặp:
+- Chưa chọn “Kho bán hàng”.
+
+Cách xử lý:
+- Chọn kho trước, sau đó kiểm tra lại danh sách sản phẩm.
+
+9.2. Không thêm được sản phẩm / sản phẩm bị báo hết
+Nguyên nhân:
+- Tồn kho của sản phẩm tại kho đang chọn bằng 0.
+
+Cách xử lý:
+- Chọn sản phẩm khác, hoặc kiểm tra tồn kho/kho khác.
+
+9.3. Không tăng được số lượng
+Nguyên nhân:
+- Số lượng vượt tồn kho.
+
+Cách xử lý:
+- Giảm số lượng về mức hợp lệ.
+
+9.4. Báo không đủ tồn kho nhưng thực tế “có hàng”
+Nguyên nhân:
+- Hàng có thể nằm ở lô đã hết hạn, hoặc lượng còn hạn không đủ.
+
+Cách xử lý:
+- Kiểm tra lô hàng hết hạn và tồn kho theo lô; loại bỏ lô hết hạn theo quy trình kho.
+
+9.5. Tạo hóa đơn thất bại
+Nguyên nhân thường gặp:
+- Giỏ hàng trống
+- Chưa chọn kho
+- Có sản phẩm giá <= 0
+- Không đủ tồn kho / lô hết hạn
+
+Cách xử lý:
+- Kiểm tra lại các điều kiện trên, sau đó thao tác lại.
+
+====================================================================
+10) Ghi chú vận hành
+====================================================================
+- Khuyến nghị kiểm tra kỹ kho bán hàng trước khi thêm sản phẩm.
+- Khi cần chỉnh sửa lớn sau khi đã hoàn thành, nên tạo đơn mới để đảm bảo tồn kho chính xác.
+
+HẾT

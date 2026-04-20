@@ -1,0 +1,220 @@
+TÀI LIỆU HƯỚNG DẪN SỬ DỤNG (Tutorial)
+Màn hình: LUÂN CHUYỂN KHO
+Phiên bản: WMS (WareHouseManagement)
+Cập nhật: 2026-04-21
+
+====================================================================
+1) Mục tiêu của tài liệu (bạn sẽ làm được gì)
+====================================================================
+Sau khi đọc và làm theo tài liệu này, bạn sẽ có thể:
+1) Tạo phiếu luân chuyển kho (từ kho nguồn sang kho đích)
+2) Thực hiện đúng quy trình duyệt phiếu (vai trò quản lý)
+3) Huỷ phiếu khi tạo sai (khi phiếu còn chờ duyệt)
+4) Tra cứu lịch sử luân chuyển và xem chi tiết phiếu
+
+Ghi chú quan trọng về “xuất/in”:
+- Màn hình Luân chuyển kho hiện tập trung vào tạo/duyệt/huỷ và xem chi tiết.
+- Chưa thấy nút in/xuất PDF trực tiếp trên màn hình này.
+- Sau khi duyệt, hệ thống tạo phiếu xuất kho (kho nguồn) và phiếu nhập kho (kho đích) để phục vụ đối soát.
+
+====================================================================
+2) Tổng quan nghiệp vụ (đọc 30 giây)
+====================================================================
+“Luân chuyển kho” dùng khi bạn muốn chuyển hàng giữa 2 kho trong cùng chi nhánh.
+Quy trình chuẩn:
+- Người tạo lập phiếu ở trạng thái PENDING (chờ duyệt)
+- Người quản lý (khác người tạo) duyệt phiếu
+- Khi duyệt, hệ thống:
+  + Trừ tồn kho ở kho nguồn
+  + Tạo lô hàng tương ứng ở kho đích
+  + Tạo chứng từ kho: 1 phiếu EXPORT (kho nguồn) + 1 phiếu IMPORT (kho đích)
+
+====================================================================
+3) Điều kiện trước khi thao tác
+====================================================================
+3.1. Dữ liệu
+- Kho nguồn phải có tồn kho (và còn hạn sử dụng) cho các sản phẩm muốn luân chuyển.
+- Nếu chọn theo lô (batch), lô phải thuộc đúng kho nguồn và còn tồn.
+
+3.2. Quyền (RBAC) — bạn có thể thấy nút nhưng bị khoá
+- Xem danh sách/chi tiết: cần quyền xem module “Luân chuyển kho”.
+- Tạo phiếu: cần quyền createWarehouseTransfers (hoặc tương đương theo phân quyền).
+- Duyệt phiếu: cần quyền manageWarehouseTransfers (quản lý).
+
+3.3. Quy tắc hệ thống bắt buộc
+- Kho nguồn và kho đích không được trùng nhau.
+- Kho nguồn và kho đích phải thuộc cùng chi nhánh.
+- Phiếu chỉ duyệt/huỷ được khi trạng thái còn PENDING.
+- Người tạo phiếu không được tự duyệt phiếu.
+
+====================================================================
+4) Bài thực hành 1 — Tạo phiếu luân chuyển kho (PENDING)
+====================================================================
+Mục tiêu: Tạo được 1 phiếu mới, trạng thái chờ duyệt.
+
+Bước 1 — Vào màn hình Luân chuyển kho
+1) Mở menu bên trái: “Luân chuyển kho”.
+2) Bạn sẽ thấy danh sách phiếu (bảng) và nút “Tạo phiếu luân chuyển”.
+
+Bước 2 — Tạo phiếu mới
+1) Bấm “Tạo phiếu luân chuyển”.
+2) Hệ thống mở màn hình “Luân chuyển kho > Tạo mới”.
+
+Bước 3 — Chọn kho nguồn / kho đích
+1) Ở trường “Kho nguồn”: chọn kho xuất hàng.
+2) Ở trường “Kho đích”: chọn kho nhận hàng.
+
+Lưu ý:
+- Nếu bạn chưa chọn “Kho nguồn”, trường “Kho đích” có thể bị khoá.
+- Không được chọn kho nguồn = kho đích.
+
+Bước 4 — (Tuỳ chọn) nhập Lý do / Ghi chú
+- “Lý do”: ví dụ “Bổ sung hàng cho kho bán”.
+- “Ghi chú”: ghi thêm thông tin vận hành.
+
+Bước 5 — Thêm danh sách hàng cần luân chuyển
+Tại mục “Danh sách hàng”:
+1) Bấm nút “+” để thêm dòng.
+2) Tại cột “Sản phẩm”: chọn sản phẩm.
+3) (Tuỳ chọn) Tại cột “Lô (tuỳ chọn)”: chọn lô.
+   - Nếu để trống: hệ thống sẽ tự chọn lô theo nguyên tắc FEFO (lô gần hết hạn xuất trước) khi duyệt.
+   - Nếu muốn kiểm soát chính xác: chọn đúng lô cần chuyển.
+4) Tại cột “Số lượng”: nhập số lượng (>= 1).
+5) Nếu nhập nhầm dòng: bấm nút “−” để xoá dòng.
+
+Lưu ý khi chọn lô:
+- Bạn chỉ chọn được lô khi đã chọn “Kho nguồn” và đã chọn “Sản phẩm”.
+- Danh sách lô hiển thị theo dạng: “batchCode | Tồn | HSD”.
+
+Bước 6 — Tạo phiếu
+1) Bấm “Tạo phiếu”.
+2) Nếu hợp lệ, hệ thống thông báo “Tạo phiếu luân chuyển thành công!” và quay về danh sách.
+3) Trong danh sách, bạn sẽ thấy phiếu vừa tạo:
+   - Mã phiếu dạng: LC-YYYYMMDD-xxxx
+   - Trạng thái: PENDING
+
+====================================================================
+5) Bài thực hành 2 — Duyệt phiếu (vai trò quản lý)
+====================================================================
+Mục tiêu: Duyệt phiếu để hệ thống thực hiện xuất kho nguồn và nhập kho đích.
+
+Bước 1 — Lọc danh sách phiếu PENDING
+1) Ở danh sách, dùng dropdown “Lọc trạng thái”.
+2) Chọn “PENDING” để lọc các phiếu chờ duyệt.
+
+Bước 2 — Mở chi tiết phiếu
+1) Ở dòng phiếu cần xử lý, bấm “Chi tiết”.
+2) Bạn sẽ thấy thông tin: Mã phiếu, Trạng thái, Người tạo, Ngày tạo.
+
+Bước 3 — Kiểm tra quyền duyệt
+Trên màn chi tiết hoặc danh sách:
+- Nút “Duyệt” chỉ khả dụng khi:
+  + Phiếu đang PENDING
+  + Bạn là quản lý (có quyền manage)
+  + Bạn KHÔNG phải người tạo phiếu
+
+Nếu bạn là người tạo phiếu:
+- Hệ thống sẽ không cho tự duyệt.
+
+Bước 4 — Thực hiện duyệt
+1) Bấm “Duyệt”.
+2) Xác nhận trong hộp thoại.
+3) Nếu thành công, hệ thống thông báo “Duyệt phiếu luân chuyển thành công!”.
+
+Kết quả sau duyệt (quan trọng):
+- Trạng thái phiếu sẽ chuyển sang “COMPLETED”.
+- Hệ thống tự động:
+  + Trừ tồn kho ở kho nguồn theo lô (nếu không chọn lô, hệ thống tự chọn FEFO)
+  + Tạo các lô mới ở kho đích tương ứng lượng đã chuyển
+  + Tạo chứng từ kho:
+    * 1 phiếu EXPORT (kho nguồn)
+    * 1 phiếu IMPORT (kho đích)
+  + Các chứng từ này dùng để đối soát nhập/xuất kho.
+
+====================================================================
+6) Bài thực hành 3 — Huỷ phiếu khi tạo sai
+====================================================================
+Mục tiêu: Huỷ phiếu đúng quy định để tránh ảnh hưởng tồn kho.
+
+Quy tắc huỷ:
+- Chỉ phiếu PENDING mới được huỷ.
+- Người được huỷ:
+  + Người tạo phiếu (creator)
+  + Hoặc quản lý (manager)
+
+Các bước:
+Cách A — Huỷ từ danh sách
+1) Tìm phiếu ở trạng thái PENDING.
+2) Bấm “Huỷ”.
+3) Nhập “Lý do huỷ” (tuỳ chọn) trong popup.
+4) Bấm “Xác nhận”.
+
+Cách B — Huỷ từ màn chi tiết
+1) Mở “Chi tiết” của phiếu.
+2) Bấm nút “Huỷ”.
+3) Nhập lý do (tuỳ chọn) và xác nhận.
+
+Kết quả:
+- Phiếu chuyển trạng thái “CANCELED/CANCELLED” (tuỳ cách hiển thị trên UI).
+- Vì phiếu chưa duyệt, việc huỷ không làm trừ kho.
+
+====================================================================
+7) Bài thực hành 4 — Tra cứu lịch sử luân chuyển
+====================================================================
+Mục tiêu: Biết cách tìm lại phiếu và đọc đúng thông tin.
+
+Bước 1 — Lọc theo trạng thái
+- Dùng “Lọc trạng thái” để xem nhóm phiếu:
+  + PENDING: chờ duyệt
+  + COMPLETED: đã hoàn tất
+  + CANCELED/CANCELLED: đã huỷ
+
+Lưu ý:
+- Một số môi trường có thể hiển thị thêm “APPROVED”. Tuy nhiên, theo nghiệp vụ hiện tại, sau duyệt phiếu sẽ về “COMPLETED”.
+
+Bước 2 — Xem chi tiết
+1) Bấm “Chi tiết”.
+2) Kiểm tra:
+- Kho nguồn / Kho đích
+- Danh sách hàng, số lượng
+- Nếu trước đó bạn không chọn “Lô”: hệ thống sẽ ghi nhận phân bổ theo nhiều lô (allocations) sau khi duyệt.
+
+====================================================================
+8) Xử lý lỗi thường gặp (Troubleshooting)
+====================================================================
+8.1. Không tạo được phiếu: “Kho nguồn và kho đích không được trùng nhau”
+- Nguyên nhân: bạn chọn cùng 1 kho.
+- Cách xử lý: chọn lại kho đích khác kho nguồn.
+
+8.2. Không tạo được phiếu: “Kho nguồn và kho đích phải thuộc cùng chi nhánh”
+- Nguyên nhân: chọn kho khác chi nhánh.
+- Cách xử lý: chọn kho đích thuộc cùng chi nhánh với kho nguồn.
+
+8.3. Không chọn được “Lô”
+- Nguyên nhân: chưa chọn kho nguồn hoặc chưa chọn sản phẩm.
+- Cách xử lý: chọn “Kho nguồn” trước → chọn “Sản phẩm” → mở dropdown lô.
+
+8.4. Duyệt thất bại: “Người tạo phiếu không được tự duyệt”
+- Nguyên nhân: bạn đang đăng nhập bằng tài khoản người tạo.
+- Cách xử lý: nhờ quản lý (tài khoản khác) thực hiện duyệt.
+
+8.5. Duyệt thất bại: “Không đủ tồn kho còn hạn để luân chuyển”
+- Nguyên nhân:
+  + Tồn kho vật lý có thể còn, nhưng lô còn hạn không đủ.
+  + Hoặc bạn chọn lô không đủ số lượng.
+- Cách xử lý:
+  + Chọn lô khác còn đủ số lượng, hoặc giảm số lượng luân chuyển.
+  + Kiểm tra xử lý lô hết hạn theo quy trình kho.
+
+8.6. Không thấy nút “Tạo phiếu” / “Duyệt” / “Huỷ”
+- Nguyên nhân: thiếu quyền hoặc trạng thái không còn PENDING.
+- Cách xử lý: kiểm tra quyền tài khoản và trạng thái phiếu.
+
+====================================================================
+9) Tóm tắt thao tác nhanh (cheat-sheet)
+====================================================================
+- Tạo phiếu: Luân chuyển kho → Tạo phiếu luân chuyển → chọn kho nguồn/đích → thêm dòng hàng → Tạo phiếu.
+- Duyệt phiếu: (Quản lý) → lọc PENDING → Duyệt (không phải người tạo).
+- Huỷ phiếu: PENDING → Huỷ → (tuỳ chọn) nhập lý do.
+
+HẾT
