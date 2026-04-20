@@ -69,6 +69,7 @@ const LoginPage = memo(() => {
         <Form
           name="basic"
           form={form}
+          className="login-form"
           //   labelCol={{ span: 8 }}
           //   wrapperCol={{ span: 16 }}
           //   style={{ maxWidth: 600 }}

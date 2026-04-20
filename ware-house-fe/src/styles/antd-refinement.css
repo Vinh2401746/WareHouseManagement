@@ -1,0 +1,119 @@
+/*
+  Ant Design refinements (UI-only)
+  Goal: consistent form spacing, inputs, and modals across the app.
+  Keep selectors minimal and rely on CSS variables from src/index.css.
+*/
+
+/* ---- Forms ---- */
+
+.ant-form-vertical .ant-form-item {
+  margin-bottom: 14px;
+}
+
+/* Inline forms (common for filter bars) */
+.ant-form-inline {
+  flex-wrap: wrap;
+  row-gap: 10px;
+}
+
+.ant-form-inline .ant-form-item {
+  margin-inline-end: 12px;
+}
+
+.ant-form-vertical .ant-form-item-label {
+  padding-bottom: 4px;
+}
+
+.ant-form-item-label > label {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--app-text);
+}
+
+.ant-form-item-label > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
+  opacity: 0.7;
+}
+
+.ant-form-item .ant-form-item-explain,
+.ant-form-item .ant-form-item-extra {
+  color: var(--app-text-muted);
+}
+
+/* Tighten modal forms a bit */
+.ant-modal-body .ant-form {
+  margin-top: 6px;
+}
+
+.ant-modal-body .ant-form .ant-form-item:last-child {
+  margin-bottom: 0;
+}
+
+/* ---- Inputs / Select / DatePicker ---- */
+
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-input-number-affix-wrapper,
+.ant-select-selector,
+.ant-picker {
+  border-color: rgba(15, 23, 42, 0.14) !important;
+}
+
+.ant-input::placeholder,
+.ant-input-affix-wrapper input::placeholder,
+.ant-select-selection-placeholder,
+.ant-picker-input > input::placeholder {
+  color: rgba(15, 23, 42, 0.45);
+}
+
+/* Make controls feel less "plastic" without changing behavior */
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-input-number-affix-wrapper,
+.ant-select-selector,
+.ant-picker {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+/* Multi-select tags spacing */
+.ant-select-multiple .ant-select-selection-item {
+  border-radius: 999px;
+}
+
+/* ---- Modals ---- */
+
+.ant-modal .ant-modal-content {
+  border-radius: 16px;
+  border: 1px solid var(--app-border);
+  box-shadow: 0 28px 90px rgba(0, 21, 41, 0.26);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+}
+
+.ant-modal .ant-modal-header {
+  background: transparent;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px 16px 0 0;
+}
+
+.ant-modal .ant-modal-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.ant-modal .ant-modal-footer {
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.ant-modal .ant-modal-close {
+  border-radius: 10px;
+}
+
+/* ---- Upload (Dragger) ---- */
+
+.ant-upload.ant-upload-drag {
+  border-radius: 14px;
+  border-color: rgba(15, 23, 42, 0.14);
+  background: rgba(255, 255, 255, 0.70);
+}

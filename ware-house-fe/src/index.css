@@ -1,14 +1,33 @@
+/*
+  Global design primitives (kept minimal, used by AntD theme + a few pages).
+  Direction: industrial/utilitarian — crisp typography, quiet surfaces, high readability.
+*/
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  color-scheme: light;
+
+  --app-font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Arial, sans-serif;
+  --app-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --app-text: rgba(15, 23, 42, 0.92);
+  --app-text-muted: rgba(15, 23, 42, 0.68);
+  --app-border: rgba(15, 23, 42, 0.12);
+
+  --app-bg: #f5f7fb;
+  --app-surface: #ffffff;
+  --app-surface-2: rgba(255, 255, 255, 0.74);
+
+  --app-primary: #2f6fed;
+  --app-primary-2: #1e4bb8;
+  --app-header-bg: #001529;
+
+  font-family: var(--app-font-sans);
+  line-height: 1.45;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  /* background-color: #242424; */
-
   font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -24,10 +43,42 @@
 
 body {
   margin: 0;
-  /* display: flex; */
-  /* place-items: center; */
-  /* min-width: 320px;
-  min-height: 100vh; */
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 700px at 20% 0%, rgba(47, 111, 237, 0.10), transparent 55%),
+    radial-gradient(900px 520px at 90% 10%, rgba(0, 21, 41, 0.10), transparent 60%),
+    linear-gradient(180deg, #f7f9fd, var(--app-bg));
+  color: var(--app-text);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Subtle default selection, keeps contrast consistent */
+::selection {
+  background: rgba(47, 111, 237, 0.22);
+}
+
+/* Better-looking scrollbars without being loud */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 23, 42, 0.25) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.18);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.26);
+  border: 3px solid transparent;
+  background-clip: padding-box;
 }
 
 /* h1 {

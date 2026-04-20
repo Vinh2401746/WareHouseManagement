@@ -103,6 +103,17 @@ const UserPage = memo(() => {
       align: "center",
     },
     {
+      title: "Tên cửa hàng",
+      dataIndex: "branch",
+      key: "branch",
+      align: "center",
+      render: (branch: any) => {
+        if (!branch) return "";
+        if (typeof branch === "string") return "";
+        return branch?.name || "";
+      },
+    },
+    {
       title: "Quyền",
       dataIndex: "role",
       key: "role",
@@ -157,7 +168,7 @@ const UserPage = memo(() => {
         );
       },
     }
-  ],[onAction]);
+  ],[onAction, isManager, roleMap]);
 
   if(!canView) return <NoPermissonPage />
   return (

@@ -16,6 +16,10 @@ export const MainLayout = () => {
             padding: 16,
             height: "calc(100vh - 60px)",
             overflowY: "auto",
+            background: "var(--app-surface-2)",
+            border: "1px solid var(--app-border)",
+            borderRadius: 16,
+            backdropFilter: "blur(10px)",
           }}
         >
           <Outlet />

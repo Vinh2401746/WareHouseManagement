@@ -26,12 +26,20 @@ export const createUser = async (payload: {
 };
 
 export const updateUser = async (payload: UpdateUserType): Promise<any> => {
-  const dataUpdate: Pick<UpdateUserType, "email" | "password" | "name" | "role" > = {
-    email:payload.email,
-    password:payload.password,
-    name:payload.name,
-    role :payload.role
-  };  
+  const dataUpdate: any = {
+    email: payload.email,
+    name: payload.name,
+    role: payload.role,
+  };
+
+  if (payload.branch) {
+    dataUpdate.branch = payload.branch;
+  }
+
+  if (payload.password && String(payload.password).trim()) {
+    dataUpdate.password = payload.password;
+  }
+
   if (!payload.id) throw "Không tìm thấy user";
 
   return AxiosClient.patch(`users/${payload?.id}`, dataUpdate);

@@ -134,6 +134,8 @@ const queryUsers = async (filter, options, requesterContext = {}) => {
   const scopedFilter = applyBranchScope(filter, requesterContext);
   const normalized = normalizeUserFilter(scopedFilter);
   const queryOptions = { ...options };
+  // Ensure FE can render branch/shop name in user list
+  queryOptions.populate = queryOptions.populate ? `${queryOptions.populate},branch` : 'branch';
   const users = await User.paginate(normalized, queryOptions);
   return users;
 };

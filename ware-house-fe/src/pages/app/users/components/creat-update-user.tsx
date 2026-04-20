@@ -13,7 +13,7 @@ export type UserFormData = {
   role: string | null;
   id: string;
   password: string;
-  branch:string
+  branch: string;
 };
 
 export type UserFormRef = {
@@ -39,8 +39,13 @@ const UserFormModal = forwardRef<UserFormRef>((_, ref) => {
   useImperativeHandle(ref, () => ({
     show: (data) => {
       setOpen(true);
-      form.setFieldsValue(data ? data : initForm);
-      setDataUser((data ? data : initForm) as UserFormData);
+      const nextData: any = data ? { ...data } : { ...initForm };
+      // BE may populate branch, so normalize { id, name } -> id for Select value
+      if (nextData.branch && typeof nextData.branch === "object") {
+        nextData.branch = nextData.branch?.id || nextData.branch?._id || "";
+      }
+      form.setFieldsValue(nextData);
+      setDataUser(nextData as UserFormData);
       // if (data) {
       //   form.setFieldsValue({
       //     ...data,
@@ -162,8 +167,8 @@ const UserFormModal = forwardRef<UserFormRef>((_, ref) => {
             })) || []} 
           />
         </Form.Item>
-         <Form.Item
-          label="Cửa hàng"
+        <Form.Item
+          label="Tên cửa hàng"
           name="branch"
           rules={[
             { required: true, message: "Vui lòng chọn cửa hàng người dùng" },
