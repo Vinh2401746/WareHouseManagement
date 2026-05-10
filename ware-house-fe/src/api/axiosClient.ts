@@ -11,7 +11,6 @@ const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/v1/"
 const AxiosClient = axios.create({
   baseURL,
   headers: {
-    "Content-Type": "application/json",
     Accept: "application/json",
     transactionId: new Date().getTime().toString(),
   },
@@ -33,6 +32,12 @@ AxiosClient.interceptors.request.use(async (config: InternalAxiosRequestConfig<a
   const { token } = store.getState().user.tokens.access;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  // Let the browser set the correct boundary for FormData uploads.
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+  } else if (!config.headers["Content-Type"]) {
+    config.headers["Content-Type"] = "application/json";
   }
   return config;
 });

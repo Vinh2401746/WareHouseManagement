@@ -41,3 +41,20 @@ export const getCustomerByIdApi = async (id: string) => {
   const response = await AxiosClient.get<Customer>(`/customer/${id}`);
   return response as any;
 };
+
+export const getTemplateCustomer = () => {
+  return AxiosClient.get(`/customer/import-template`, { responseType: 'blob' });
+};
+
+export const importTemplateCustomer = (payload: { file: File; branchId?: string }) => {
+  const formData = new FormData();
+  formData.append('file', payload.file);
+  if (payload.branchId) {
+    formData.append('branch', payload.branchId);
+  }
+  return AxiosClient.post(`/customer/import`, formData);
+};
+
+export const exportCurrentCustomers = () => {
+  return AxiosClient.get(`/customer/export`, { responseType: 'blob' });
+};

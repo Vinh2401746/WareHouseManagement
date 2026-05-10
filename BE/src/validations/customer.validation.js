@@ -50,10 +50,25 @@ const deleteCustomer = {
   }),
 };
 
+const importCustomers = {
+  // File validation is handled by multer middleware; no body/query schema needed
+};
+
+const exportCustomers = {
+  query: Joi.object().keys({
+    name: Joi.string().allow('', null),
+    phone: Joi.string().allow('', null),
+    email: Joi.string().allow('', null),
+    address: Joi.string().allow('', null),
+  }),
+};
+
 module.exports = {
   createCustomer,
   getCustomers,
   getCustomer,
   updateCustomer,
   deleteCustomer,
+  importCustomers,
+  exportCustomers,
 };

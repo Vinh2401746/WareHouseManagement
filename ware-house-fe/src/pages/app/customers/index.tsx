@@ -9,7 +9,7 @@ import dispatchToast from "../../../constants/toast";
 import { UserOutlined } from "@ant-design/icons";
 import { TableCommon } from "../../../components/table/table";
 import { AppRoutes } from "../../../router/routes";
-import { getCustomersApi, deleteCustomerApi } from "../../../api/customer";
+import { deleteCustomerApi, exportCurrentCustomers, getCustomersApi, getTemplateCustomer, importTemplateCustomer } from "../../../api/customer";
 import { usePermission } from "../../../hooks/usePermission";
 import NoPermissonPage from "../../404-developing/no-permission";
 import { formatNumber } from "../../../utils/helper";
@@ -22,7 +22,7 @@ const CustomerPage = memo(() => {
   const navigate = useNavigate();
   const [searchName, setSearchName] = useState("");
   // Change permissions to 'customers'
-  const { isManager, canView } = usePermission("customers"); 
+  const { isManager, canView, isSuperAdmin } = usePermission("customers"); 
   
   const { data, refetch, isFetching, error, isError } = useQuery({
     queryKey: ["customers.list", { page, limit, searchName }],
@@ -50,6 +50,77 @@ const CustomerPage = memo(() => {
   });
 
   const customers = useMemo(() => data?.results ?? [], [data?.results]);
+
+  const { mutate: downloadTemplate } = useMutation({
+    mutationFn: getTemplateCustomer,
+    onSuccess: (res) => {
+      const url = URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "customer_import_template.xlsx";
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    onError: () => {
+      dispatchToast("error", "Tải file mẫu thất bại!");
+    },
+  });
+
+  const { mutate: importCustomer } = useMutation({
+    mutationFn: importTemplateCustomer,
+    onSuccess: (res: any) => {
+      if (res?.errors?.length === 0) {
+        dispatchToast("success", "Nhập khách hàng thành công!");
+        refetch();
+        return;
+      }
+      dispatchToast("error", res?.errors?.[0]?.errors?.[0] || "Mẫu đẩy lên không đúng quy định!");
+    },
+    onError: () => {
+      dispatchToast("error", "Nhập file thất bại!");
+    },
+  });
+
+  const { mutate: exportCustomers } = useMutation({
+    mutationFn: exportCurrentCustomers,
+    onSuccess: (res) => {
+      const url = URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "customers.xlsx";
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    onError: () => {
+      dispatchToast("error", "Xuất khách hàng thất bại!");
+    },
+  });
+
+  const utitilesAction = (action: "template" | "import" | "export") => {
+    switch (action) {
+      case "template":
+        downloadTemplate();
+        break;
+      case "import": {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".xlsx,.xls";
+        input.onchange = (e) => {
+          const file = (e.target as HTMLInputElement).files?.[0];
+          if (file) {
+            importCustomer({ file });
+          }
+        };
+        input.click();
+        break;
+      }
+      case "export":
+        exportCustomers();
+        break;
+      default:
+        break;
+    }
+  };
 
   const onAction = useCallback(
     (type: "delete" | "update" | "view", record: any) => {
@@ -170,16 +241,27 @@ const CustomerPage = memo(() => {
           },
         ]}
       />
-      <Flex justify="space-between">
+      <Flex justify="space-between" wrap="wrap" gap={12}>
         <Input.Search 
           placeholder="Tìm kiếm theo tên..." 
           allowClear 
           onSearch={(value) => setSearchName(value)}
           style={{ width: 300 }} 
         />
-        <Button type="primary" onClick={() => formRef.current?.show()} disabled={!isManager}>
-          Thêm khách hàng
-        </Button>
+        <Flex wrap="wrap" justify="end" gap={8}>
+          <Button type="primary" onClick={() => utitilesAction("template")} disabled={!isManager}>
+            Tải file mẫu
+          </Button>
+          <Button type="primary" onClick={() => utitilesAction("import")} disabled={!isManager || isSuperAdmin}>
+            Tải danh sách khách hàng
+          </Button>
+          <Button type="primary" onClick={() => utitilesAction("export")} disabled={!isManager}>
+            Xuất khách hàng hiện có
+          </Button>
+          <Button type="primary" onClick={() => formRef.current?.show()} disabled={!isManager || isSuperAdmin}>
+            Thêm khách hàng
+          </Button>
+        </Flex>
       </Flex>
       <TableCommon
         size="middle"

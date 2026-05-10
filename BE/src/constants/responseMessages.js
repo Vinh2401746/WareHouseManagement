@@ -54,6 +54,11 @@ const responseMessages = {
   customer: {
     notFound: 'Không tìm thấy khách hàng',
     cannotDeleteWithSales: 'Khách hàng đã phát sinh giao dịch bán hàng, không thể xoá',
+    excel: {
+      invalidFile: 'File không hợp lệ. Vui lòng tải lên file Excel (.xlsx, .xls)',
+      noData: 'File Excel không có dữ liệu (chỉ có header hoặc rỗng)',
+      importSuccess: 'Nhập khách hàng thành công',
+    },
   },
   unit: {
     notFound: 'Không tìm thấy đơn vị',
